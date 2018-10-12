@@ -7,11 +7,11 @@ from astropy import log as logger
 logger.setLevel('INFO')
 
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
-from nbconvert.exporters import RSTExporter
+from nbconvert.exporters import RSTExporter, HTMLExporter
 from nbconvert.writers import FilesWriter
 import nbformat
 
-IPYTHON_VERSION = 4
+NB_VERSION = 4
 
 def clean_keyword(kw):
     """Given a keyword parsed from the header of one of the tutorials, return
@@ -22,14 +22,18 @@ def clean_keyword(kw):
     """
     return kw.strip().title().replace('.', '').replace('/', '').replace(' ', '')
 
-class NBTutorialsConverter(object):
 
+class NBPagesConverter(object):
     def __init__(self, nb_path, output_path=None, template_file=None,
-                 overwrite=False, kernel_name=None):
+                 overwrite=False, kernel_name=None, output_type='rst'):
         self.nb_path = path.abspath(nb_path)
         fn = path.basename(self.nb_path)
         self.path_only = path.dirname(self.nb_path)
         self.nb_name, _ = path.splitext(fn)
+
+        if output_type.upper() not in ('HTML', 'RST'):
+            raise ValueError('output_type has to be either html or rst')
+        self._output_type = output_type.upper()
 
         if output_path is not None:
             self.output_path = output_path
@@ -52,8 +56,8 @@ class NBTutorialsConverter(object):
                                                               self.path_only))
 
         # the RST file
-        self._rst_path = path.join(self.output_path,
-                                   '{0}.rst'.format(self.nb_name))
+        self._output_path = path.join(self.output_path,
+                                   '{0}.{1}'.format(self.nb_name, self._output_type.lower()))
 
         self._execute_kwargs = dict(timeout=900)
         if kernel_name:
@@ -89,7 +93,7 @@ class NBTutorialsConverter(object):
         executor = ExecutePreprocessor(**self._execute_kwargs)
 
         with open(self.nb_path) as f:
-            nb = nbformat.read(f, as_version=IPYTHON_VERSION)
+            nb = nbformat.read(f, as_version=NB_VERSION)
 
         try:
             executor.preprocess(nb, {'metadata': {'path': self.path_only}})
@@ -107,23 +111,24 @@ class NBTutorialsConverter(object):
 
     def convert(self, remove_executed=False):
         """
-        Convert the executed notebook to a restructured text (RST) file.
+        Convert the executed notebook to a restructured text (RST) file or HTML.
 
         Parameters
         ----------
         delete_executed : bool, optional
             Controls whether to remove the executed notebook or not.
+
         """
 
         if not path.exists(self._executed_nb_path):
             raise IOError("Executed notebook file doesn't exist! Expected: {0}"
                           .format(self._executed_nb_path))
 
-        if path.exists(self._rst_path) and not self.overwrite:
-            logger.debug("RST version of notebook already exists at {0}. Use "
+        if path.exists(self._output_path) and not self.overwrite:
+            logger.debug("{} version of notebook already exists at {0}. Use "
                          "overwrite=True or --overwrite (at cmd line) to re-run"
-                         .format(self._rst_path))
-            return self._rst_path
+                         .format(self._output_type, self._output_path))
+            return self._output_path
 
         # Initialize the resources dict - see:
         # https://github.com/jupyter/nbconvert/blob/master/nbconvert/nbconvertapp.py#L327
@@ -135,23 +140,39 @@ class NBTutorialsConverter(object):
         resources['output_files_dir'] = 'nboutput'
 
         # Exports the notebook to RST
-        logger.debug('Exporting notebook to RST...')
-        exporter = RSTExporter()
+        logger.debug('Exporting notebook to {}...'.format(self._output_type))
+        if self._output_type == 'RST':
+            exporter = RSTExporter()
+        elif self._output_type == 'HTML':
+            exporter = HTMLExporter()
+        else:
+            raise ValueError('Unrecognized output type {}'.format(self._output_type))
 
         if self.template_file:
             exporter.template_file = self.template_file
         output, resources = exporter.from_filename(self._executed_nb_path,
                                                    resources=resources)
 
-        # Write the output RST file
+        # Write the output file
         writer = FilesWriter()
         output_file_path = writer.write(output, resources,
                                         notebook_name=self.nb_name)
 
-        # read the executed notebook, grab the keywords from the header,
-        # add them in to the RST as filter keywords
+        if self._output_type == 'RST':
+            self._add_filter_keywords(output_file_path)
+
+        if remove_executed: # optionally, clean up the executed notebook file
+            remove(self._executed_nb_path)
+
+        return output_file_path
+
+    def _add_filter_keywords(self, output_file_path):
+        """
+        read the executed notebook, grab the keywords from the header,
+        add them in to the output as filter keywords
+        """
         with open(self._executed_nb_path) as f:
-            nb = nbformat.read(f, as_version=IPYTHON_VERSION)
+            nb = nbformat.read(f, as_version=NB_VERSION)
 
         top_cell_text = nb['cells'][0]['source']
         match = re.search('## [kK]eywords\s+(.*)', top_cell_text)
@@ -175,17 +196,13 @@ class NBTutorialsConverter(object):
             rst_text = '{0}\n{1}'.format(meta_tutorials, rst_text)
             f.write(rst_text)
 
-        if remove_executed: # optionally, clean up the executed notebook file
-            remove(self._executed_nb_path)
-
-        return output_file_path
 
 def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
     """
     Execute and optionally convert the specified notebook file or directory of
     notebook files.
 
-    This is a wrapper around the ``NBTutorialsConverter`` class that does file
+    This is a wrapper around the ``NBPagesConverter`` class that does file
     handling.
 
     Parameters
@@ -195,7 +212,7 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
     exec_only : bool, optional
         Just execute the notebooks, don't run them.
     **kwargs
-        Any other keyword arguments are passed to the ``NBTutorialsConverter``
+        Any other keyword arguments are passed to the ``NBPagesConverter``
         init.
 
     """
@@ -214,7 +231,7 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
                     continue
 
                 if ext == '.ipynb':
-                    nbc = NBTutorialsConverter(full_path, **kwargs)
+                    nbc = NBPagesConverter(full_path, **kwargs)
                     nbc.execute()
 
                     if not exec_only:
@@ -222,7 +239,7 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
 
     else:
         # It's a single file, so convert it
-        nbc = NBTutorialsConverter(nbfile_or_path, **kwargs)
+        nbc = NBPagesConverter(nbfile_or_path, **kwargs)
         nbc.execute()
 
         if not exec_only:
@@ -246,6 +263,10 @@ if __name__ == "__main__":
                                                'don\'t convert them as well. '
                                                'This is useful for testing that'
                                                ' the notebooks run.')
+
+    parser.add_argument('--html', default=False, action='store_true',
+                        dest='html', help='Output as html directly instead of '
+                                          'as rst')
 
     parser.add_argument('-o', '--overwrite', action='store_true',
                         dest='overwrite', default=False,
@@ -302,4 +323,5 @@ if __name__ == "__main__":
 
     process_notebooks(args.nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
-                      overwrite=args.overwrite, kernel_name=args.kernel_name)
+                      overwrite=args.overwrite, kernel_name=args.kernel_name,
+                      output_type='HTML' if args.html else 'RST')
