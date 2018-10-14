@@ -1,4 +1,4 @@
-from converter import *
+from .converter import *
 
 import logging
 

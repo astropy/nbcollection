@@ -10,8 +10,9 @@ from nbconvert.exporters import RSTExporter, HTMLExporter
 from nbconvert.writers import FilesWriter
 import nbformat
 
-__all__ = ['NBPagesConverter', 'process_notebooks', 'make_parser' ,'run_parsed']
+__all__ = ['NBPagesConverter', 'process_notebooks', 'make_parser', 'run_parsed']
 
+logger = logging.getLogger('nbpages')
 
 
 class NBPagesConverter(object):
@@ -310,7 +311,6 @@ def make_parser(parser=None):
 
 
 def run_parsed(args):
-    logger = logging.getLogger('nbpages')
     # Set logger level based on verbose flags
     if args.verbosity != 0:
         if args.verbosity == 1:
