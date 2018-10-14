@@ -13,6 +13,10 @@ import nbformat
 __all__ = ['NBPagesConverter', 'process_notebooks', 'make_parser', 'run_parsed']
 
 logger = logging.getLogger('nbpages')
+def init_logger():
+    logger.setLevel(logging.INFO)
+    logging.basicConfig()
+    logging.captureWarnings(True)
 
 
 class NBPagesConverter(object):
@@ -119,7 +123,7 @@ class NBPagesConverter(object):
                           .format(self._executed_nb_path))
 
         if path.exists(self._output_path) and not self.overwrite:
-            logger.debug("{} version of notebook already exists at {0}. Use "
+            logger.debug("{0} version of notebook already exists at {1}. Use "
                          "overwrite=True or --overwrite (at cmd line) to re-run"
                          .format(self._output_type, self._output_path))
             return self._output_path
@@ -300,7 +304,8 @@ def make_parser(parser=None):
     return parser
 
 
-def run_parsed(nbfile_or_path, output_type args):
+def run_parsed(nbfile_or_path, output_type, args):
+    init_logger()
     # Set logger level based on verbose flags
     if args.verbosity != 0:
         if args.verbosity == 1:
@@ -334,7 +339,6 @@ def run_parsed(nbfile_or_path, output_type args):
 
 if __name__ == "__main__":
     parser = make_parser()
-
 
     parser.add_argument('nbfile_or_path',
                         help='Path to a specific notebook file, or the '
