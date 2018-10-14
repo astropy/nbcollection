@@ -4,6 +4,7 @@ from os import path, walk, remove, makedirs
 import re
 import logging
 import argparse
+from urllib import request
 
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 from nbconvert.exporters import RSTExporter, HTMLExporter
@@ -22,12 +23,13 @@ def init_logger():
 class NBPagesConverter(object):
     def __init__(self, nb_path, output_path=None, template_file=None,
                  overwrite=False, kernel_name=None, output_type='rst',
-                 nb_version=4):
+                 nb_version=4, base_path=None):
         self.nb_path = path.abspath(nb_path)
         fn = path.basename(self.nb_path)
         self.path_only = path.dirname(self.nb_path)
         self.nb_name, _ = path.splitext(fn)
         self.nb_version = nb_version
+        self.base_path = base_path
 
         if output_type.upper() not in ('HTML', 'RST'):
             raise ValueError('output_type has to be either html or rst')
@@ -137,6 +139,14 @@ class NBPagesConverter(object):
         # path to store extra files, like plots generated
         resources['output_files_dir'] = 'nboutput'
 
+        if self.base_path is None:
+            path_to_root = ''
+        else:
+            path_to_root = path.relpath(self.base_path,
+                                        start=path.split(self.nb_path)[0])
+            path_to_root += path.sep
+        resources['path_to_pages_root'] = request.pathname2url(path_to_root)
+
         # Exports the notebook to the output format
         logger.debug('Exporting notebook to {}...'.format(self._output_type))
         if self._output_type == 'RST':
@@ -218,6 +228,7 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
     """
     converted = []
     if path.isdir(nbfile_or_path):
+        kwargs.setdefault('base_path', nbfile_or_path)
         # It's a path, so we need to walk through recursively and find any
         # notebook files
         for root, dirs, files in walk(nbfile_or_path):
@@ -307,7 +318,7 @@ def make_parser(parser=None):
     return parser
 
 
-def run_parsed(nbfile_or_path, output_type, args):
+def run_parsed(nbfile_or_path, output_type, args, **kwargs):
     init_logger()
     # Set logger level based on verbose flags
     if args.verbosity != 0:
@@ -337,7 +348,8 @@ def run_parsed(nbfile_or_path, output_type, args):
     return process_notebooks(nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
-                      output_type=output_type, nb_version=args.nb_version)
+                      output_type=output_type, nb_version=args.nb_version,
+                      **kwargs)
 
 
 if __name__ == "__main__":
