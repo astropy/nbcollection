@@ -1,2 +1,3 @@
 nbconvert>=5.4.0
 nbformat
+jinja2

@@ -137,7 +137,7 @@ class NBPagesConverter(object):
         # path to store extra files, like plots generated
         resources['output_files_dir'] = 'nboutput'
 
-        # Exports the notebook to RST
+        # Exports the notebook to the output format
         logger.debug('Exporting notebook to {}...'.format(self._output_type))
         if self._output_type == 'RST':
             exporter = RSTExporter()
@@ -216,6 +216,7 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
         init.
 
     """
+    converted = []
     if path.isdir(nbfile_or_path):
         # It's a path, so we need to walk through recursively and find any
         # notebook files
@@ -235,7 +236,7 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
                     nbc.execute()
 
                     if not exec_only:
-                        nbc.convert()
+                        converted.append(nbc.convert())
 
     else:
         # It's a single file, so convert it
@@ -243,7 +244,9 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
         nbc.execute()
 
         if not exec_only:
-            nbc.convert()
+            converted.append(nbc.convert())
+
+    return converted
 
 
 def clean_keyword(kw):
@@ -331,7 +334,7 @@ def run_parsed(nbfile_or_path, output_type, args):
         raise IOError("Couldn't find template file at {0}"
                       .format(template_file))
 
-    process_notebooks(nbfile_or_path, exec_only=args.exec_only,
+    return process_notebooks(nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
                       output_type=output_type, nb_version=args.nb_version)
