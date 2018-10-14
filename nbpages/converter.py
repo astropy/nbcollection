@@ -273,10 +273,6 @@ def make_parser(parser=None):
                                                'This is useful for testing that'
                                                ' the notebooks run.')
 
-    parser.add_argument('--html', default=False, action='store_true',
-                        dest='html', help='Output as html directly instead of '
-                                          'as rst')
-
     parser.add_argument('-o', '--overwrite', action='store_true',
                         dest='overwrite', default=False,
                         help='Re-run and overwrite any existing executed '
@@ -310,7 +306,7 @@ def make_parser(parser=None):
     return parser
 
 
-def run_parsed(args):
+def run_parsed(args, output_type):
     # Set logger level based on verbose flags
     if args.verbosity != 0:
         if args.verbosity == 1:
@@ -339,9 +335,14 @@ def run_parsed(args):
     process_notebooks(args.nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
-                      output_type='HTML' if args.html else 'RST',
-                      nb_version=args.nb_version)
+                      output_type=output_type, nb_version=args.nb_version)
 
 
 if __name__ == "__main__":
-    run_parsed(make_parser().parse_args())
+    parser = make_parser()
+
+    parser.add_argument('convertto', help='output type to convert to.  Must be '
+                                          'one of "RST" or "HTML"')
+
+    args = parser.parse_args()
+    run_parsed(args, args.convertto.upper())
