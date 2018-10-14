@@ -1,35 +1,28 @@
 # Standard library
 from os import path, walk, remove, makedirs
-import re
 
-# Third-party
-from astropy import log as logger
-logger.setLevel('INFO')
+import re
+import logging
+import argparse
 
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 from nbconvert.exporters import RSTExporter, HTMLExporter
 from nbconvert.writers import FilesWriter
 import nbformat
 
-NB_VERSION = 4
+__all__ = ['NBPagesConverter', 'process_notebooks', 'make_parser' ,'run_parsed']
 
-def clean_keyword(kw):
-    """Given a keyword parsed from the header of one of the tutorials, return
-    a 'cleaned' keyword that can be used by the filtering machinery.
-
-    - Replaces spaces with capital letters
-    - Removes . / and space
-    """
-    return kw.strip().title().replace('.', '').replace('/', '').replace(' ', '')
 
 
 class NBPagesConverter(object):
     def __init__(self, nb_path, output_path=None, template_file=None,
-                 overwrite=False, kernel_name=None, output_type='rst'):
+                 overwrite=False, kernel_name=None, output_type='rst',
+                 nb_version=4):
         self.nb_path = path.abspath(nb_path)
         fn = path.basename(self.nb_path)
         self.path_only = path.dirname(self.nb_path)
         self.nb_name, _ = path.splitext(fn)
+        self.nb_version = nb_version
 
         if output_type.upper() not in ('HTML', 'RST'):
             raise ValueError('output_type has to be either html or rst')
@@ -93,7 +86,7 @@ class NBPagesConverter(object):
         executor = ExecutePreprocessor(**self._execute_kwargs)
 
         with open(self.nb_path) as f:
-            nb = nbformat.read(f, as_version=NB_VERSION)
+            nb = nbformat.read(f, as_version=self.nb_version)
 
         try:
             executor.preprocess(nb, {'metadata': {'path': self.path_only}})
@@ -146,7 +139,9 @@ class NBPagesConverter(object):
         elif self._output_type == 'HTML':
             exporter = HTMLExporter()
         else:
-            raise ValueError('Unrecognized output type {}'.format(self._output_type))
+            raise ValueError('This should be impossible... output_type should '
+                             'have been checked earlier, but it is '
+                             'unrecognized')
 
         if self.template_file:
             exporter.template_file = self.template_file
@@ -172,7 +167,7 @@ class NBPagesConverter(object):
         add them in to the output as filter keywords
         """
         with open(self._executed_nb_path) as f:
-            nb = nbformat.read(f, as_version=NB_VERSION)
+            nb = nbformat.read(f, as_version=self.nb_version)
 
         top_cell_text = nb['cells'][0]['source']
         match = re.search('## [kK]eywords\s+(.*)', top_cell_text)
@@ -245,12 +240,25 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
         if not exec_only:
             nbc.convert()
 
-if __name__ == "__main__":
-    from argparse import ArgumentParser
-    import logging
 
-    # Define parser object
-    parser = ArgumentParser(description="")
+def clean_keyword(kw):
+    """Given a keyword parsed from the header of one of the tutorials, return
+    a 'cleaned' keyword that can be used by the filtering machinery.
+
+    - Replaces spaces with capital letters
+    - Removes . / and space
+    """
+    return kw.strip().title().replace('.', '').replace('/', '').replace(' ', '')
+
+
+def make_parser(parser=None):
+    """
+    Generate an `argparse.ArgumentParser` for nbpages
+    """
+    if parser is None:
+        parser = argparse.ArgumentParser()
+    parser.description = ('A command-line tool leveraging nbconvert to execute '
+                          'a set of notebooks and convert then to html or rst.')
 
     vq_group = parser.add_mutually_exclusive_group()
     vq_group.add_argument('-v', '--verbose', action='count', default=0,
@@ -271,7 +279,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--overwrite', action='store_true',
                         dest='overwrite', default=False,
                         help='Re-run and overwrite any existing executed '
-                             'notebook or RST files.')
+                             'notebook or converted files.')
 
     parser.add_argument('nbfile_or_path', default='tutorials/notebooks/',
                         nargs='?',
@@ -281,7 +289,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--template', default=None, dest='template_file',
                         help='The path to a jinja2 template file for the '
-                             'notebook to RST conversion.')
+                             'conversion.  The template operates in a context '
+                             'determined by the exporter.')
 
     parser.add_argument('--output-path', default=None, dest='output_path',
                         help='The path to save all executed or converted '
@@ -294,19 +303,25 @@ if __name__ == "__main__":
                              ' Must be an available kernel from "jupyter '
                              'kernelspec list".')
 
-    args = parser.parse_args()
+    parser.add_argument('--notebook-version', default=4, dest='nb_version',
+                        help='The version of the notebook format to convert to'
+                             ' for execution.')
+    return parser
 
+
+def run_parsed(args):
+    logger = logging.getLogger('nbpages')
     # Set logger level based on verbose flags
     if args.verbosity != 0:
         if args.verbosity == 1:
             logger.setLevel(logging.DEBUG)
-        else: # anything >= 2
+        else:  # anything >= 2
             logger.setLevel(1)
 
     elif args.quietness != 0:
         if args.quietness == 1:
             logger.setLevel(logging.WARNING)
-        else: # anything >= 2
+        else:  # anything >= 2
             logger.setLevel(logging.ERROR)
 
     # make sure output path exists
@@ -318,10 +333,15 @@ if __name__ == "__main__":
     # make sure the template file exists
     template_file = args.template_file
     if template_file is not None and not path.exists(template_file):
-        raise IOError("Couldn't find RST template file at {0}"
+        raise IOError("Couldn't find template file at {0}"
                       .format(template_file))
 
     process_notebooks(args.nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
-                      output_type='HTML' if args.html else 'RST')
+                      output_type='HTML' if args.html else 'RST',
+                      nb_version=args.nb_version)
+
+
+if __name__ == "__main__":
+    run_parsed(make_parser().parse_args())
