@@ -8,9 +8,9 @@ import re
 import os
 import sys
 
-# Building from inside the tutorials/ directory?  Need to add correct helpers to the python path
+# Building from inside the rst/ directory?  Need to add correct helpers to the python path
 a_h_path = None
-if os.path.basename(os.getcwd()) == 'tutorials':
+if os.path.basename(os.getcwd()) == 'rst':
     a_h_path = os.path.abspath(os.path.join('..', 'astropy_helpers'))
     if os.path.isdir(a_h_path):
         sys.path.insert(1, a_h_path)
@@ -41,7 +41,7 @@ except ImportError:
     from configparser import ConfigParser
 conf = ConfigParser()
 
-conf.read([os.path.join(os.path.dirname(__file__), '..', 'metadata.cfg')])
+conf.read([os.path.join(os.path.dirname(__file__), '..', '..', 'metadata.cfg')])
 setup_cfg = dict(conf.items('metadata'))
 
 
@@ -170,19 +170,19 @@ _scripts_path = os.path.join(_root, 'scripts')
 if _scripts_path not in sys.path:
     sys.path.insert(1, _scripts_path)
 
-from convert import process_notebooks
-nb_tutorials_path = os.path.join(_root, 'tutorials', 'notebooks')
-template_path = os.path.join(_root, 'tutorials', 'astropy.tpl')
-rst_output_path = os.path.join(_root, 'tutorials', 'rst-tutorials')
+from nbpages.converter import process_notebooks
+nb_rst_path = os.path.join(_root, 'rst', 'notebooks')
+template_path = os.path.join(_root, 'rst', 'nb_template.tpl')
+rst_output_path = os.path.join(_root, 'rst', 'nb-to-rst-output')
 
 processkwargs = dict(output_path=rst_output_path, template_file=template_path)
 if os.environ.get('NBCONVERT_KERNEL'):  # this allows access from "make html"
     processkwargs['kernel_name'] = os.environ.get('NBCONVERT_KERNEL')
 
 if os.environ.get('NBFILE'):  # this allows only building a single tutorial file
-    nb_tutorials_path = os.path.abspath(os.environ.get('NBFILE'))
+    nb_rst_path = os.path.abspath(os.environ.get('NBFILE'))
 
-process_notebooks(nb_tutorials_path, **processkwargs)
+process_notebooks(nb_rst_path, **processkwargs)
 
 
 suppress_warnings = ['image.nonlocal_uri']
