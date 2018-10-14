@@ -127,7 +127,7 @@ class NBPagesConverter(object):
         # Initialize the resources dict - see:
         # https://github.com/jupyter/nbconvert/blob/master/nbconvert/nbconvertapp.py#L327
         resources = {}
-        resources['config_dir'] = '' # we don't need to specify config
+        resources['config_dir'] = ''  # we don't need to specify config
         resources['unique_key'] = self.nb_name
 
         # path to store extra files, like plots generated
@@ -157,7 +157,7 @@ class NBPagesConverter(object):
         if self._output_type == 'RST':
             self._add_filter_keywords(output_file_path)
 
-        if remove_executed: # optionally, clean up the executed notebook file
+        if remove_executed:  # optionally, clean up the executed notebook file
             remove(self._executed_nb_path)
 
         return output_file_path
@@ -217,13 +217,13 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
         # notebook files
         for root, dirs, files in walk(nbfile_or_path):
             for name in files:
-                _,ext = path.splitext(name)
+                _, ext = path.splitext(name)
                 full_path = path.join(root, name)
 
-                if 'ipynb_checkpoints' in full_path: # skip checkpoint saves
+                if 'ipynb_checkpoints' in full_path:  # skip checkpoint saves
                     continue
 
-                if name.startswith('exec'): # notebook already executed
+                if name.startswith('exec'):  # notebook already executed
                     continue
 
                 if ext == '.ipynb':
