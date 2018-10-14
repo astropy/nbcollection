@@ -278,12 +278,6 @@ def make_parser(parser=None):
                         help='Re-run and overwrite any existing executed '
                              'notebook or converted files.')
 
-    parser.add_argument('nbfile_or_path', default='tutorials/notebooks/',
-                        nargs='?',
-                        help='Path to a specific notebook file, or the '
-                             'top-level path to a directory containing '
-                             'notebook files to process.')
-
     parser.add_argument('--template', default=None, dest='template_file',
                         help='The path to a jinja2 template file for the '
                              'conversion.  The template operates in a context '
@@ -306,7 +300,7 @@ def make_parser(parser=None):
     return parser
 
 
-def run_parsed(args, output_type):
+def run_parsed(nbfile_or_path, output_type args):
     # Set logger level based on verbose flags
     if args.verbosity != 0:
         if args.verbosity == 1:
@@ -332,7 +326,7 @@ def run_parsed(args, output_type):
         raise IOError("Couldn't find template file at {0}"
                       .format(template_file))
 
-    process_notebooks(args.nbfile_or_path, exec_only=args.exec_only,
+    process_notebooks(nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
                       output_type=output_type, nb_version=args.nb_version)
@@ -341,8 +335,14 @@ def run_parsed(args, output_type):
 if __name__ == "__main__":
     parser = make_parser()
 
+
+    parser.add_argument('nbfile_or_path',
+                        help='Path to a specific notebook file, or the '
+                             'top-level path to a directory containing notebook'
+                             ' files to process.')
+
     parser.add_argument('convertto', help='output type to convert to.  Must be '
                                           'one of "RST" or "HTML"')
 
     args = parser.parse_args()
-    run_parsed(args, args.convertto.upper())
+    run_parsed(args.nbfile_or_path, args.convertto.upper(), args)

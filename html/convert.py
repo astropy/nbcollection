@@ -2,4 +2,4 @@
 
 from nbpages import make_parser, run_parsed
 
-run_parsed(make_parser().parse_args(), output_type='HTML')
+run_parsed('.', output_type='HTML', args=make_parser().parse_args())
