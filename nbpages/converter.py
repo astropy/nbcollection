@@ -207,7 +207,7 @@ class NBPagesConverter(object):
             f.write(rst_text)
 
 
-def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
+def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], **kwargs):
     """
     Execute and optionally convert the specified notebook file or directory of
     notebook files.
@@ -221,11 +221,15 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
         Either a single notebook filename or a path containing notebook files.
     exec_only : bool, optional
         Just execute the notebooks, don't run them.
+    exclude : list
+        A list of notebook name patterns (*full path* regex's) to exclude.
     **kwargs
         Any other keyword arguments are passed to the ``NBPagesConverter``
         init.
 
     """
+    exclude_res = [re.compile(ex) for ex in exclude]
+
     converted = []
     if path.isdir(nbfile_or_path):
         kwargs.setdefault('base_path', nbfile_or_path)
@@ -240,6 +244,9 @@ def process_notebooks(nbfile_or_path, exec_only=False, **kwargs):
                     continue
 
                 if name.startswith('exec'):  # notebook already executed
+                    continue
+
+                if any([rex.match(full_path) for rex in exclude_res]):
                     continue
 
                 if ext == '.ipynb':
@@ -315,6 +322,9 @@ def make_parser(parser=None):
     parser.add_argument('--notebook-version', default=4, dest='nb_version',
                         help='The version of the notebook format to convert to'
                              ' for execution.')
+
+    parser.add_argument('--exclude', default=None,
+                        help='A comma-separated list of notebook names to exclude.')
     return parser
 
 
@@ -345,11 +355,17 @@ def run_parsed(nbfile_or_path, output_type, args, **kwargs):
         raise IOError("Couldn't find template file at {0}"
                       .format(template_file))
 
+    if args.exclude is None:
+        exclude_list = []
+    else:
+        exclude_list = [ex if ex.startswith('.*') else '.*?' + ex
+                        for ex in args.exclude.split(',')]
+
     return process_notebooks(nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
                       output_type=output_type, nb_version=args.nb_version,
-                      **kwargs)
+                      exclude=exclude_list, **kwargs)
 
 
 if __name__ == "__main__":
