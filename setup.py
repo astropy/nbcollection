@@ -24,4 +24,5 @@ setuptools.setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research'
     ],
+    install_requires=['nbconvert>=5.4.0', 'nbformat', 'jinja2']
 )
