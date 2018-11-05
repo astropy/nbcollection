@@ -9,7 +9,7 @@ There are two versions, outlined below.  They use cookiecutter to build a notebo
 This is the simpler version, which uses a set of templates to generate an html site directly from the notebooks.  To set up a repo for this version, do:
 
 ``` sh
-$ cookiecutter gh:eteq/nbpages/html_template
+$ cookiecutter gh:eteq/nbpages --checkout cookiecutter_html
 ```
 
 Once this has been created, the build step is simply:
@@ -28,7 +28,7 @@ This version uses the same input notebook layout, but instead uses [sphinx](http
 To set up a repo in this case, do:
 
 ``` sh
-$ cookiecutter gh:eteq/nbpages/sphinx_template
+$ cookiecutter gh:eteq/nbpages --checkout cookiecutter_sphinx
 ```
 
 but then do the standard build as for a sphinx project:
