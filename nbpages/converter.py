@@ -246,10 +246,11 @@ def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], **kwargs):
                 if name.startswith('exec'):  # notebook already executed
                     continue
 
-                if any([rex.match(full_path) for rex in exclude_res]):
-                    continue
-
                 if ext == '.ipynb':
+                    if any([rex.match(full_path) for rex in exclude_res]):
+                        logger.info("Skipping {} because it is in the exclude list".format(full_path))
+                        continue
+
                     nbc = NBPagesConverter(full_path, **kwargs)
                     nbc.execute()
 
