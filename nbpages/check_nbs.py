@@ -62,10 +62,10 @@ def main():
     logging.basicConfig()
     log.setLevel(logging.INFO)
     success = visit_content_nbs('.', execution_check)
-    if not success:
-        sys.exit(1)
-    else:
+    if success:
         sys.exit(0)
+    else:
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
