@@ -2,6 +2,7 @@
 from os import path, walk, remove, makedirs
 
 import re
+import time
 import logging
 import argparse
 from urllib import request
@@ -95,11 +96,15 @@ class NBPagesConverter(object):
         with open(self.nb_path) as f:
             nb = nbformat.read(f, as_version=self.nb_version)
 
+        st = time.time()
         try:
             executor.preprocess(nb, {'metadata': {'path': self.path_only}})
         except CellExecutionError:
             # TODO: should we fail fast and raies, or record all errors?
             raise
+        et = time.time()
+        logger.info('Execution of notebook {} took {} sec'.format(self.nb_name,
+                    et - st))
 
         if write:
             logger.debug('Writing executed notebook to file {0}...'
