@@ -212,7 +212,8 @@ class NBPagesConverter(object):
             f.write(rst_text)
 
 
-def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], **kwargs):
+def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], include=[],
+                      **kwargs):
     """
     Execute and optionally convert the specified notebook file or directory of
     notebook files.
@@ -228,12 +229,19 @@ def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], **kwargs):
         Just execute the notebooks, don't run them.
     exclude : list
         A list of notebook name patterns (*full path* regex's) to exclude.
+    include : list
+        A list of notebook name patterns (*full path* regex's) to include.
+        Cannot be given at the same time as ``exclude``.
     **kwargs
         Any other keyword arguments are passed to the ``NBPagesConverter``
         init.
 
     """
     exclude_res = [re.compile(ex) for ex in exclude]
+    include_res = [re.compile(ix) for ix in include]
+    if include_res and exclude_res:
+        raise ValueError('cannot give both include and exclude patterns at the '
+                         'same time')
 
     converted = []
     if path.isdir(nbfile_or_path):
@@ -254,6 +262,9 @@ def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], **kwargs):
                 if ext == '.ipynb':
                     if any([rex.match(full_path) for rex in exclude_res]):
                         logger.info("Skipping {} because it is in the exclude list".format(full_path))
+                        continue
+                    if include_res and not any([rex.match(full_path) for rex in include_res]):
+                        logger.info("Skipping {} because it is not in the include list".format(full_path))
                         continue
 
                     nbc = NBPagesConverter(full_path, **kwargs)
@@ -330,7 +341,13 @@ def make_parser(parser=None):
                              ' for execution.')
 
     parser.add_argument('--exclude', default=None,
-                        help='A comma-separated list of notebook names to exclude.')
+                        help='A comma-separated list of notebook names to '
+                             'exclude.')
+
+    parser.add_argument('--include', default=None,
+                        help='A comma-separated list of notebook names to '
+                             'include. Cannot be given at the same time as '
+                             'exclude.')
     return parser
 
 
@@ -367,11 +384,17 @@ def run_parsed(nbfile_or_path, output_type, args, **kwargs):
         exclude_list = [ex if ex.startswith('.*') else '.*?' + ex
                         for ex in args.exclude.split(',')]
 
+    if args.include is None:
+        include_list = []
+    else:
+        include_list = [inc if inc.startswith('.*') else '.*?' + inc
+                        for inc in args.include.split(',')]
+
     return process_notebooks(nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
                       output_type=output_type, nb_version=args.nb_version,
-                      exclude=exclude_list, **kwargs)
+                      exclude=exclude_list, include=include_list, **kwargs)
 
 
 if __name__ == "__main__":
