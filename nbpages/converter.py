@@ -179,7 +179,18 @@ class NBPagesConverter(object):
         if remove_executed:  # optionally, clean up the executed notebook file
             remove(self._executed_nb_path)
 
-        return output_file_path
+        title = ''
+        try:
+            with open(self.nb_path) as f:
+                nb = nbformat.reader.read(f)
+                title = nb['cells'][0]['source'].split('#')[1].split("\n")[0].strip()
+        except Exception:
+            print('Failed to parse notebook title from first cell, please check notebook.')
+
+        page_info = dict(output_file_path=output_file_path, name=self.nb_name.replace("_", ' ').title(), title=title)
+
+        return (page_info)
+
 
     def _add_filter_keywords(self, output_file_path):
         """
