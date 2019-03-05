@@ -12,7 +12,10 @@ from nbconvert.exporters import RSTExporter, HTMLExporter
 from nbconvert.writers import FilesWriter
 import nbformat
 
+from .reporter import Reporter
+
 __all__ = ['NBPagesConverter', 'process_notebooks', 'make_parser', 'run_parsed']
+reporter = Reporter()
 
 logger = logging.getLogger('nbpages')
 def init_logger():
@@ -20,17 +23,17 @@ def init_logger():
     logging.basicConfig()
     logging.captureWarnings(True)
 
-
 class NBPagesConverter(object):
     def __init__(self, nb_path, output_path=None, template_file=None,
                  overwrite=False, kernel_name=None, output_type='rst',
-                 nb_version=4, base_path=None):
+                 nb_version=4, base_path=None, report_file=None):
         self.nb_path = path.abspath(nb_path)
         fn = path.basename(self.nb_path)
         self.path_only = path.dirname(self.nb_path)
         self.nb_name, _ = path.splitext(fn)
         self.nb_version = nb_version
         self.base_path = base_path
+        self.report_file = report_file
 
         if output_type.upper() not in ('HTML', 'RST'):
             raise ValueError('output_type has to be either html or rst')
@@ -96,15 +99,25 @@ class NBPagesConverter(object):
         with open(self.nb_path) as f:
             nb = nbformat.read(f, as_version=self.nb_version)
 
+        # Create a test case for this notebook
+        reporter.add_test_case(test_name='Convert_Execution',
+                                nb_name=self.nb_name,
+                                nb_file=self.nb_path)
+
         st = time.time()
         try:
             executor.preprocess(nb, {'metadata': {'path': self.path_only}})
-        except CellExecutionError:
-            # TODO: should we fail fast and raies, or record all errors?
-            raise
+        except CellExecutionError as e:
+            logger.exception('CellExecutionError in {} Notebook'
+                            .format(self.nb_name))
+            # Add error info to the test
+            reporter.add_error(message=e, error_type='CellExecutionError')
         et = time.time()
         logger.info('Execution of notebook {} took {} sec'.format(self.nb_name,
                     et - st))
+
+        # Add execution time to the test case
+        reporter.add_execution_time(seconds=et - st)
 
         if write:
             logger.debug('Writing executed notebook to file {0}...'
@@ -212,6 +225,7 @@ class NBPagesConverter(object):
             f.write(rst_text)
 
 
+
 def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], include=[],
                       **kwargs):
     """
@@ -281,6 +295,10 @@ def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], include=[],
         if not exec_only:
             converted.append(nbc.convert())
 
+    reporter.create_report(report_file=kwargs['report_file'],
+                            suite_name="Convert",
+                            suite_package='spacetelescope_notebooks')
+
     return converted
 
 
@@ -348,6 +366,11 @@ def make_parser(parser=None):
                         help='A comma-separated list of notebook names to '
                              'include. Cannot be given at the same time as '
                              'exclude.')
+
+    parser.add_argument('--report', default=None, dest='report_file',
+                        help='The path and file name to write a Junit XML '
+                             'report to. Extension will always be .xml')
+
     return parser
 
 
@@ -390,11 +413,16 @@ def run_parsed(nbfile_or_path, output_type, args, **kwargs):
         include_list = [inc if inc.startswith('.*') else '.*?' + inc
                         for inc in args.include.split(',')]
 
+    # if report_file specified, activate reporter
+    if args.report_file:
+        reporter.activate()
+
     return process_notebooks(nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
                       output_type=output_type, nb_version=args.nb_version,
-                      exclude=exclude_list, include=include_list, **kwargs)
+                      exclude=exclude_list, include=include_list,
+                      report_file=args.report_file, **kwargs)
 
 
 if __name__ == "__main__":

@@ -26,7 +26,7 @@ env:
 
         # We need to install the master/latest version of nbconvert because it has support for
         # allowing exceptions in individual cells:
-        - PIP_DEPENDENCIES='git+https://github.com/jupyter/nbconvert'
+        - PIP_DEPENDENCIES='git+https://github.com/jupyter/nbconvert junit_xml'
 
 # matrix:
 
