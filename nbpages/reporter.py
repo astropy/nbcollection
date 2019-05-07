@@ -88,16 +88,25 @@ class Reporter(object):
     def create_report(self, report_file=None, suite_name='Test Suite', suite_package='root'):
         """
         Create a test suite and write report to file specified
-        in report_file.
+        in report_file.  Returns the resulting report string (or None if not
+        activated.)
 
-        Note: depending on system, mode may need to be set to wb
+
         """
-        if self.activated and report_file:
+        if self.activated:
             if '.xml'.casefold() not in report_file.casefold():
                 report_file = report_file.split('.')[0] + '.xml'
 
             ts = [TestSuite(suite_name, self.test_cases, package=suite_package)]
-            with open(report_file, mode='w') as f:
-                TestSuite.to_file(f, ts, prettyprint=True)
-                print('Test report written to {}'.format(os.path.abspath(f.name)))
-                f.close()
+
+            xmls = TestSuite.to_xml_string(ts, prettyprint=True)
+            if report_file:
+                if hasattr(report_file, 'write'):
+                    # assume file-like
+                    report_file.write(xmls)
+                else:
+                    # Note: depending on system, mode may need to be set to wb
+                    with open(report_file, mode='w') as f:
+                        f.write(xmls)
+                    print('Test report written to {}'.format(os.path.abspath(f.name)))
+            return xmls
