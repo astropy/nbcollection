@@ -3,6 +3,8 @@ import re
 import html
 import traceback
 
+from warnings import warn
+
 class Reporter(object):
     def __init__(self):
         self.test_cases = []
@@ -26,7 +28,7 @@ class Reporter(object):
             global TestSuite, TestCase
             from junit_xml import TestSuite, TestCase
         except ImportError:
-            print('Failed to Import junit_xml, required to create report.')
+            warn('Failed to import junit_xml, required to create report.')
 
 
     @staticmethod
