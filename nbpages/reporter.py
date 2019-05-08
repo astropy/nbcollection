@@ -16,20 +16,22 @@ class Reporter(object):
         Imports junit_xml and activates the reporter.
         This allows all functions with imports to execute.
         """
-        self.junit_xml_import()
-        self.activated = True
+        self.activated = self._junit_xml_import()
 
 
-    def junit_xml_import(self):
+    def _junit_xml_import(self):
         """
         Imports junit_xml which is required to format reports for use in CI.
+
+        Returns True if import succeeded, False otherwise
         """
         try:
             global TestSuite, TestCase
             from junit_xml import TestSuite, TestCase
+            return True
         except ImportError:
             warn('Failed to import junit_xml, required to create junit-style report.')
-
+            return False
 
     @staticmethod
     def format_error(e):
