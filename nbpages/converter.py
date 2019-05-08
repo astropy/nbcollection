@@ -4,6 +4,7 @@ from os import path, walk, remove, makedirs
 import re
 import time
 import logging
+import warnings
 import argparse
 from urllib import request
 
@@ -11,6 +12,8 @@ from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 from nbconvert.exporters import RSTExporter, HTMLExporter
 from nbconvert.writers import FilesWriter
 import nbformat
+
+from .reporter import Reporter
 
 __all__ = ['NBPagesConverter', 'process_notebooks', 'make_parser', 'run_parsed']
 
@@ -20,17 +23,24 @@ def init_logger():
     logging.basicConfig()
     logging.captureWarnings(True)
 
-
 class NBPagesConverter(object):
     def __init__(self, nb_path, output_path=None, template_file=None,
                  overwrite=False, kernel_name=None, output_type='rst',
-                 nb_version=4, base_path=None):
+                 nb_version=4, base_path=None, report_file=None, reporter=None):
         self.nb_path = path.abspath(nb_path)
         fn = path.basename(self.nb_path)
         self.path_only = path.dirname(self.nb_path)
         self.nb_name, _ = path.splitext(fn)
         self.nb_version = nb_version
         self.base_path = base_path
+        self.report_file = report_file
+        self.reporter = Reporter() if reporter is None else reporter
+
+        # try to activate the reporter.  But if report_file is not specified,
+        # supress the warning if junit_xml isn't present
+        if self.report_file:
+            warnings.filterwarnings('ignore', 'Failed to import junit_xml')
+        self.reporter.activate()
 
         if output_type.upper() not in ('HTML', 'RST'):
             raise ValueError('output_type has to be either html or rst')
@@ -96,15 +106,25 @@ class NBPagesConverter(object):
         with open(self.nb_path) as f:
             nb = nbformat.read(f, as_version=self.nb_version)
 
+        # Create a test case for this notebook
+        self.reporter.add_test_case(test_name='Convert_Execution',
+                                nb_name=self.nb_name,
+                                nb_file=self.nb_path)
+
         st = time.time()
         try:
             executor.preprocess(nb, {'metadata': {'path': self.path_only}})
-        except CellExecutionError:
-            # TODO: should we fail fast and raies, or record all errors?
-            raise
+        except CellExecutionError as e:
+            logger.exception('CellExecutionError in {} Notebook'
+                            .format(self.nb_name))
+            # Add error info to the test
+            self.reporter.add_error(message=e, error_type='CellExecutionError')
         et = time.time()
         logger.info('Execution of notebook {} took {} sec'.format(self.nb_name,
                     et - st))
+
+        # Add execution time to the test case
+        self.reporter.add_execution_time(seconds=et - st)
 
         if write:
             logger.debug('Writing executed notebook to file {0}...'
@@ -248,6 +268,8 @@ def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], include=[],
         kwargs.setdefault('base_path', nbfile_or_path)
         # It's a path, so we need to walk through recursively and find any
         # notebook files
+        if 'reporter' not in kwargs:
+            kwargs['reporter'] = Reporter()
         for root, dirs, files in walk(nbfile_or_path):
             for name in files:
                 _, ext = path.splitext(name)
@@ -280,6 +302,10 @@ def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], include=[],
 
         if not exec_only:
             converted.append(nbc.convert())
+
+    nbc.reporter.create_report(report_file=kwargs['report_file'],
+                            suite_name="Convert",
+                            suite_package='spacetelescope_notebooks')
 
     return converted
 
@@ -348,6 +374,11 @@ def make_parser(parser=None):
                         help='A comma-separated list of notebook names to '
                              'include. Cannot be given at the same time as '
                              'exclude.')
+
+    parser.add_argument('--report', default=None, dest='report_file',
+                        help='The path and file name to write a Junit XML '
+                             'report to. Extension will always be .xml')
+
     return parser
 
 
@@ -394,7 +425,8 @@ def run_parsed(nbfile_or_path, output_type, args, **kwargs):
                       output_path=output_path, template_file=template_file,
                       overwrite=args.overwrite, kernel_name=args.kernel_name,
                       output_type=output_type, nb_version=args.nb_version,
-                      exclude=exclude_list, include=include_list, **kwargs)
+                      exclude=exclude_list, include=include_list,
+                      report_file=args.report_file, **kwargs)
 
 
 if __name__ == "__main__":
