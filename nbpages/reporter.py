@@ -28,7 +28,7 @@ class Reporter(object):
             global TestSuite, TestCase
             from junit_xml import TestSuite, TestCase
         except ImportError:
-            warn('Failed to import junit_xml, required to create report.')
+            warn('Failed to import junit_xml, required to create junit-style report.')
 
 
     @staticmethod
@@ -92,8 +92,6 @@ class Reporter(object):
         Create a test suite and write report to file specified
         in report_file.  Returns the resulting report string (or None if not
         activated.)
-
-
         """
         if self.activated:
             if '.xml'.casefold() not in report_file.casefold():
