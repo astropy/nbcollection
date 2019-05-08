@@ -4,6 +4,7 @@ from os import path, walk, remove, makedirs
 import re
 import time
 import logging
+import warnings
 import argparse
 from urllib import request
 
@@ -15,7 +16,6 @@ import nbformat
 from .reporter import Reporter
 
 __all__ = ['NBPagesConverter', 'process_notebooks', 'make_parser', 'run_parsed']
-reporter = Reporter()
 
 logger = logging.getLogger('nbpages')
 def init_logger():
@@ -26,7 +26,7 @@ def init_logger():
 class NBPagesConverter(object):
     def __init__(self, nb_path, output_path=None, template_file=None,
                  overwrite=False, kernel_name=None, output_type='rst',
-                 nb_version=4, base_path=None, report_file=None):
+                 nb_version=4, base_path=None, report_file=None, reporter=None):
         self.nb_path = path.abspath(nb_path)
         fn = path.basename(self.nb_path)
         self.path_only = path.dirname(self.nb_path)
@@ -34,6 +34,13 @@ class NBPagesConverter(object):
         self.nb_version = nb_version
         self.base_path = base_path
         self.report_file = report_file
+        self.reporter = Reporter() if reporter is None else reporter
+
+        # try to activate the reporter.  But if report_file is not specified,
+        # supress the warning if junit_xml isn't present
+        if self.report_file:
+            warnings.filterwarnings('ignore', 'Failed to import junit_xml')
+        self.reporter.activate()
 
         if output_type.upper() not in ('HTML', 'RST'):
             raise ValueError('output_type has to be either html or rst')
@@ -100,7 +107,7 @@ class NBPagesConverter(object):
             nb = nbformat.read(f, as_version=self.nb_version)
 
         # Create a test case for this notebook
-        reporter.add_test_case(test_name='Convert_Execution',
+        self.reporter.add_test_case(test_name='Convert_Execution',
                                 nb_name=self.nb_name,
                                 nb_file=self.nb_path)
 
@@ -111,13 +118,13 @@ class NBPagesConverter(object):
             logger.exception('CellExecutionError in {} Notebook'
                             .format(self.nb_name))
             # Add error info to the test
-            reporter.add_error(message=e, error_type='CellExecutionError')
+            self.reporter.add_error(message=e, error_type='CellExecutionError')
         et = time.time()
         logger.info('Execution of notebook {} took {} sec'.format(self.nb_name,
                     et - st))
 
         # Add execution time to the test case
-        reporter.add_execution_time(seconds=et - st)
+        self.reporter.add_execution_time(seconds=et - st)
 
         if write:
             logger.debug('Writing executed notebook to file {0}...'
@@ -225,7 +232,6 @@ class NBPagesConverter(object):
             f.write(rst_text)
 
 
-
 def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], include=[],
                       **kwargs):
     """
@@ -262,6 +268,8 @@ def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], include=[],
         kwargs.setdefault('base_path', nbfile_or_path)
         # It's a path, so we need to walk through recursively and find any
         # notebook files
+        if 'reporter' not in kwargs:
+            kwargs['reporter'] = Reporter()
         for root, dirs, files in walk(nbfile_or_path):
             for name in files:
                 _, ext = path.splitext(name)
@@ -295,7 +303,7 @@ def process_notebooks(nbfile_or_path, exec_only=False, exclude=[], include=[],
         if not exec_only:
             converted.append(nbc.convert())
 
-    reporter.create_report(report_file=kwargs['report_file'],
+    nbc.reporter.create_report(report_file=kwargs['report_file'],
                             suite_name="Convert",
                             suite_package='spacetelescope_notebooks')
 
@@ -412,10 +420,6 @@ def run_parsed(nbfile_or_path, output_type, args, **kwargs):
     else:
         include_list = [inc if inc.startswith('.*') else '.*?' + inc
                         for inc in args.include.split(',')]
-
-    # if report_file specified, activate reporter
-    if args.report_file:
-        reporter.activate()
 
     return process_notebooks(nbfile_or_path, exec_only=args.exec_only,
                       output_path=output_path, template_file=template_file,
