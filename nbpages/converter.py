@@ -189,7 +189,7 @@ class NBPagesConverter(object):
 
         page_info = dict(output_file_path=output_file_path, name=self.nb_name.replace("_", ' ').title(), title=title)
 
-        return (page_info)
+        return page_info
 
 
     def _add_filter_keywords(self, output_file_path):
