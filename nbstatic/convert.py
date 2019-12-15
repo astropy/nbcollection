@@ -13,23 +13,25 @@ import nbformat
 from nbstatic.logger import logger
 
 BUILD_DIR_NAME = "_build"
+NBFORMAT_VERSION = 4
 
 
 class NBStaticNotebook:
 
-    def __init__(self, nb_path, build_path):
-        if not os.path.exists(nb_path):
-            raise IOError(f"Notebook file '{nb_path}' does not exist")
+    def __init__(self, nb_file_path, build_path):
+        if not os.path.exists(nb_file_path):
+            raise IOError(f"Notebook file '{nb_file_path}' does not exist")
 
-        if not os.path.isfile(nb_path):
+        if not os.path.isfile(nb_file_path):
             raise ValueError("Input notebook path must contain a filename, "
                              "e.g., /path/to/some/notebook.ipynb (I received: "
-                             f"{nb_path})")
+                             f"{nb_file_path})")
 
         os.makedirs(build_path, exist_ok=True)
 
         # First, get the path and notebook filename separately:
-        nb_path, nb_filename = os.path.split(os.path.abspath(nb_path))
+        self.nb_file_path = os.path.abspath(nb_file_path)
+        nb_path, nb_filename = os.path.split(self.nb_file_path)
 
         # We need the notebook basename to construct the executed notebook name
         # and the rendered HTML page name:
@@ -52,39 +54,38 @@ class NBStaticNotebook:
         self.nb_html_path = os.path.abspath(
             os.path.join(build_path, relative_path, f"{basename}.html"))
 
-    def execute(self, write=True, overwrite=False):
-        """
-        Execute the specified notebook file, and optionally write out the
-        executed notebook to a new file.
+    def execute(self, overwrite=False, **kwargs):
+        """Execute this notebook file and write out the executed contents to a
+        new file.
 
         Parameters
         ----------
-        write : bool, optional
-            Write the executed notebook to a new file, or not.
         overwrite : bool, optional
+            Whether or not to overwrite an existing executed notebook file.
+        **kwargs
+            Additional keyword arguments are passed to the
+            `nbconvert.preprocessors.ExecutePreprocessor` initializer.
 
         Returns
         -------
         executed_nb_path : str, ``None``
-            The path to the executed notebook path, or ``None`` if
-            ``write=False``.
+            The path to the executed notebook.
 
         """
 
-        if path.exists(self.nb_exec_path) and not overwrite:
-            logger.debug("Executed notebook already exists at {0}. Use "
-                         "overwrite=True or --overwrite (at cmd line) to re-run"
-                         .format(self._executed_nb_path))
-            return self._executed_nb_path
+        if os.path.exists(self.nb_exec_path) and not overwrite:
+            logger.debug(f"Executed notebook already exists at "
+                         "'self.nb_exec_path'. Use overwrite=True or set the config item exec_overwrite=True to overwrite.")
+            return self.nb_exec_path
 
         # Execute the notebook
-        logger.debug('Executing notebook using kwargs '
-                     '"{}"...'.format(self._execute_kwargs))
+        if kwargs:
+            logger.debug(f'Executing notebook using kwargs {kwargs}')
         t0 = time.time()
-        executor = ExecutePreprocessor(**self._execute_kwargs)
+        executor = ExecutePreprocessor(**kwargs)
 
-        with open(self.nb_path) as f:
-            nb = nbformat.read(f, as_version=IPYTHON_VERSION)
+        with open(self.nb_file_path) as f:
+            nb = nbformat.read(f, as_version=NBFORMAT_VERSION)
 
         try:
             executor.preprocess(nb, {'metadata': {'path': self.path_only}})
