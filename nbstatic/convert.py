@@ -29,7 +29,7 @@ class NBStaticNotebook:
         os.makedirs(build_path, exist_ok=True)
 
         # First, get the path and notebook filename separately:
-        nb_path, nb_filename = os.path.split(nb_path)
+        nb_path, nb_filename = os.path.split(os.path.abspath(nb_path))
 
         # We need the notebook basename to construct the executed notebook name
         # and the rendered HTML page name:
@@ -39,12 +39,69 @@ class NBStaticNotebook:
         build_path_up_one = os.path.abspath(os.path.join(build_path, '..'))
 
         common_prefix = os.path.commonpath([nb_path, build_path_up_one])
-        relative_path = os.path.relpath(nb_path, common_prefix)
+        if common_prefix == '/':
+            # If there is no common prefix, write all notebooks directly to the
+            # build directory. This is useful for testing and, e.g., writing all
+            # executed notebooks to a temporary directory
+            relative_path = ''
+        else:
+            relative_path = os.path.relpath(nb_path, common_prefix)
 
         self.nb_exec_path = os.path.abspath(
             os.path.join(build_path, relative_path, f"exec_{basename}.ipynb"))
         self.nb_html_path = os.path.abspath(
             os.path.join(build_path, relative_path, f"{basename}.html"))
+
+    def execute(self, write=True, overwrite=False):
+        """
+        Execute the specified notebook file, and optionally write out the
+        executed notebook to a new file.
+
+        Parameters
+        ----------
+        write : bool, optional
+            Write the executed notebook to a new file, or not.
+        overwrite : bool, optional
+
+        Returns
+        -------
+        executed_nb_path : str, ``None``
+            The path to the executed notebook path, or ``None`` if
+            ``write=False``.
+
+        """
+
+        if path.exists(self.nb_exec_path) and not overwrite:
+            logger.debug("Executed notebook already exists at {0}. Use "
+                         "overwrite=True or --overwrite (at cmd line) to re-run"
+                         .format(self._executed_nb_path))
+            return self._executed_nb_path
+
+        # Execute the notebook
+        logger.debug('Executing notebook using kwargs '
+                     '"{}"...'.format(self._execute_kwargs))
+        t0 = time.time()
+        executor = ExecutePreprocessor(**self._execute_kwargs)
+
+        with open(self.nb_path) as f:
+            nb = nbformat.read(f, as_version=IPYTHON_VERSION)
+
+        try:
+            executor.preprocess(nb, {'metadata': {'path': self.path_only}})
+        except CellExecutionError:
+            # TODO: should we fail fast and raise, or record all errors?
+            raise
+
+        logger.info("Finished running notebook ({:.2f} seconds)"
+                    .format(time.time() - t0))
+
+        if write:
+            logger.debug('Writing executed notebook to file {0}...'
+                         .format(self._executed_nb_path))
+            with open(self._executed_nb_path, 'w') as f:
+                nbformat.write(nb, f)
+
+            return self._executed_nb_path
 
 
 class NBStaticConverter:
