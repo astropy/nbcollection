@@ -6,7 +6,7 @@ __all__ = ['logger']
 
 class CustomHandler(logging.StreamHandler):
     def emit(self, record):
-        record.origin = 'nbstatic'
+        record.msg = f'[nbstatic ({record.levelname})]: {record.msg}'
         super().emit(record)
 
 
