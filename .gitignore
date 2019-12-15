@@ -11,20 +11,6 @@ __pycache__
 # add a non-generated .c extension, use `git add -f filename.c`.
 *.c
 
-# Other generated files
-MANIFEST
-astropy/version.py
-astropy/cython_version.py
-astropy/wcs/include/wcsconfig.h
-astropy/_erfa/core.py
-
-# Sphinx
-_build
-_generated
-docs/api
-docs/generated
-docs/visualization/ngc6976.jpeg
-docs/visualization/ngc6976-default.jpeg
 
 # Packages/installer info
 *.egg
