@@ -161,12 +161,15 @@ class NBStaticConverter:
             # It's a directory, so we need to walk through recursively and find
             # any notebook files
             for root, dirs, files in os.walk(root_nb_path):
+                for d in dirs:
+                    if d.startswith('.') or d.startswith('_'):
+                        # calling remove here actually modifies the paths that
+                        # os.walk will recursively explore
+                        dirs.remove(d)
+
                 for name in files:
                     basename, ext = os.path.splitext(name)
                     file_path = os.path.join(root, name)
-
-                    if file_path.startswith('.'):  # skip hidden dirs
-                        continue
 
                     if ext == '.ipynb':
                         notebooks.append(NBStaticNotebook(file_path,
