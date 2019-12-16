@@ -16,5 +16,4 @@ def convert():
     kwargs = vars(args)
 
     nbstatic = NBStaticConverter(kwargs.pop('nb_root_path'))
-    nbstatic.convert(overwrite=args.overwrite,
-                     **kwargs)
+    nbstatic.convert(**kwargs)

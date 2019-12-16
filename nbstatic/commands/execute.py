@@ -21,5 +21,4 @@ def execute():
     kwargs = vars(args)
 
     nbstatic = NBStaticConverter(kwargs.pop('nb_root_path'))
-    nbstatic.execute(overwrite=args.overwrite,
-                     **kwargs)
+    nbstatic.execute(**kwargs)
