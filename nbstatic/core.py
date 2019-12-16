@@ -181,7 +181,8 @@ class NBStaticConverter:
             notebooks.append(NBStaticNotebook(root_nb_path, build_path))
 
         else:
-            raise ValueError("TODO")
+            raise ValueError("Invalid input: must either be a notebook file or "
+                             "a directory containing notebook files.")
 
         logger.info(f"Collected {len(notebooks)} notebooks to convert")
 

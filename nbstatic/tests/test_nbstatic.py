@@ -5,7 +5,7 @@ import shutil
 from nbconvert.preprocessors.execute import CellExecutionError
 import pytest
 
-from nbstatic.convert import NBStaticNotebook, BUILD_DIR_NAME
+from nbstatic.core import NBStaticNotebook, BUILD_DIR_NAME
 from nbstatic.logger import logger
 
 
