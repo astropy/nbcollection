@@ -1,10 +1,8 @@
-nbstatic
-========
+# nbstatic
 
 Execute and convert collections of Jupyter notebooks to static HTML.
 
-Examples
---------
+## Examples
 
 Some very basic example usage:
 
