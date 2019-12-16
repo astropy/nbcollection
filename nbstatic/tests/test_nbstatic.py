@@ -94,16 +94,16 @@ def test_nbstaticnotebook(tmpdir, caplog, case_i):
         build_path, post_build, f'{nb_name}.html'))
 
     # Now try executing:
-    executed_path = nb.execute(kernel_name='python3')
+    nb.execute(kernel_name='python3')
     assert 'Use overwrite=True' not in caplog.records[-1].message
-    executed_path = nb.execute(kernel_name='python3')
+    nb.execute(kernel_name='python3')
     assert 'Use overwrite=True' in caplog.records[-1].message
 
-    executed_path = nb.execute(kernel_name='python3', overwrite=True)
+    nb.execute(kernel_name='python3', overwrite=True)
     assert 'Use overwrite=True' not in caplog.records[-1].message
 
     # Convert to HTML:
-    html_path = nb.convert()
+    nb.convert()
 
 
 def test_convert_pass(tmpdir):

@@ -1,6 +1,5 @@
 # Standard library
 import os
-import re
 import time
 
 # Third-party
@@ -155,137 +154,43 @@ class NBStaticNotebook:
 
 class NBStaticConverter:
 
-    def __init__(self, root_nb_path, template_file=None, overwrite=False):
-        pass
+    def __init__(self, root_nb_path, overwrite=False):
+        # This works whether the input is a single notebook file or a directory
+        # containing notebooks:
+        build_path = os.path.join(os.path.split(root_nb_path)[0],
+                                  BUILD_DIR_NAME)
 
+        notebooks = []
+        if os.path.isdir(root_nb_path):
+            # It's a directory, so we need to walk through recursively and find
+            # any notebook files
+            for root, dirs, files in os.walk(root_nb_path):
+                for name in files:
+                    basename, ext = os.path.splitext(name)
+                    file_path = os.path.join(root, name)
 
-def process_notebooks(nbfile_or_path, exec_only=False, verbosity=None,
-                      **kwargs):
-    """
-    Execute and optionally convert the specified notebook file or directory of
-    notebook files.
+                    if file_path.startswith('.'):  # skip hidden dirs
+                        continue
 
-    This is a wrapper around the ``NBTutorialsConverter`` class that does file
-    handling.
+                    if ext == '.ipynb':
+                        notebooks.append(NBStaticNotebook(file_path,
+                                                          build_path))
 
-    Parameters
-    ----------
-    nbfile_or_path : str
-        Either a single notebook filename or a path containing notebook files.
-    exec_only : bool, optional
-        Just execute the notebooks, don't run them.
-    verbosity : int, optional
-        A ``logging`` verbosity level, e.g., logging.DEBUG or etc. to specify
-        the log level.
-    **kwargs
-        Any other keyword arguments are passed to the ``NBTutorialsConverter``
-        init.
+        elif os.path.isfile(root_nb_path):
+            # It's a single file:
+            notebooks.append(NBStaticNotebook(root_nb_path, build_path))
 
-    """
-    if verbosity is not None:
-        logger.setLevel(verbosity)
+        else:
+            raise ValueError("TODO")
 
-    if path.isdir(nbfile_or_path):
-        # It's a path, so we need to walk through recursively and find any
-        # notebook files
-        for root, dirs, files in walk(nbfile_or_path):
-            for name in files:
-                _,ext = path.splitext(name)
-                full_path = path.join(root, name)
+        logger.info(f"Collected {len(notebooks)} notebooks to convert")
 
-                if 'ipynb_checkpoints' in full_path: # skip checkpoint saves
-                    continue
+        self.notebooks = notebooks
 
-                if name.startswith('exec'): # notebook already executed
-                    continue
+    def execute(self, overwrite=False, **kwargs):
+        for nb in self.notebooks:
+            nb.execute(overwrite=overwrite, **kwargs)
 
-                if ext == '.ipynb':
-                    nbc = NBTutorialsConverter(full_path, **kwargs)
-                    nbc.execute()
-
-                    if not exec_only:
-                        nbc.convert()
-
-    else:
-        # It's a single file, so convert it
-        nbc = NBTutorialsConverter(nbfile_or_path, **kwargs)
-        nbc.execute()
-
-        if not exec_only:
-            nbc.convert()
-
-if __name__ == "__main__":
-    from argparse import ArgumentParser
-    import logging
-
-    # Define parser object
-    parser = ArgumentParser(description="")
-
-    vq_group = parser.add_mutually_exclusive_group()
-    vq_group.add_argument('-v', '--verbose', action='count', default=0,
-                          dest='verbosity')
-    vq_group.add_argument('-q', '--quiet', action='count', default=0,
-                          dest='quietness')
-
-    parser.add_argument('--exec-only', default=False, action='store_true',
-                        dest='exec_only', help='Just execute the notebooks, '
-                                               'don\'t convert them as well. '
-                                               'This is useful for testing that'
-                                               ' the notebooks run.')
-
-    parser.add_argument('-o', '--overwrite', action='store_true',
-                        dest='overwrite', default=False,
-                        help='Re-run and overwrite any existing executed '
-                             'notebook or RST files.')
-
-    parser.add_argument('nbfile_or_path', default='tutorials/notebooks/',
-                        nargs='?',
-                        help='Path to a specific notebook file, or the '
-                             'top-level path to a directory containing '
-                             'notebook files to process.')
-
-    parser.add_argument('--template', default=None, dest='template_file',
-                        help='The path to a jinja2 template file for the '
-                             'notebook to RST conversion.')
-
-    parser.add_argument('--output-path', default=None, dest='output_path',
-                        help='The path to save all executed or converted '
-                             'notebook files. If not specified, the executed/'
-                             'converted files will be in the same path as the '
-                             'source notebooks.')
-
-    parser.add_argument('--kernel-name', default='python3', dest='kernel_name',
-                        help='The name of the kernel to run the notebooks with.'
-                             ' Must be an available kernel from "jupyter '
-                             'kernelspec list".')
-
-    args = parser.parse_args()
-
-    # Set logger level based on verbose flags
-    if args.verbosity != 0:
-        if args.verbosity == 1:
-            logger.setLevel(logging.DEBUG)
-        else: # anything >= 2
-            logger.setLevel(1)
-
-    elif args.quietness != 0:
-        if args.quietness == 1:
-            logger.setLevel(logging.WARNING)
-        else: # anything >= 2
-            logger.setLevel(logging.ERROR)
-
-    # make sure output path exists
-    output_path = args.output_path
-    if output_path is not None:
-        output_path = path.abspath(output_path)
-        makedirs(output_path, exist_ok=True)
-
-    # make sure the template file exists
-    template_file = args.template_file
-    if template_file is not None and not path.exists(template_file):
-        raise IOError("Couldn't find RST template file at {0}"
-                      .format(template_file))
-
-    process_notebooks(args.nbfile_or_path, exec_only=args.exec_only,
-                      output_path=output_path, template_file=template_file,
-                      overwrite=args.overwrite, kernel_name=args.kernel_name)
+    def convert(self, overwrite=False, **kwargs):
+        for nb in self.notebooks:
+            nb.convert(overwrite=overwrite, **kwargs)
