@@ -75,7 +75,6 @@ class NBStaticNotebook:
         """
 
         if os.path.exists(self.nb_exec_path) and not overwrite:
-            print("DERP")
             logger.debug("Executed notebook already exists at "
                          f"'{self.nb_exec_path}'. Use overwrite=True or set "
                          "the config item exec_overwrite=True to overwrite.")
@@ -96,8 +95,8 @@ class NBStaticNotebook:
             # TODO: should we fail fast and raise, or record all errors?
             raise
 
-        logger.info("Finished running notebook ({:.2f} seconds)"
-                    .format(time.time() - t0))
+        logger.info(f"Finished running notebook '{self.nb_filename}' "
+                    "({:.2f} seconds)".format(time.time() - t0))
 
         logger.debug(f'Writing executed notebook to file {self.nb_exec_path}')
         with open(self.nb_exec_path, 'w') as f:
@@ -185,9 +184,17 @@ class NBStaticConverter:
 
         self.notebooks = notebooks
 
-    def execute(self, overwrite=False, **kwargs):
+    def execute(self, stop_on_error=False, overwrite=False, **kwargs):
+        errors = []
         for nb in self.notebooks:
-            nb.execute(overwrite=overwrite, **kwargs)
+            try:
+                nb.execute(overwrite=overwrite, **kwargs)
+            except Exception as e:
+                if stop_on_error:
+                    raise e
+
+                logger.error(f"Notebook '{nb.nb_filename}' errored: {str(e)}")
+                errors.append(e)
 
     def convert(self, overwrite=False, **kwargs):
         for nb in self.notebooks:
