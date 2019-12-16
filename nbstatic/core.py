@@ -149,9 +149,6 @@ class NBStaticNotebook:
         return output_file_path
 
 
-# TODO:
-# self._execute_kwargs = dict(timeout=900)
-
 class NBStaticConverter:
 
     def __init__(self, root_nb_path, overwrite=False):
