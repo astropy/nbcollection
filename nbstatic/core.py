@@ -91,12 +91,13 @@ class NBStaticNotebook:
 
         try:
             executor.preprocess(nb, {'metadata': {'path': self.nb_path}})
+            success = "✅"
         except CellExecutionError:
-            # TODO: should we fail fast and raise, or record all errors?
-            raise
+            success = "❌"
 
+        run_time = time.time() - t0
         logger.info(f"Finished running notebook '{self.nb_filename}' "
-                    "({:.2f} seconds)".format(time.time() - t0))
+                    f"({run_time:.2f} seconds) {success}")
 
         logger.debug(f'Writing executed notebook to file {self.nb_exec_path}')
         with open(self.nb_exec_path, 'w') as f:
