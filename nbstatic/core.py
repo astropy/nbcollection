@@ -91,13 +91,13 @@ class NBStaticNotebook:
 
         try:
             executor.preprocess(nb, {'metadata': {'path': self.nb_path}})
-            success = "✅"
         except CellExecutionError:
-            success = "❌"
+            logger.error(f"Notebook '{self.nb_filename}' errored ❌")
+            raise
 
         run_time = time.time() - t0
         logger.info(f"Finished running notebook '{self.nb_filename}' "
-                    f"({run_time:.2f} seconds) {success}")
+                    f"({run_time:.2f} seconds) ✅")
 
         logger.debug(f'Writing executed notebook to file {self.nb_exec_path}')
         with open(self.nb_exec_path, 'w') as f:
@@ -211,4 +211,4 @@ class NBStaticConverter:
 
     def convert(self, overwrite=False, **kwargs):
         for nb in self.notebooks:
-            nb.convert(overwrite=overwrite, **kwargs)
+            nb.convert(overwrite=overwrite)
