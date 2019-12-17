@@ -188,16 +188,25 @@ class NBStaticConverter:
         self.notebooks = notebooks
 
     def execute(self, stop_on_error=False, overwrite=False, **kwargs):
-        errors = []
+        exceptions = dict()
         for nb in self.notebooks:
             try:
                 nb.execute(overwrite=overwrite, **kwargs)
             except Exception as e:
                 if stop_on_error:
                     raise e
+                exceptions[nb.nb_filename] = e
 
-                logger.error(f"Notebook '{nb.nb_filename}' errored: {str(e)}")
-                errors.append(e)
+        if exceptions:
+            for nb, e in exceptions.items():
+                logger.error(f"Notebook '{nb}' errored: {str(e)}")
+            raise RuntimeError(f"{len(exceptions)} notebooks raised unexpected "
+                               "errors while executing cells: "
+                               f"{list(exceptions.keys())} — see above for "
+                               "more details about the failing cells. If any "
+                               "of these are expected errors, add a Jupyter "
+                               "cell tag 'raises-exception' to the failing "
+                               "cells.")
 
     def convert(self, overwrite=False, **kwargs):
         for nb in self.notebooks:
