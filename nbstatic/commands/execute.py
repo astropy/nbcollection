@@ -6,7 +6,9 @@ from .argparse_helpers import get_parser
 DESCRIPTION = "Execute a collection of Jupyter notebooks"
 
 
-def execute():
+def execute(args=None):
+    args = args or sys.argv[2:]
+
     parser = get_parser(DESCRIPTION)
 
     # Specific to this command:
@@ -18,9 +20,9 @@ def execute():
     parser.add_argument("--stop-on-error", action='store_true', default=False,
                         help="The timeout (in seconds) for executing notebooks")
 
-    args = parser.parse_args(sys.argv[2:])
+    args = parser.parse_args(args)
 
     kwargs = vars(args)
 
-    nbstatic = NBStaticConverter(kwargs.pop('nb_root_path'))
+    nbstatic = NBStaticConverter(kwargs.pop('notebooks'))
     nbstatic.execute(**kwargs)

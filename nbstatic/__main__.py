@@ -3,26 +3,34 @@ import argparse
 
 from .commands import convert, execute
 
-DESCRIPTION = (
-    "Type `nbstatic <command> -h` for help.")
 commands = {'execute': execute,
             'convert': convert}
 
-parser = argparse.ArgumentParser(description=DESCRIPTION)
+DESCRIPTION = """Type `nbstatic <command> -h` for help.
+
+The allowed commands are:
+
+    nbstatic execute
+    nbstatic convert
+"""
+
+parser = argparse.ArgumentParser(description=DESCRIPTION,
+                                 formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("command",
                     help="The command you'd like to run. Allowed commands: "
                          f"{list(commands.keys())}")
 
 
-def main():
-    args = parser.parse_args(sys.argv[1:2])
-    if args.command not in commands:
+def main(args=None):
+    args = args or sys.argv
+    parsed = parser.parse_args(args[1:2])
+    if parsed.command not in commands:
         parser.print_help()
-        raise ValueError(f'Unrecognized command: {args.command}\n See the help '
-                         'above for usage information')
+        raise ValueError(f'Unrecognized command: {parsed.command}\n See the '
+                         'help above for usage information')
 
     # Run the command
-    commands[args.command]()
+    commands[parsed.command](args)
 
 
 if __name__ == "__main__":

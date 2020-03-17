@@ -38,9 +38,10 @@ def get_parser(description):
 
     parser = CustomArgumentParser(description=description)
 
-    parser.add_argument("nb_root_path",
+    parser.add_argument("notebooks", nargs='+',
                         help="Path to the root directory containing Jupyter "
-                             "notebooks, or to a single notebook file.")
+                             "notebooks, to a single notebook file, or a list "
+                             "of notebook files.")
 
     parser.add_argument('--build-path', default=None,
                         help='The path to save all executed or converted '
