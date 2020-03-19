@@ -7,7 +7,7 @@ DESCRIPTION = "Execute a collection of Jupyter notebooks"
 
 
 def execute(args=None):
-    args = args or sys.argv[2:]
+    args = args or sys.argv
 
     parser = get_parser(DESCRIPTION)
 
@@ -20,9 +20,9 @@ def execute(args=None):
     parser.add_argument("--stop-on-error", action='store_true', default=False,
                         help="The timeout (in seconds) for executing notebooks")
 
-    args = parser.parse_args(args)
+    args = parser.parse_args(args[2:])
 
     kwargs = vars(args)
 
-    nbstatic = NBStaticConverter(kwargs.pop('notebooks'))
-    nbstatic.execute(**kwargs)
+    nbstatic = NBStaticConverter(**kwargs)
+    nbstatic.execute(kwargs.get('stop_on_error', False))

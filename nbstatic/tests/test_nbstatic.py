@@ -14,9 +14,10 @@ def get_test_cases(case_i=None):
 
     cases = []
 
-    # /path/to/the/notebook1.ipynb
-    # -> /path/to/the/_build/exec_notebook1.ipynb
-    # -> /path/to/the/_build/notebook1.html
+    # Single notebook file
+    # nb_test1/notebook1.ipynb
+    # -> nb_test1/_build/notebook1.ipynb
+    # -> nb_test1/_build/notebook1.html
     nb_name = 'notebook1'
     nb_path = os.path.join(test_root_path, 'data', 'nb_test1',
                            f'{nb_name}.ipynb')

@@ -17,7 +17,8 @@ NBFORMAT_VERSION = 4
 
 class NBStaticNotebook:
 
-    def __init__(self, nb_file_path, build_path):
+    def __init__(self, nb_file_path, build_path, relative_root_path=None,
+                 flatten=False, overwrite=False, **kwargs):
         if not os.path.exists(nb_file_path):
             raise IOError(f"Notebook file '{nb_file_path}' does not exist")
 
@@ -34,28 +35,36 @@ class NBStaticNotebook:
         # and the rendered HTML page name:
         self.nb_basename = os.path.splitext(self.nb_filename)[0]
 
-        # Get the path containing the build path:
-        build_path_up_one = os.path.abspath(os.path.join(build_path, '..'))
-
-        common_prefix = os.path.commonpath([self.nb_path, build_path_up_one])
-        if common_prefix == '/':
-            # If there is no common prefix, write all notebooks directly to the
-            # build directory. This is useful for testing and, e.g., writing all
-            # executed notebooks to a temporary directory
-            relative_path = ''
+        if relative_root_path is not None:
+            common_prefix = os.path.commonpath([self.nb_path,
+                                                relative_root_path])
+            if common_prefix == '/':
+                # If there is no common prefix, write all notebooks directly to
+                # the build directory. This is useful for testing and, e.g.,
+                # writing all executed notebooks to a temporary directory
+                relative_path = ''
+                # TODO: should I warn?
+            else:
+                relative_path = os.path.relpath(self.nb_path, common_prefix)
         else:
-            relative_path = os.path.relpath(self.nb_path, common_prefix)
+            relative_path = ''
 
-        full_build_path = os.path.abspath(os.path.join(build_path,
-                                                       relative_path))
+        if flatten:  # flatten the directory structure
+            full_build_path = build_path
+        else:
+            full_build_path = os.path.abspath(os.path.join(build_path,
+                                                           relative_path))
         os.makedirs(full_build_path, exist_ok=True)
 
         self.nb_exec_path = os.path.join(full_build_path,
-                                         f"exec_{self.nb_basename}.ipynb")
+                                         f"{self.nb_basename}.ipynb")
         self.nb_html_path = os.path.join(full_build_path,
                                          f"{self.nb_basename}.html")
 
-    def execute(self, overwrite=False, **kwargs):
+        self.overwrite = overwrite
+        self.flatten = flatten
+
+    def execute(self):
         """Execute this notebook file and write out the executed contents to a
         new file.
 
@@ -63,9 +72,6 @@ class NBStaticNotebook:
         ----------
         overwrite : bool, optional
             Whether or not to overwrite an existing executed notebook file.
-        **kwargs
-            Additional keyword arguments are passed to the
-            `nbconvert.preprocessors.ExecutePreprocessor` initializer.
 
         Returns
         -------
@@ -74,17 +80,15 @@ class NBStaticNotebook:
 
         """
 
-        if os.path.exists(self.nb_exec_path) and not overwrite:
+        if os.path.exists(self.nb_exec_path) and not self.overwrite:
             logger.debug("Executed notebook already exists at "
                          f"'{self.nb_exec_path}'. Use overwrite=True or set "
                          "the config item exec_overwrite=True to overwrite.")
             return self.nb_exec_path
 
         # Execute the notebook
-        if kwargs:
-            logger.debug(f'Executing notebook using kwargs {kwargs}')
         t0 = time.time()
-        executor = ExecutePreprocessor(**kwargs)
+        executor = ExecutePreprocessor(kernel_name='python3')  # TODO: fix kernel
 
         with open(self.nb_file_path) as f:
             nb = nbformat.read(f, as_version=NBFORMAT_VERSION)
@@ -105,7 +109,7 @@ class NBStaticNotebook:
 
         return self.nb_exec_path
 
-    def convert(self, overwrite=False):
+    def convert(self):
         """Convert the executed notebook to a static HTML file.
 
         Parameters
@@ -114,9 +118,9 @@ class NBStaticNotebook:
 
         if not os.path.exists(self.nb_exec_path):
             raise IOError("Executed notebook file doesn't exist at "
-                          f"{self.nb_exec_path} - did you run .execute() yet?")
+                          f"{self.nb_exec_path} - did you execute it yet?")
 
-        if os.path.exists(self.nb_html_path) and not overwrite:
+        if os.path.exists(self.nb_html_path) and not self.overwrite:
             logger.debug("Rendered notebook page already exists at "
                          f"{self.nb_html_path}. Use overwrite=True to "
                          "overwrite.")
@@ -151,48 +155,80 @@ class NBStaticNotebook:
 
 class NBStaticConverter:
 
-    def __init__(self, root_nb_path, overwrite=False):
-        # This works whether the input is a single notebook file or a directory
-        # containing notebooks:
-        build_path = os.path.join(os.path.split(root_nb_path)[0],
-                                  BUILD_DIR_NAME)
+    def __init__(self, notebooks, overwrite=False, **kwargs):
+        """
+        Parameters
+        ----------
+        notebooks : str, iterable
+            Either a string path to a single notebook, a path to a collection of
+            notebooks, or an iterable containing individual notebook files.
+        overwrite : bool (optional)
+        """
 
-        notebooks = []
-        if os.path.isdir(root_nb_path):
-            # It's a directory, so we need to walk through recursively and find
-            # any notebook files
-            for root, dirs, files in os.walk(root_nb_path):
-                for d in dirs:
-                    if d.startswith('.') or d.startswith('_'):
-                        # calling remove here actually modifies the paths that
-                        # os.walk will recursively explore
-                        dirs.remove(d)
+        if isinstance(notebooks, str) or len(notebooks) == 1:
+            if isinstance(notebooks, str):
+                notebooks = [notebooks]
 
-                for name in files:
-                    basename, ext = os.path.splitext(name)
-                    file_path = os.path.join(root, name)
-
-                    if ext == '.ipynb':
-                        notebooks.append(NBStaticNotebook(file_path,
-                                                          build_path))
-
-        elif os.path.isfile(root_nb_path):
-            # It's a single file:
-            notebooks.append(NBStaticNotebook(root_nb_path, build_path))
+            # This works whether the input is a single notebook file or a
+            # directory containing notebooks:
+            nb_path = os.path.split(notebooks[0])[0]
+            default_build_path = os.path.join(nb_path, BUILD_DIR_NAME)
+            relative_root_path = nb_path
 
         else:
-            raise ValueError("Invalid input: must either be a notebook file or "
-                             "a directory containing notebook files.")
+            # Multiple paths were specified as a list, so we can't infer the
+            # build path location - default to using the cwd:
+            default_build_path = os.path.join(os.getcwd(), BUILD_DIR_NAME)
+            relative_root_path = None
 
-        logger.info(f"Collected {len(notebooks)} notebooks to convert")
+        build_path = kwargs.pop('build_path')
+        if build_path is None:
+            build_path = default_build_path
+        else:
+            build_path = os.path.join(build_path, BUILD_DIR_NAME)
 
-        self.notebooks = notebooks
+        nbs = []
+        for notebook in notebooks:
+            if os.path.isdir(notebook):
+                # It's a directory, so we need to walk through recursively and
+                # collect any notebook files
+                for root, dirs, files in os.walk(notebook):
+                    for d in dirs:
+                        if d.startswith('.') or d.startswith('_'):
+                            # calling remove here actually modifies the paths
+                            # that os.walk will recursively explore
+                            dirs.remove(d)
 
-    def execute(self, stop_on_error=False, overwrite=False, **kwargs):
+                    for name in files:
+                        basename, ext = os.path.splitext(name)
+                        file_path = os.path.join(root, name)
+
+                        if ext == '.ipynb':
+                            nb = NBStaticNotebook(
+                                file_path, build_path=build_path,
+                                relative_root_path=relative_root_path, **kwargs)
+
+            elif os.path.isfile(notebook):
+                # It's a single file:
+                nb = NBStaticNotebook(notebook, build_path=build_path, **kwargs)
+
+            else:
+                raise ValueError("Input specification of notebooks not "
+                                 f"understood: {notebook}")
+
+            nbs.append(nb)
+
+        logger.info(f"Collected {len(nbs)} notebooks to convert")
+        logger.debug("Executed/converted notebooks will be saved in: "
+                     f"{build_path}")
+
+        self.notebooks = nbs
+
+    def execute(self, stop_on_error=False):
         exceptions = dict()
         for nb in self.notebooks:
             try:
-                nb.execute(overwrite=overwrite, **kwargs)
+                nb.execute()
             except Exception as e:
                 if stop_on_error:
                     raise e
@@ -209,6 +245,6 @@ class NBStaticConverter:
                                "cell tag 'raises-exception' to the failing "
                                "cells.")
 
-    def convert(self, overwrite=False, **kwargs):
+    def convert(self):
         for nb in self.notebooks:
-            nb.convert(overwrite=overwrite)
+            nb.convert()

@@ -43,7 +43,7 @@ def get_parser(description):
                              "notebooks, to a single notebook file, or a list "
                              "of notebook files.")
 
-    parser.add_argument('--build-path', default=None,
+    parser.add_argument('--build-path', dest='build_path',
                         help='The path to save all executed or converted '
                              'notebook files. If not specified, the executed/'
                              'converted files will be in _build')
