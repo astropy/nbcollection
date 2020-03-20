@@ -48,6 +48,12 @@ def get_parser(description):
                              'notebook files. If not specified, the executed/'
                              'converted files will be in _build')
 
+    parser.add_argument("--flatten", action='store_true',
+                        dest='flatten', default=False,
+                        help="Flatten the directory structure of the built "
+                             "notebooks. All HTML notebook files will be "
+                             "written to the top-level build path.")
+
     parser.add_argument("-o", "--overwrite", action='store_true',
                         dest='overwrite',
                         help="Overwrite executed notebooks if they already "

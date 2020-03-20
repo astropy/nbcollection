@@ -12,11 +12,8 @@ def convert(args=None):
     parser = get_parser(DESCRIPTION)
 
     # Specific to this command:
-    parser.add_argument("--flatten", action='store_true',
-                        dest='flatten', default=False,
-                        help="Flatten the directory structure of the built "
-                             "notebooks. All HTML notebook files will be "
-                             "written to the top-level build path.")
+    parser.add_argument("--template", dest="template", default=None,
+                        help="A jinja2 template file passed to nbconvert.")
 
     args = parser.parse_args(args[2:])
 

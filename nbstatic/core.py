@@ -64,6 +64,8 @@ class NBStaticNotebook:
         self.overwrite = overwrite
         self.flatten = flatten
 
+        self.template_file = kwargs.get('template', None)
+
     def execute(self):
         """Execute this notebook file and write out the executed contents to a
         new file.
@@ -139,9 +141,8 @@ class NBStaticNotebook:
         logger.debug('Exporting notebook to HTML...')
         exporter = HTMLExporter()
 
-        # TODO: figure out template-ing...
-        # if self.template_file:
-        #     exporter.template_file = self.template_file
+        if self.template_file:
+            exporter.template_file = self.template_file
         output, resources = exporter.from_filename(self.nb_exec_path,
                                                    resources=resources)
 
@@ -207,16 +208,16 @@ class NBStaticConverter:
                             nb = NBStaticNotebook(
                                 file_path, build_path=build_path,
                                 relative_root_path=relative_root_path, **kwargs)
+                            nbs.append(nb)
 
             elif os.path.isfile(notebook):
                 # It's a single file:
                 nb = NBStaticNotebook(notebook, build_path=build_path, **kwargs)
+                nbs.append(nb)
 
             else:
                 raise ValueError("Input specification of notebooks not "
                                  f"understood: {notebook}")
-
-            nbs.append(nb)
 
         logger.info(f"Collected {len(nbs)} notebooks to convert")
         logger.debug("Executed/converted notebooks will be saved in: "
