@@ -18,7 +18,7 @@ NBFORMAT_VERSION = 4
 class NBStaticNotebook:
 
     def __init__(self, nb_file_path, build_path, relative_root_path=None,
-                 flatten=False, overwrite=False, **kwargs):
+                 flatten=False, overwrite=False, timeout=30, **kwargs):
         if not os.path.exists(nb_file_path):
             raise IOError(f"Notebook file '{nb_file_path}' does not exist")
 
@@ -66,6 +66,7 @@ class NBStaticNotebook:
         self.flatten = flatten
 
         self.template_file = kwargs.get('template', None)
+        self.timeout = timeout
 
     def execute(self):
         """Execute this notebook file and write out the executed contents to a
@@ -90,8 +91,11 @@ class NBStaticNotebook:
             return self.nb_exec_path
 
         # Execute the notebook
+        logger.debug(f"Executing notebook '{self.nb_filename}' ⏳")
         t0 = time.time()
-        executor = ExecutePreprocessor(kernel_name='python3')  # TODO: fix kernel
+        executor = ExecutePreprocessor(kernel_name='python3')  # TODO: kernel
+        if self.timeout is not None:
+            executor.timeout = self.timeout
 
         with open(self.nb_file_path) as f:
             nb = nbformat.read(f, as_version=NBFORMAT_VERSION)
@@ -220,7 +224,7 @@ class NBStaticConverter:
                 raise ValueError("Input specification of notebooks not "
                                  f"understood: {notebook}")
 
-        logger.info(f"Collected {len(nbs)} notebooks to convert")
+        logger.info(f"Collected {len(nbs)} notebook files")
         logger.debug("Executed/converted notebooks will be saved in: "
                      f"{build_path}")
 

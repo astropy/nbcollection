@@ -17,8 +17,8 @@ def execute(args=None):
                              "notebooks with.")
     parser.add_argument("--timeout", default=None, type=int,
                         help="The timeout (in seconds) for executing notebooks")
-    parser.add_argument("--stop-on-error", action='store_true', default=False,
-                        help="The timeout (in seconds) for executing notebooks")
+    # parser.add_argument("--stop-on-error", action='store_true', default=False,
+    #                     help="The timeout (in seconds) for executing notebooks")
 
     args = parser.parse_args(args[2:])
 
