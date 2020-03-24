@@ -36,6 +36,7 @@ class NBStaticNotebook:
         self.nb_basename = os.path.splitext(self.nb_filename)[0]
 
         if relative_root_path is not None:
+            relative_root_path = os.path.abspath(relative_root_path)
             common_prefix = os.path.commonpath([self.nb_path,
                                                 relative_root_path])
             if common_prefix == '/':
