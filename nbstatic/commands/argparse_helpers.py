@@ -1,5 +1,6 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 import logging
+import sys
 
 from ..logger import logger
 
@@ -34,14 +35,20 @@ def get_parser(description):
         def parse_args(self, *args, **kwargs):
             parsed = super().parse_args(*args, **kwargs)
             set_log_level(parsed, logger)
+
+            if parsed.notebooks is None:
+                if not sys.stdin.isatty():
+                    stdin = sys.stdin.read().strip()
+                    parsed.notebooks = stdin.split()
+
             return parsed
 
     parser = CustomArgumentParser(description=description)
 
-    parser.add_argument("notebooks", nargs='+',
+    parser.add_argument("notebooks", nargs='?', default=None,
                         help="Path to the root directory containing Jupyter "
-                             "notebooks, to a single notebook file, or a list "
-                             "of notebook files.")
+                             "notebooks, to a single notebook file, or a "
+                             "list of notebook files.")
 
     parser.add_argument('--build-path', dest='build_path',
                         help='The path to save all executed or converted '

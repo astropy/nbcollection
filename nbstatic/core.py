@@ -222,7 +222,8 @@ class NBStaticConverter:
 
             else:
                 raise ValueError("Input specification of notebooks not "
-                                 f"understood: {notebook}")
+                                 "understood: File or path does not exist "
+                                 f"'{notebook}'")
 
         logger.info(f"Collected {len(nbs)} notebook files")
         logger.debug("Executed/converted notebooks will be saved in: "
