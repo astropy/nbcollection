@@ -1,6 +1,7 @@
 # nbstatic
 
-Convert a collection of Jupyter notebooks to static HTML pages.
+Tools for building collections of Jupyter notebooks into web pages for public
+consumption.
 
 This project serves as a thin wrapper around `nbconvert` to enable converting
 and executing directories or directory structures full of Jupyter notebooks to

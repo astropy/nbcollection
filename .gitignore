@@ -1,56 +1,104 @@
-# Compiled files
+# Byte-compiled / optimized / DLL files
+__pycache__/
 *.py[cod]
-*.a
-*.o
+*$py.class
+
+# C extensions
 *.so
-*.pyd
-*.dll
-__pycache__
 
-# Ignore .c files by default to avoid including generated code. If you want to
-# add a non-generated .c extension, use `git add -f filename.c`.
-*.c
-
-
-# Packages/installer info
-*.egg
-*.egg-info
-dist
-build
-eggs
-.eggs
-parts
-bin
-var
-sdist
-develop-eggs
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
 .installed.cfg
-distribute-*.tar.gz
-.venv
-venv
+*.egg
+MANIFEST
 
-# Other
-.cache
-.tox
-.*.swp
-.*.swo
-*~
-.project
-.pydevproject
-.settings
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
 .coverage
-cover
-htmlcov
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
 
-# Mac OSX
-.DS_Store
+# Translations
+*.mo
+*.pot
 
-# PyCharm
-.idea
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
 
-# Pytest
-v
-.pytest_cache
+# Flask stuff:
+instance/
+.webassets-cache
 
-# VSCode
-.vscode
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
