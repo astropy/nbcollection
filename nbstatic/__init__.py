@@ -1,1 +1,2 @@
-from .core import NBStaticConverter, NBStaticNotebook
+from .converter import NBStaticConverter
+from .notebook import NBStaticNotebook
