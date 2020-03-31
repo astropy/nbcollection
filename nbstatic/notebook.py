@@ -20,6 +20,21 @@ class NBStaticNotebook:
 
     def __init__(self, file_path, output_path=None, overwrite=False,
                  execute_kwargs=None, convert_kwargs=None):
+        """
+        Parameters
+        ----------
+        file_path : str
+            The path to a notebook file
+        output_path : str (optional)
+            The full path to a notebook
+        overwrite : bool (optional)
+            Whether or not to overwrite files.
+        execute_kwargs : dict (optional)
+            Keyword arguments passed through to
+            ``nbconvert.ExecutePreprocessor``.
+        convert_kwargs : dict (optional)
+            Keyword arguments passed through to ``nbconvert.HTMLExporter``.
+        """
 
         if not os.path.exists(file_path):
             raise IOError(f"Notebook file '{file_path}' does not exist")
@@ -41,10 +56,8 @@ class NBStaticNotebook:
         self.basename = os.path.splitext(self.filename)[0]
 
         # Paths to executed and converted HTML notebook files:
-        self.exec_path = os.path.join(output_path,
-                                      f"{self.basename}.ipynb")
-        self.html_path = os.path.join(output_path,
-                                      f"{self.basename}.html")
+        self.exec_path = os.path.join(output_path, f"{self.basename}.ipynb")
+        self.html_path = os.path.join(output_path, f"{self.basename}.html")
 
         self.overwrite = overwrite
 
