@@ -1,7 +1,7 @@
 import sys
-
-from nbstatic import NBStaticConverter
-from .argparse_helpers import get_parser
+from nbconvert.exporters import HTMLExporter
+from .argparse_helpers import (get_parser, get_converter,
+                               _trait_type_map, convert_trait_names)
 
 DESCRIPTION = "Convert a collection of Jupyter notebooks to HTML"
 
@@ -12,9 +12,6 @@ def convert(args=None):
     parser = get_parser(DESCRIPTION)
 
     # Specific to this command:
-    parser.add_argument("--template", dest="template", default=None,
-                        help="A jinja2 template file passed to nbconvert.")
-
     parser.add_argument("--index-template", dest="index_template",
                         default=None, type=str,
                         help="A jinja2 template file used to create the index "
@@ -24,9 +21,13 @@ def convert(args=None):
                         help="Controls whether to make an index page that "
                              "lists all of the converted notebooks.")
 
+    for trait_name in convert_trait_names:
+        trait = getattr(HTMLExporter, trait_name)
+        parser.add_argument("--" + trait_name.replace('_', '-'),
+                            default=trait.default_value,
+                            type=_trait_type_map[type(trait)],
+                            help=trait.help)
+
     args = parser.parse_args(args[2:])
-
-    kwargs = vars(args)
-
-    nbstatic = NBStaticConverter(**kwargs)
-    nbstatic.convert()
+    nbstatic = get_converter(args)
+    # nbstatic.convert()

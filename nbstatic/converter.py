@@ -15,7 +15,7 @@ __all__ = ['NBStaticConverter']
 def get_output_path(nb_path, build_path,
                     relative_root_path=None, flatten=False):
     if relative_root_path is not None:
-        relative_root_path = os.path.abspath(relative_root_path)
+        # relative_root_path = os.path.abspath(relative_root_path)
         common_prefix = os.path.commonpath([nb_path,
                                             relative_root_path])
         if common_prefix == '/':
@@ -42,7 +42,7 @@ class NBStaticConverter:
 
     def __init__(self, notebooks, overwrite=False,
                  build_path=None, flatten=False,
-                 execute_kwargs=None, convert_kwargs=None):
+                 execute_kwargs=None, convert_kwargs=None, **kwargs):
         """
         Parameters
         ----------
@@ -104,7 +104,7 @@ class NBStaticConverter:
             elif os.path.isfile(notebook):
                 # It's a single file:
                 nb = NBStaticNotebook(
-                    file_path,
+                    notebook,
                     output_path=get_output_path(
                         notebook, build_path=build_path,
                         relative_root_path=self._relative_root_path,

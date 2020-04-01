@@ -1,7 +1,7 @@
 import sys
-
-from nbstatic import NBStaticConverter
-from .argparse_helpers import get_parser
+from nbconvert.preprocessors import ExecutePreprocessor
+from .argparse_helpers import (get_parser, get_converter,
+                               _trait_type_map, execute_trait_names)
 
 DESCRIPTION = "Execute a collection of Jupyter notebooks"
 
@@ -12,18 +12,13 @@ def execute(args=None):
     parser = get_parser(DESCRIPTION)
 
     # Specific to this command:
-    # TODO: package these into execute_kwargs
-    parser.add_argument("--kernel-name", default='python3', type=str,
-                        help="The name of an IPython kernel to run the "
-                             "notebooks with.")
-    parser.add_argument("--timeout", default=None, type=int,
-                        help="The timeout (in seconds) for executing notebooks")
-    # parser.add_argument("--stop-on-error", action='store_true', default=False,
-    #                     help="The timeout (in seconds) for executing notebooks")
+    for trait_name in execute_trait_names:
+        trait = getattr(ExecutePreprocessor, trait_name)
+        parser.add_argument("--" + trait_name.replace('_', '-'),
+                            default=trait.default_value,
+                            type=_trait_type_map[type(trait)],
+                            help=trait.help)
 
     args = parser.parse_args(args[2:])
-
-    kwargs = vars(args)
-
-    nbstatic = NBStaticConverter(**kwargs)
-    nbstatic.execute(kwargs.get('stop_on_error', False))
+    nbstatic = get_converter(args)
+    # nbstatic.execute()

@@ -1,8 +1,21 @@
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser
 import logging
 import sys
 
+import traitlets
+
 from ..logger import logger
+from nbstatic import NBStaticConverter
+
+
+_trait_type_map = {
+    traitlets.Unicode: str,
+    traitlets.Int: int,
+    traitlets.Bool: bool
+}
+
+execute_trait_names = ['kernel_name', 'timeout', 'allow_errors']
+convert_trait_names = ['template_file', ]  # TODO: add exclude_*?
 
 
 def set_log_level(args, logger):
@@ -73,3 +86,29 @@ def get_parser(description):
                           dest='quietness')
 
     return parser
+
+
+def get_converter(args):
+    kw = {}
+
+    execute_kw = {}
+    for k in execute_trait_names:
+        if hasattr(args, k):
+            execute_kw[k] = getattr(args, k)
+
+    convert_kw = {}
+    for k in convert_trait_names:
+        if hasattr(args, k):
+            convert_kw[k] = getattr(args, k)
+
+    kw['execute_kwargs'] = execute_kw
+    kw['convert_kwargs'] = convert_kw
+
+    # Process the other flags:
+    kwargs = vars(args)
+    for k in kwargs:
+        if k in list(execute_kw.keys())+list(convert_kw.keys()):
+            continue
+        kw[k] = getattr(args, k)
+
+    return NBStaticConverter(**kw)
