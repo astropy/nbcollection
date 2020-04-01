@@ -88,9 +88,9 @@ class NBStaticNotebook:
         if (os.path.exists(self.exec_path)
                 and is_executed(self.exec_path)
                 and not self.overwrite):
-            logger.debug("Executed notebook already exists at "
-                         f"'{self.exec_path}'. Use overwrite=True or set "
-                         "the config item exec_overwrite=True to overwrite.")
+            logger.debug(f"Executed notebook exists at '{self.exec_path}'. "
+                         "Use overwrite=True or set the config item "
+                         "exec_overwrite=True to overwrite.")
             return self.exec_path
 
         # Execute the notebook
