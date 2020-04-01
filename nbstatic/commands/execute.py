@@ -1,6 +1,6 @@
 import sys
 
-from ..core import NBStaticConverter
+from nbstatic import NBStaticConverter
 from .argparse_helpers import get_parser
 
 DESCRIPTION = "Execute a collection of Jupyter notebooks"
@@ -12,6 +12,7 @@ def execute(args=None):
     parser = get_parser(DESCRIPTION)
 
     # Specific to this command:
+    # TODO: package these into execute_kwargs
     parser.add_argument("--kernel-name", default='python3', type=str,
                         help="The name of an IPython kernel to run the "
                              "notebooks with.")

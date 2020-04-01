@@ -1,9 +1,9 @@
 import sys
 
-from ..core import NBStaticConverter
+from nbstatic import NBStaticConverter
 from .argparse_helpers import get_parser
 
-DESCRIPTION = "Convert a collection of executed Jupyter notebooks to HTML"
+DESCRIPTION = "Convert a collection of Jupyter notebooks to HTML"
 
 
 def convert(args=None):
@@ -15,7 +15,8 @@ def convert(args=None):
     parser.add_argument("--template", dest="template", default=None,
                         help="A jinja2 template file passed to nbconvert.")
 
-    parser.add_argument("--index-template", dest="index_template", default=None,
+    parser.add_argument("--index-template", dest="index_template",
+                        default=None, type=str,
                         help="A jinja2 template file used to create the index "
                              "page.")
 
