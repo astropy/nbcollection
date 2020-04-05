@@ -30,4 +30,7 @@ def convert(args=None):
 
     args = parser.parse_args(args[2:])
     nbstatic = get_converter(args)
-    # nbstatic.convert()
+    nbstatic.convert()
+
+    if args.make_index:
+        nbstatic.make_html_index(args.index_template)

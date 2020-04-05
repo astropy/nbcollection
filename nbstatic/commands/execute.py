@@ -21,4 +21,4 @@ def execute(args=None):
 
     args = parser.parse_args(args[2:])
     nbstatic = get_converter(args)
-    # nbstatic.execute()
+    nbstatic.execute()
