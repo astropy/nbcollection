@@ -204,7 +204,7 @@ class NBStaticConverter:
             })
 
         content = templ.render(notebooks=notebook_metadata)
-        with open(out_path, 'w') as f:
+        with open(os.path.join(out_path, output_filename), 'w') as f:
             f.write(content)
 
         return content

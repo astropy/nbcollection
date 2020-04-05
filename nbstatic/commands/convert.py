@@ -18,13 +18,18 @@ def convert(args=None):
                              "page.")
 
     parser.add_argument("--make-index", dest="make_index", default=False,
+                        action="store_true",
                         help="Controls whether to make an index page that "
                              "lists all of the converted notebooks.")
 
     for trait_name in convert_trait_names:
         trait = getattr(HTMLExporter, trait_name)
+        if trait_name == 'template_file':  # HACK
+            default = None
+        else:
+            default = trait.default_value
         parser.add_argument("--" + trait_name.replace('_', '-'),
-                            default=trait.default_value,
+                            default=default,
                             type=_trait_type_map[type(trait)],
                             help=trait.help)
 
