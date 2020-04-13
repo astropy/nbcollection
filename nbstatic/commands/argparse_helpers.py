@@ -58,7 +58,7 @@ def get_parser(description):
 
     parser = CustomArgumentParser(description=description)
 
-    parser.add_argument("notebooks", nargs='?', default=None,
+    parser.add_argument("notebooks", nargs='*', default=None,
                         help="Path to the root directory containing Jupyter "
                              "notebooks, to a single notebook file, or a "
                              "list of notebook files.")
