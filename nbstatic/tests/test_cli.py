@@ -42,7 +42,7 @@ def test_default(tmp_path, command):
     assert '_build' in os.listdir(str(build_path))
     assert nb_name in os.listdir(os.path.join(build_path, '_build/nb_test1'))
 
-    # Default behavior, two notebook files, no specified build path
+    # Two notebook files, specified build path
     nb_path1 = os.path.join(test_root_path, 'data/nb_test1/notebook1.ipynb')
     nb_path2 = os.path.join(test_root_path, 'data/nb_test2/notebook2.ipynb')
     build_path = tmp_path / f'test_{command}_{counter}'
@@ -71,6 +71,28 @@ def test_flatten(tmp_path, command):
         if command == 'convert':
             assert f'{nb_name}.html' in os.listdir(os.path.join(nb_root_path,
                                                                 '../_build/'))
+
+
+def test_index(tmp_path):
+    test_root_path = os.path.dirname(__file__)
+
+    nb_root_path = os.path.join(test_root_path, 'data/my_notebooks')
+    index_tpl_path = os.path.join(test_root_path, 'data/default.tpl')
+
+    # Make an index file with more complex notebook path structure
+    build_path = tmp_path / f'test_index'
+    _ = main(['nbstatic', 'convert', nb_root_path,
+              f'--build-path={str(build_path)}',
+              '--make-index', f'--index-template={index_tpl_path}'])
+    assert '_build' in os.listdir(str(build_path))
+    assert 'index.html' in os.listdir(str(build_path / '_build'))
+
+    # Flatten the build directory structure and make an index file
+    _ = main(['nbstatic', 'convert', nb_root_path, '--flatten',
+              '--make-index', f'--index-template={index_tpl_path}'])
+    assert '_build' in os.listdir(os.path.join(nb_root_path, '..'))
+    build_path = os.path.join(nb_root_path, '../_build/')
+    assert 'index.html' in os.listdir(build_path)
 
 
 # Too scary...
