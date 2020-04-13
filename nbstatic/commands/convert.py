@@ -24,12 +24,8 @@ def convert(args=None):
 
     for trait_name in convert_trait_names:
         trait = getattr(HTMLExporter, trait_name)
-        if trait_name == 'template_file':  # HACK
-            default = None
-        else:
-            default = trait.default_value
         parser.add_argument("--" + trait_name.replace('_', '-'),
-                            default=default,
+                            default=trait.default_value,
                             type=_trait_type_map[type(trait)],
                             help=trait.help)
 

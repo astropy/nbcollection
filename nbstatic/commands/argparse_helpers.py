@@ -104,6 +104,12 @@ def get_converter(args):
     kw['execute_kwargs'] = execute_kw
     kw['convert_kwargs'] = convert_kw
 
+    # Bit of a hack, but it seems like explicitly passing a value for
+    # template_file (even if it is the default, null value) raises an error in
+    # nbconvert
+    if kw['convert_kwargs'].get('template_file', None) == '':
+        kw['convert_kwargs'].pop('template_file')
+
     # Process the other flags:
     kwargs = vars(args)
     for k in kwargs:
