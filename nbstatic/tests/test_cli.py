@@ -48,8 +48,8 @@ def test_default(tmp_path, command):
     build_path = tmp_path / f'test_{command}_{counter}'
     counter += 1
     build_path.mkdir()
-    _ = main(['nbstatic', command, nb_path1, nb_path2,
-              f'--build-path={str(build_path)}'])
+    _ = main(['nbstatic', command, f'--build-path={str(build_path)}',
+              nb_path1, nb_path2])
     assert '_build' in os.listdir(str(build_path))
     for nb_name in ['notebook1.ipynb', 'notebook2.ipynb']:
         assert nb_name in os.listdir(os.path.join(build_path, '_build'))
