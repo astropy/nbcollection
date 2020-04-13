@@ -148,7 +148,7 @@ exporting notebook files to HTML. We support this through the `--template`
 command-line flag, which allows specifying a path to a `jinja2` template file.
 For example:
 
-    nbstatic convert my_notebooks --template=templates/custom.tpl
+    nbstatic convert my_notebooks --template-file=templates/custom.tpl
 
 
 #### Only execute the notebooks
