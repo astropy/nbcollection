@@ -35,6 +35,7 @@ def get_output_path(nb_path, build_path,
         full_build_path = os.path.abspath(os.path.join(build_path,
                                                        relative_path))
     os.makedirs(full_build_path, exist_ok=True)
+    return full_build_path
 
 
 class NBStaticConverter:

@@ -147,7 +147,7 @@ class NBStaticNotebook:
                                                    resources=resources)
 
         # Write the output HTML file
-        writer = FilesWriter()
+        writer = FilesWriter(build_directory=os.path.dirname(self.html_path))
         output_file_path = writer.write(output, resources,
                                         notebook_name=self.basename)
 
