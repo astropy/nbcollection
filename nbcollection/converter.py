@@ -5,11 +5,11 @@ import os
 import jinja2
 
 # Package
-from nbstatic.logger import logger
-from nbstatic.nb_helpers import get_title
-from nbstatic.notebook import NBStaticNotebook
+from nbcollection.logger import logger
+from nbcollection.nb_helpers import get_title
+from nbcollection.notebook import nbcollectionNotebook
 
-__all__ = ['NBStaticConverter']
+__all__ = ['nbcollectionConverter']
 
 
 def get_output_path(nb_path, build_path,
@@ -38,7 +38,7 @@ def get_output_path(nb_path, build_path,
     return full_build_path
 
 
-class NBStaticConverter:
+class nbcollectionConverter:
     build_dir_name = "_build"
 
     def __init__(self, notebooks, overwrite=False,
@@ -91,7 +91,7 @@ class NBStaticConverter:
                         file_path = os.path.join(root, name)
 
                         if ext == '.ipynb':
-                            nb = NBStaticNotebook(
+                            nb = nbcollectionNotebook(
                                 file_path,
                                 output_path=get_output_path(
                                     file_path, build_path=build_path,
@@ -104,7 +104,7 @@ class NBStaticConverter:
 
             elif os.path.isfile(notebook):
                 # It's a single file:
-                nb = NBStaticNotebook(
+                nb = nbcollectionNotebook(
                     notebook,
                     output_path=get_output_path(
                         notebook, build_path=build_path,

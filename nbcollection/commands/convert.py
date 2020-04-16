@@ -30,8 +30,8 @@ def convert(args=None):
                             help=trait.help)
 
     args = parser.parse_args(args[2:])
-    nbstatic = get_converter(args)
-    nbstatic.convert()
+    nbcollection = get_converter(args)
+    nbcollection.convert()
 
     if args.make_index:
-        nbstatic.make_html_index(args.index_template)
+        nbcollection.make_html_index(args.index_template)

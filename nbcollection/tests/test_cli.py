@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from nbstatic.__main__ import main
+from nbcollection.__main__ import main
 
 
 @pytest.mark.parametrize('command', ['execute', 'convert'])
@@ -14,7 +14,7 @@ def test_default(tmp_path, command):
     counter = 0
 
     # Default behavior, one notebook input, no specified build path
-    _ = main(['nbstatic', command, nb_path])
+    _ = main(['nbcollection', command, nb_path])
     assert '_build' in os.listdir(nb_root_path)
     assert nb_name in os.listdir(os.path.join(nb_root_path, '_build'))
 
@@ -22,13 +22,13 @@ def test_default(tmp_path, command):
     build_path = tmp_path / f'test_{command}_{counter}'
     counter += 1
     build_path.mkdir()
-    _ = main(['nbstatic', command, nb_path,
+    _ = main(['nbcollection', command, nb_path,
               f'--build-path={str(build_path)}'])
     assert '_build' in os.listdir(str(build_path))
     assert nb_name in os.listdir(os.path.join(build_path, '_build'))
 
     # Default behavior, one notebook path, no specified build path
-    _ = main(['nbstatic', command, nb_root_path])
+    _ = main(['nbcollection', command, nb_root_path])
     assert '_build' in os.listdir(os.path.join(nb_root_path, '..'))
     assert nb_name in os.listdir(os.path.join(nb_root_path,
                                               '../_build/nb_test1'))
@@ -37,7 +37,7 @@ def test_default(tmp_path, command):
     build_path = tmp_path / f'test_{command}_{counter}'
     counter += 1
     build_path.mkdir()
-    _ = main(['nbstatic', command, nb_root_path,
+    _ = main(['nbcollection', command, nb_root_path,
               f'--build-path={str(build_path)}'])
     assert '_build' in os.listdir(str(build_path))
     assert nb_name in os.listdir(os.path.join(build_path, '_build/nb_test1'))
@@ -48,7 +48,7 @@ def test_default(tmp_path, command):
     build_path = tmp_path / f'test_{command}_{counter}'
     counter += 1
     build_path.mkdir()
-    _ = main(['nbstatic', command, f'--build-path={str(build_path)}',
+    _ = main(['nbcollection', command, f'--build-path={str(build_path)}',
               nb_path1, nb_path2])
     assert '_build' in os.listdir(str(build_path))
     for nb_name in ['notebook1.ipynb', 'notebook2.ipynb']:
@@ -62,7 +62,7 @@ def test_flatten(tmp_path, command):
     nb_root_path = os.path.join(test_root_path, 'data/my_notebooks')
 
     # One notebook path, no specified build path, but flatten the file structure
-    _ = main(['nbstatic', command, nb_root_path, '--flatten'])
+    _ = main(['nbcollection', command, nb_root_path, '--flatten'])
     assert '_build' in os.listdir(os.path.join(nb_root_path, '..'))
     for nb_name in ['notebook1', 'notebook2', 'notebook3']:
         assert f'{nb_name}.ipynb' in os.listdir(os.path.join(nb_root_path,
@@ -81,14 +81,14 @@ def test_index(tmp_path):
 
     # Make an index file with more complex notebook path structure
     build_path = tmp_path / f'test_index'
-    _ = main(['nbstatic', 'convert', nb_root_path,
+    _ = main(['nbcollection', 'convert', nb_root_path,
               f'--build-path={str(build_path)}',
               '--make-index', f'--index-template={index_tpl_path}'])
     assert '_build' in os.listdir(str(build_path))
     assert 'index.html' in os.listdir(str(build_path / '_build'))
 
     # Flatten the build directory structure and make an index file
-    _ = main(['nbstatic', 'convert', nb_root_path, '--flatten',
+    _ = main(['nbcollection', 'convert', nb_root_path, '--flatten',
               '--make-index', f'--index-template={index_tpl_path}'])
     assert '_build' in os.listdir(os.path.join(nb_root_path, '..'))
     build_path = os.path.join(nb_root_path, '../_build/')

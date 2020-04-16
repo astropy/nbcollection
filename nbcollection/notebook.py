@@ -9,13 +9,13 @@ from nbconvert.writers import FilesWriter
 import nbformat
 
 # Package
-from nbstatic.logger import logger
-from nbstatic.nb_helpers import is_executed
+from nbcollection.logger import logger
+from nbcollection.nb_helpers import is_executed
 
-__all__ = ['NBStaticNotebook']
+__all__ = ['nbcollectionNotebook']
 
 
-class NBStaticNotebook:
+class nbcollectionNotebook:
     nbformat_version = 4
 
     def __init__(self, file_path, output_path=None, overwrite=False,

@@ -6,12 +6,12 @@ from .commands import convert, execute
 commands = {'execute': execute,
             'convert': convert}
 
-DESCRIPTION = """Type `nbstatic <command> -h` for help.
+DESCRIPTION = """Type `nbcollection <command> -h` for help.
 
 The allowed commands are:
 
-    nbstatic execute
-    nbstatic convert
+    nbcollection execute
+    nbcollection convert
 """
 
 parser = argparse.ArgumentParser(description=DESCRIPTION,

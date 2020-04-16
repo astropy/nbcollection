@@ -20,5 +20,5 @@ def execute(args=None):
                             help=trait.help)
 
     args = parser.parse_args(args[2:])
-    nbstatic = get_converter(args)
-    nbstatic.execute()
+    nbcollection = get_converter(args)
+    nbcollection.execute()

@@ -5,7 +5,7 @@ import sys
 import traitlets
 
 from ..logger import logger
-from nbstatic import NBStaticConverter
+from nbcollection import nbcollectionConverter
 
 
 _trait_type_map = {
@@ -117,4 +117,4 @@ def get_converter(args):
             continue
         kw[k] = getattr(args, k)
 
-    return NBStaticConverter(**kw)
+    return nbcollectionConverter(**kw)
