@@ -41,20 +41,21 @@ def set_log_level(args, logger):
     logger.setLevel(log_level)
 
 
+class CustomArgumentParser(ArgumentParser):
+
+    def parse_args(self, *args, **kwargs):
+        parsed = super().parse_args(*args, **kwargs)
+        set_log_level(parsed, logger)
+
+        if parsed.notebooks is None:
+            if not sys.stdin.isatty():
+                stdin = sys.stdin.read().strip()
+                parsed.notebooks = stdin.split()
+
+        return parsed
+
+
 def get_parser(description):
-
-    class CustomArgumentParser(ArgumentParser):
-
-        def parse_args(self, *args, **kwargs):
-            parsed = super().parse_args(*args, **kwargs)
-            set_log_level(parsed, logger)
-
-            if parsed.notebooks is None:
-                if not sys.stdin.isatty():
-                    stdin = sys.stdin.read().strip()
-                    parsed.notebooks = stdin.split()
-
-            return parsed
 
     parser = CustomArgumentParser(description=description)
 
