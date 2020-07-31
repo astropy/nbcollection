@@ -27,6 +27,8 @@ if [ "$1" == "run-tests" ]; then
     else
         source env-tests/bin/activate
     fi
+    # GITHUB_PASSWORD=... GITHUB_USERNAME=...
+    PYTHONPATH='.' pytest nbcollection_tests/ci/test_generator.py
 fi
 
 if [ "$1" == "reset-test-repo" ]; then
