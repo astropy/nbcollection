@@ -1,4 +1,5 @@
-# nbcollection
+nbcollection Overview
+#####################
 
 Tools for building collections of Jupyter notebooks into web pages for public
 consumption.
@@ -7,21 +8,22 @@ This project serves as a thin wrapper around `nbconvert` to enable converting
 and executing directories or directory structures full of Jupyter notebooks to
 static HTML pages.
 
-## License
+License
+-------
 
 `nbcollection` is free software made available under the MIT License. For details
 see the LICENSE file.
 
---------
+Example usage
+-------------
 
-## Example usage
-
-### Default behavior:
-
-#### Converting a directory structure of specific notebook files
+Converting a directory structure of specific notebook files
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Imagine we have a directory containing Jupyter notebook files and some other
 sub-directories that also contain notebook files, such as:
+
+.. code-block:: plain
 
     my_notebooks
     ├── notebook1.ipynb
@@ -32,11 +34,15 @@ sub-directories that also contain notebook files, such as:
 From the top level, we could use `nbcollection` to execute and convert all of these
 notebook files to HTML by running:
 
+.. code-block:: bash
+
     nbcollection convert my_notebooks
 
 With no options specified, this will create a directory within the specified
 path, `my_notebooks/_build`, to store the executed notebooks and the converted
 HTML pages:
+
+.. code-block:: plain
 
     my_notebooks
     └── _build
@@ -51,10 +57,14 @@ HTML pages:
 If you are only interested in executing the notebooks, you can instead use the
 `execute` command:
 
+.. code-block:: bash
+
     nbcollection execute my_notebooks
 
 which still creates a new `_build` path but now only contains the executed
 notebook files:
+
+.. code-block:: plain
 
     my_notebooks
     └── _build
@@ -64,12 +74,15 @@ notebook files:
             └── notebook3.ipynb
 
 
-#### Converting a list of specific notebook files
+Converting a list of specific notebook files
+++++++++++++++++++++++++++++++++++++++++++++
 
 Instead of running on a full directory, it is also possible to convert or
 execute single notebook files (but you should probably use `jupyter nbconvert`
 directly), or lists of notebook files. For example, to convert a set of specific
 notebook files within the above example directory layout:
+
+.. code-block:: bash
 
     nbcollection convert my_notebooks/notebook1.ipynb my_notebooks/sub_path1/notebook2.ipynb
 
@@ -78,18 +91,22 @@ build products here will instead be written to the current working directory by
 default (but see the command option `--build-path` below to customize). So, the
 above command would result in:
 
+.. code-block:: plain
+
     _build
     ├── notebook1.ipynb
     └── sub_path1
         └── notebook2.ipynb
 
 
-### Command options:
+Command options
+---------------
 
 Several options are available to modify the default behavior of the `nbcollection`
 commands.
 
-#### Customizing the build path
+Customizing the build path
+++++++++++++++++++++++++++
 
 As outlined above, the default locations for storing the executed notebooks or
 converted HTML pages is either in a parallel directory structure contained
@@ -100,19 +117,23 @@ explicitly by specifying the `--build-path` command line flag. For example, with
 the notebook directory structure illustrated in the above examples, we could
 instead specify the build path with:
 
+.. code-block:: bash
+
     nbcollection convert my_notebooks --build-path=/new/path/my_build
 
 With this option specified, the executed notebook files and converted HTML
 notebooks would be placed under `/new/path/my_build` instead.
 
-
-#### Flattening the built file structure
+Flattening the built file structure
++++++++++++++++++++++++++++++++++++
 
 If your notebook files are spread throughout a nested directory structure, you
 may want to place all of the converted notebook files in a single path rather
 than reproduce the relative path structure of your content. To enable this, use
 the `--flatten` boolean flag. For example, if your content has the following
 path structure:
+
+.. code-block:: plain
 
     my_notebooks
     ├── notebook1.ipynb
@@ -122,9 +143,13 @@ path structure:
 
 You can convert all of the notebooks to a single build path with:
 
+.. code-block:: bash
+
     nbcollection convert my_notebooks --flatten
 
 This will result in:
+
+.. code-block:: plain
 
     my_notebooks
     └── _build
@@ -140,7 +165,8 @@ convert a list of individual notebook files and have the build products end up
 in the same root path.
 
 
-#### Specifying a custom template file
+Specifying a custom template file
++++++++++++++++++++++++++++++++++
 
 `nbconvert` allows specifying custom `jinja2` [template
 files](https://nbconvert.readthedocs.io/en/latest/customizing.html) for
@@ -148,10 +174,13 @@ exporting notebook files to HTML. We support this through the `--template`
 command-line flag, which allows specifying a path to a `jinja2` template file.
 For example:
 
+.. code-block:: bash
+
     nbcollection convert my_notebooks --template-file=templates/custom.tpl
 
 
-#### Only execute the notebooks
+Only execute the notebooks
+++++++++++++++++++++++++++
 
 Though the primary utility of `nbcollection` is to enable converting a collection of
 notebook files to static HTML pages, you can also use the `nbcollection execute`
@@ -161,15 +190,7 @@ in place as a way to test the notebooks. To execute a collection of notebooks
 in-place (i.e., this will not create a `_build` path with the executed
 notebooks):
 
+.. code-block:: bash
+
     nbcollection execute my_notebooks --inplace
-
-
-# nbcollection-ci
-
-`nbcollection-ci` is a suite of CLI tools designed to make working with jupyter-lab seemless. The goal is to empower
-communities using Github, CircleCI, Jenkins and simular tools, to quickly build and review Jupyter Notebooks. 
-
-## Documentation URL
-
-https://nbcollection.readthedocs.io/en/latest/
 
