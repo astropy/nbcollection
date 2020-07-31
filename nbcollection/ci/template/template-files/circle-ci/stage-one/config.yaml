@@ -1,0 +1,30 @@
+version: 2.1
+
+executors:
+  notebook-executor:
+    docker:
+      - image: continuumio/miniconda3
+    working_directory: ~/repo
+
+jobs:
+  Render-Stage-Two:
+    steps:
+      - checkout
+      - run:
+        name: Render Stage Two Configuration
+        command: |
+          python -c "import sys; sys.stdout.write('Run Command\n')"
+
+      - add_ssh_keys
+      - run:
+        name: Sync Stage Two Configuration to build-branch
+        command: |
+          bash ./.circleci/sync-build-branch.sh
+
+
+workflows:
+  version: 2.1
+
+  build-deploy:
+    jobs:
+      - Render-Stage-Two
