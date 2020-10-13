@@ -106,3 +106,4 @@ venv.bak/
 *.swp
 env-docs
 env-tests
+secrets

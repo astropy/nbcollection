@@ -8,6 +8,7 @@ import tempfile
 import typing
 
 from nbcollection.ci import exceptions as ci_exceptions
+from nbcollection.ci.constants import DEFAULT_REMOTE, DEFAULT_BRANCH
 from nbcollection.ci.template import ENVIRONMENT
 
 PWN: typing.TypeVar = typing.TypeVar('PWN')
@@ -77,7 +78,8 @@ class Repo:
             for filepath in self._altered_files:
                 repo.git.add(filepath)
 
-            if len(repo.index.diff('origin/master')) or len(self._altered_files) > 0:
+            # if len(repo.index.diff('origin/main')) or len(self._altered_files) > 0:
+            if len(repo.index.diff(f'{DEFAULT_REMOTE}/{DEFAULT_BRANCH}')):
                 repo.index.commit('Added by CircleCI Integration from https://github.com/adrn/nbcollection')
                 remote: git.Remote = repo.remote(name='origin')
                 remote.push()

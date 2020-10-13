@@ -30,4 +30,3 @@ def map_filesystem(directory_path: str) -> typing.List[str]:
 def hash_filesystem(directory_path: str) -> str:
     fs_map = map_filesystem(directory_path)
     return hashlib.sha256(''.join(fs_map).encode(ENCODING)).hexdigest()
-

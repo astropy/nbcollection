@@ -7,3 +7,5 @@ class MissingENVVarException(CITestException):
 class GithubInvalidAuthorization(CITestException):
     pass
 
+class SSHInvalidAuthorization(CITestException):
+    pass

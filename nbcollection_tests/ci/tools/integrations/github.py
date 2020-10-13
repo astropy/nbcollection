@@ -8,7 +8,9 @@ import shutil
 import typing
 
 from nbcollection_tests.ci import exceptions as ci_test_exceptions
-from nbcollection_tests.ci.tools.integrations import constants
+from nbcollection_tests.ci.tools import constants
+from nbcollection_tests.ci.tools.integrations.datatypes import Template
+from nbcollection_tests.ci.tools.integrations.utils import generate_template
 
 from requests.auth import HTTPBasicAuth
 
@@ -22,7 +24,7 @@ class GithubRepo:
     def __init__(self: PWN, name: str) -> None:
         self.name = name
         self._username = os.environ['GITHUB_USERNAME']
-        self._password = os.environ['GITHUB_PASSWORD']
+        self._password = os.environ['GITHUB_TOKEN']
         self.repo_path = tempfile.NamedTemporaryFile().name
 
     @property
@@ -32,13 +34,17 @@ class GithubRepo:
                 self._repo = git.Repo(self.repo_path)
             except git.exc.InvalidGitRepositoryError:
                 logger.info(f'Cloning Repo Locally')
-                self._repo = git.Repo.clone_from(self.git_url, self._repo_path)
+                self._repo = git.Repo.clone_from(self.https_url_with_auth, self._repo_path)
 
         return self._repo
 
     @property
     def https_url(self: PWN) -> str:
-        return f'https://github.com/{self._username}/{self.name}'
+        return f'https://github.com/{self._username}/{self.name}.git'
+
+    @property
+    def https_url_with_auth(self: PWN) -> str:
+        return f'https://{self._username}:{self._password}@github.com/{self._username}/{self.name}.git'
 
     @property
     def git_url(self: PWN) -> str:
@@ -64,7 +70,7 @@ class GithubRepo:
         return self
 
     def destroy(self: PWN) -> PWN:
-        url: str = f'https://api.github.com/repos/jbcurtin/{self.name}'
+        url: str = f'https://api.github.com/repos/{self._username}/{self.name}'
         logger.info(f'Destroying Repo[{self.https_url}]')
         if os.path.exists(self.repo_path):
             shutil.rmtree(self.repo_path)
@@ -80,21 +86,24 @@ class GithubRepo:
             if response.status_code != 204:
                 raise ci_test_exceptions.GithubInvalidAuthorization(f"'delete_repo' auth required. https://developer.github.com/v3/repos/#delete-a-repository. Please regenerate token with correct perms: https://github.com/settings/tokens/")
 
-    def fill(self: PWN) -> None:
+    def fill(self: PWN, template: Template) -> None:
         """
-        Filss the repo with fake-repo-data
+        Fills the repo with fake-repo-data
         """
         logging.info(f'Copying Notebook CI Template Repo to RepoPath[{self.repo_path}]')
-        shutil.copytree(constants.CI_REPO_TEMPLATE_PATH, self.repo_path)
+        generate_template(Template.Initial, self.repo_path)
+        # shutil.copytree(constants.CI_REPO_TEMPLATE_PATH, self.repo_path)
         git.Repo.init(self.repo_path)
         for filepath in self.repo.untracked_files:
             self.repo.index.add(filepath)
 
         self.repo.index.commit('Generated Repository for https://github.com/adrn/nbcollection Integration Testing')
         remote_name: str = 'origin'
-        branch_name: str = 'master'
+        branch_name: str = 'main'
         logger.info(f'Pushing Local Repo to Github Repo: Remote[{remote_name}], Branch[{branch_name}]')
-        self.repo.create_remote(remote_name, url=self.git_url)
+        self.repo.create_remote(remote_name, url=self.https_url_with_auth)
+        new_head = self.repo.create_head(branch_name)
+        new_head.checkout()
         self.repo.remotes[0].push(branch_name)
 
 class Integrate:
@@ -110,8 +119,8 @@ class Integrate:
         if os.environ.get('GITHUB_USERNAME', None) is None:
             raise ci_test_exceptions.MissingENVVarException('GITHUB_USERNAME')
 
-        if os.environ.get('GITHUB_PASSWORD', None) is None:
-            raise ci_test_exceptions.MissingENVVarException('GITHUB_PASSWORD')
+        if os.environ.get('GITHUB_TOKEN', None) is None:
+            raise ci_test_exceptions.MissingENVVarException('GITHUB_TOKEN')
 
 
     def _test_permissions(self: PWN) -> None:
