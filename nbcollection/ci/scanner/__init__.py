@@ -1,7 +1,8 @@
 import logging
+import types
 import typing
 
-from nbcollection.ci.scanner.utils import load_gitignore_data
+from nbcollection.ci.scanner.utils import load_ignore_data
 logger = logging.getLogger(__name__)
 
 def build_categories(dir_path: str) -> types.GeneratorType:

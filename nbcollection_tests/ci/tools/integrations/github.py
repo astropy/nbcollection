@@ -91,7 +91,7 @@ class GithubRepo:
         Fills the repo with fake-repo-data
         """
         logging.info(f'Copying Notebook CI Template Repo to RepoPath[{self.repo_path}]')
-        generate_template(Template.Initial, self.repo_path)
+        generate_template(template, self.repo_path)
         # shutil.copytree(constants.CI_REPO_TEMPLATE_PATH, self.repo_path)
         git.Repo.init(self.repo_path)
         for filepath in self.repo.untracked_files:

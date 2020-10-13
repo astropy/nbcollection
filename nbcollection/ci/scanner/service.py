@@ -6,12 +6,12 @@ import types
 import typing
 
 from builder.constants import BUILD_BASE_DIR, ARTIFACT_DEST_DIR, ENCODING
-from builder.utils import filter_gitignore_entry__as_string, Collection, BuildJob, Category, Notebook, load_gitignore_data, run_command
+from builder.utils import filter_gitignore_entry__as_string, Collection, BuildJob, Category, Notebook, load_ignore_data, run_command
 
 logger = logging.getLogger(__name__)
 
 def build_categories(start_path: str, rebuild: bool = True) -> types.GeneratorType:
-    gitignore_data = load_gitignore_data(os.path.join(start_path, '.gitignore'))
+    gitignore_data = load_ignore_data(os.path.join(start_path, '.gitignore'))
     for root, dirnames, filenames in os.walk(start_path):
         for dirname in dirnames:
             dirpath = os.path.join(root, dirname)

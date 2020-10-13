@@ -37,7 +37,7 @@ class LocalRepo:
         """
         if not os.path.exists(self.repo_path):
             logger.info(f'Copying Notebook CI Template Repo to RepoPath[{self.repo_path}]')
-            generate_template(Template.Initial, self.repo_path)
+            generate_template(template, self.repo_path)
             self._repo = git.Repo.init(self.repo_path)
             for filepath in self._repo.untracked_files:
                 self._repo.index.add(filepath)
