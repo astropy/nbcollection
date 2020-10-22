@@ -13,3 +13,8 @@ class VENVValidationException(NBCollectionCIException):
 class VENVInstallException(NBCollectionCIException):
     pass
 
+class RendererException(NBCollectionCIException):
+    pass
+
+class BuildError(NBCollectionCIException):
+    pass
