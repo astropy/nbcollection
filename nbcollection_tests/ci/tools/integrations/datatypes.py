@@ -12,3 +12,4 @@ class Template(enum.Enum):
     SingleCollectionImmediateCategories = 'single-collection-immediate-categories'
     SingleCollectionNthCategories = 'single-collection-nth-categories'
     QuickBuild = 'quick-build-collection'
+    ExecutedCollection = 'executed-collection'

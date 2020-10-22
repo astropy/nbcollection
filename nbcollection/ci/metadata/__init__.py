@@ -1,4 +1,4 @@
-from nbcollection.ci.scanner import find_build_jobs
+import argparse
 
 def extract_metadata(options: argparse.Namespace) -> None:
     metadata = {}

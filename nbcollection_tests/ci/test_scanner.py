@@ -93,6 +93,22 @@ def test__find_build_jobs(single_collection_repo__nth_categories):
         assert job.category.requirements.__class__ is Requirements
         assert job.category.pre_requirements.__class__ is PreRequirements
 
+def test__find_build_jobs__filter_out_collection(multi_collection_repo):
+    from nbcollection.ci.scanner.utils import find_build_jobs
+
+    for job_idx, job in enumerate(find_build_jobs(multi_collection_repo, filter_out_collections=['collection_one'])):
+        assert job.collection.name == 'collection_two'
+
+    assert job_idx == 1
+
+def test__find_build_jobs__filter_out_category(single_collection_repo):
+    from nbcollection.ci.scanner.utils import find_build_jobs
+
+    for job_idx, job in enumerate(find_build_jobs(single_collection_repo, filter_out_collections=[], filter_out_categories=['asdf_example'])):
+        assert job.category.name == 'cube_fitting'
+
+    assert job_idx == 0
+
 def test__run_command():
     import shutil
     import tempfile

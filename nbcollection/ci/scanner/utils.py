@@ -86,9 +86,15 @@ def find_categories(collection: Collection) -> types.GeneratorType:
 
             yield category
 
-def find_build_jobs(start_path: str) -> types.GeneratorType:
+def find_build_jobs(start_path: str, filter_out_collections: typing.List[str] = [], filter_out_categories: typing.List[str] = []) -> types.GeneratorType:
     for collection in find_collections(start_path):
+        if filter_out_collections and collection.name in filter_out_collections:
+            continue
+
         for category in find_categories(collection):
+            if filter_out_categories and category.name in filter_out_categories:
+                continue
+
             yield BuildJob(collection, category)
 
 def generate_job_context(job: BuildJob) -> JobContext:

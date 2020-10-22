@@ -58,3 +58,9 @@ def quick_build_collection(request: SubRequest) -> str:
     quick_build_repo = TestRepo(RepoType.Local, Template.QuickBuild)
     request.addfinalizer(quick_build_repo.destroy)
     return quick_build_repo.setup().repo_path
+
+@pytest.fixture
+def executed_notebook_collection(request: SubRequest) -> str:
+    executed_notebook_repo = TestRepo(RepoType.Local, Template.ExecutedCollection)
+    request.addfinalizer(executed_notebook_repo.destroy)
+    return executed_notebook_repo.setup().repo_path
