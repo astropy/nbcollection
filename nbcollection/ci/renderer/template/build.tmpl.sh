@@ -6,9 +6,9 @@ source venv/bin/activate
 if [ -f "environment.sh" ]; then
     source environment.sh
 fi
-mkdir -p "{{ artifact.dirpath }}"
-nbcollection-ci metadata --input "{{ notebook.path }}" --output "{{ artifact.metadata_path }}"
-jupyter nbconvert --debug --to "{{ build_context.output_format }}" --execute "{{ notebook.path }}" --output "{{ artifact.path }}" --ExecutePreprocessor.timeout="{{ build_context.timeout }}"
+mkdir -p "{{ notebook_context.artifact.dirpath }}"
+nbcollection-ci metadata -c "{{ notebook_context.collection_name }}" -t "{{ notebook_context.category_name }}" -n "{{ notebook_context.notebook.name }}"
+jupyter nbconvert --debug --to "{{ build_context.output_format }}" --execute "{{ notebook_context.path }}" --output "{{ notebook_context.artifact.path }}" --ExecutePreprocessor.timeout="{{ build_context.timeout }}"
 
 cd -
 exit 0

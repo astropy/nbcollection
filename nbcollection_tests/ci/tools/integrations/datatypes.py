@@ -13,3 +13,5 @@ class Template(enum.Enum):
     SingleCollectionNthCategories = 'single-collection-nth-categories'
     QuickBuild = 'quick-build-collection'
     ExecutedCollection = 'executed-collection'
+    MultiNotebookCategory = 'multi-notebook-category'
+    MetadataRichNotebooks = 'metadata-rich-notebooks'

@@ -1,3 +1,4 @@
+import argparse
 import glob
 import logging
 import os
@@ -11,7 +12,7 @@ import typing
 from nbcollection.ci.constants import ENCODING, PROJECT_DIR, SCANNER_BUILD_DIR, SCANNER_ARTIFACT_DEST_DIR, \
         SCANNER_BUILD_LOG_DIR
 from nbcollection.ci.datatypes import Collection, Category, Notebook, PreRequirements, Requirements, Namespace, \
-        BuildJob, JobContext, BuildContext, Artifact, PreInstall
+        BuildJob, JobContext, BuildContext, PreInstall, IgnoreData, NotebookContext, ArtifactContext, Metadata, MetadataContext
 from nbcollection.ci.exceptions import BuildError
 from nbcollection.ci.renderer import render_template
 
@@ -20,8 +21,10 @@ STRIP_CHARS = ' \n'
 
 logger = logging.getLogger(__name__)
 
-class IgnoreData(typing.NamedTuple):
-    entries: typing.List[str]
+def validate_and_parse_inputs(options: argparse.Namespace) -> argparse.Namespace:
+    options.collection_names = options.collection_names.split(',')
+    options.category_names = options.category_names.split(',')
+    options.notebook_names = options.notebook_names.split(',')
 
 def load_ignore_data(start_path: str, root_level_only: bool = False) -> IgnoreData:
     entries = []
@@ -52,7 +55,7 @@ def find_collections(start_path: str) -> types.GeneratorType:
 
         break
 
-def find_categories(collection: Collection) -> types.GeneratorType:
+def find_categories(collection: Collection, filter_in_notebooks: typing.List[str] = []) -> types.GeneratorType:
     ignore_data = load_ignore_data(collection.path, root_level_only=True)
     for root, dirnames, filenames in os.walk(collection.path):
         if any([
@@ -78,7 +81,9 @@ def find_categories(collection: Collection) -> types.GeneratorType:
             category = Category(dirname, dirpath, collection, notebooks, pre_requirements, requirements, namespaces)
             for filepath in glob.glob(f'{dirpath}/*.ipynb'):
                 name = os.path.basename(filepath).rsplit('.', 1)[0]
-                notebooks.append(Notebook(name, filepath))
+                if len(filter_in_notebooks) == 0 or name in filter_in_notebooks:
+                    metadata = Metadata(os.path.join(dirpath, f'{name}.metadata.json'))
+                    notebooks.append(Notebook(name, filepath, metadata))
 
             if len(notebooks) < 1:
                 logger.warning(f'Missing Notebooks in Category[{dirpath}]')
@@ -86,16 +91,15 @@ def find_categories(collection: Collection) -> types.GeneratorType:
 
             yield category
 
-def find_build_jobs(start_path: str, filter_out_collections: typing.List[str] = [], filter_out_categories: typing.List[str] = []) -> types.GeneratorType:
+def find_build_jobs(start_path: str,
+        filter_in_collections: typing.List[str] = [],
+        filter_in_categories: typing.List[str] = [],
+        filter_in_notebooks: typing.List[str] = []) -> types.GeneratorType:
     for collection in find_collections(start_path):
-        if filter_out_collections and collection.name in filter_out_collections:
-            continue
-
-        for category in find_categories(collection):
-            if filter_out_categories and category.name in filter_out_categories:
-                continue
-
-            yield BuildJob(collection, category)
+        if len(filter_in_collections) == 0 or collection.name in filter_in_collections:
+            for category in find_categories(collection, filter_in_notebooks):
+                if len(filter_in_categories) == 0 or category.name in filter_in_categories:
+                    yield BuildJob(collection, category)
 
 def generate_job_context(job: BuildJob) -> JobContext:
     # Constants
@@ -117,31 +121,38 @@ def generate_job_context(job: BuildJob) -> JobContext:
         }).encode(ENCODING))
 
     # Generate Build Scripts
-    build_scripts = []
+    notebook_contexts = []
     for notebook in sorted(job.category.notebooks):
         if not os.path.exists(build_dir):
             os.makedirs(build_dir)
 
         artifact_path = os.path.join(SCANNER_ARTIFACT_DEST_DIR, job.semantic_path())
-        artifact = Artifact(
+        artifact = ArtifactContext(
                 os.path.dirname(artifact_path),
                 f'{artifact_path}.html', f'{artifact_path}.json')
 
-        build_script_path = os.path.join(build_dir, f'{notebook.name}-bulid.sh')
-        with open(build_script_path, 'wb') as stream:
+        notebook_context = NotebookContext(
+            notebook,
+            job.collection.name,
+            job.category.name,
+            os.path.join(build_dir, f'{notebook.name}.ipynb'),
+            os.path.join(build_dir, f'{notebook.name}.build.sh'),
+            MetadataContext(os.path.join(build_dir, f'{notebook.name}.metadata.json')),
+            artifact)
+
+        with open(notebook_context.build_script_path, 'wb') as stream:
             stream.write(render_template('build.tmpl.sh', {
                 'build_context': build_context,
-                'artifact': artifact,
-                'notebook': notebook,
+                'notebook_context': notebook_context,
             }).encode(ENCODING))
 
-        build_scripts.append(build_script_path)
+        notebook_contexts.append(notebook_context)
 
     requirements = Requirements(os.path.join(build_dir, 'requirements.txt'))
     pre_requirements = PreRequirements(os.path.join(build_dir, 'pre-requirements.txt'))
     pre_install = PreInstall(os.path.join(build_dir, 'pre-install.sh'))
     logfile_name = f'{job.collection.name}-{job.category.name}'
-    return JobContext(build_dir, build_setup_script, build_scripts, job, pre_install, pre_requirements, requirements, logfile_name)
+    return JobContext(build_dir, build_setup_script, notebook_contexts, job, pre_install, pre_requirements, requirements, logfile_name)
 
 def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str) -> None:
     if isinstance(cmd, str):

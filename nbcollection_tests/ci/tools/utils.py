@@ -1,6 +1,7 @@
 import hashlib
 import os
 import subprocess
+import tempfile
 import typing
 
 ENCODING = 'utf-8'
@@ -30,3 +31,27 @@ def map_filesystem(directory_path: str) -> typing.List[str]:
 def hash_filesystem(directory_path: str) -> str:
     fs_map = map_filesystem(directory_path)
     return hashlib.sha256(''.join(fs_map).encode(ENCODING)).hexdigest()
+
+def collection_set_to_namespace(path_to_collection_set, extra: typing.Dict[str, typing.Any] = {}):
+    import argparse
+
+    from nbcollection.ci.scanner.utils import find_build_jobs
+
+    collection_names = []
+    category_names = []
+    for job in find_build_jobs(path_to_collection_set):
+        if not job.collection.name in collection_names:
+            collection_names.append(job.collection.name)
+
+        if not job.category.name in category_names:
+            category_names.append(job.category.name)
+
+    kwargs = {
+        'project_path': path_to_collection_set,
+        'collection_names': ','.join(collection_names),
+        'category_names': ','.join(category_names),
+        'notebook_names': '',
+        'output_dir': tempfile.NamedTemporaryFile().name
+    }
+    kwargs.update(extra)
+    return argparse.Namespace(**kwargs)

@@ -18,3 +18,6 @@ class RendererException(NBCollectionCIException):
 
 class BuildError(NBCollectionCIException):
     pass
+
+class MetadataExtractionError(NBCollectionCIException):
+    pass

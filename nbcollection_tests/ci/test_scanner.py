@@ -3,7 +3,7 @@ import pytest
 
 from nbcollection_tests.ci.tools import multi_level_ignore_repo,    \
         single_collection_repo, multi_collection_repo, single_collection_repo__immediate_categories, \
-        single_collection_repo__nth_categories, quick_build_collection
+        single_collection_repo__nth_categories, quick_build_collection, multi_notebook_category
 
 def test__load_ignore_data(multi_level_ignore_repo):
     from nbcollection.ci.scanner.utils import IgnoreData, load_ignore_data, \
@@ -40,7 +40,7 @@ def test__find_collections__single(single_collection_repo):
 def test__find_collections__multi(multi_collection_repo):
     import os
 
-    from nbcollection.ci import Collection
+    from nbcollection.ci.datatypes import Collection
     from nbcollection.ci.scanner.utils import find_collections
 
     for coll in find_collections(multi_collection_repo):
@@ -51,7 +51,7 @@ def test__find_collections__multi(multi_collection_repo):
         assert coll.__class__ is Collection
 
 def test__find_categories__immediate(single_collection_repo__immediate_categories):
-    from nbcollection.ci import Collection, Category
+    from nbcollection.ci.datatypes import Collection, Category
     from nbcollection.ci.scanner.utils import find_collections, find_categories
 
     for coll_idx, coll in enumerate(find_collections(single_collection_repo__immediate_categories)):
@@ -66,7 +66,7 @@ def test__find_categories__immediate(single_collection_repo__immediate_categorie
     coll_idx is 0
 
 def test__find_categories__nth_categories(single_collection_repo__nth_categories):
-    from nbcollection.ci import Collection, Category
+    from nbcollection.ci.datatypes import Collection, Category
     from nbcollection.ci.scanner.utils import find_collections, find_categories
 
     for coll_idx, coll in enumerate(find_collections(single_collection_repo__nth_categories)):
@@ -93,19 +93,41 @@ def test__find_build_jobs(single_collection_repo__nth_categories):
         assert job.category.requirements.__class__ is Requirements
         assert job.category.pre_requirements.__class__ is PreRequirements
 
-def test__find_build_jobs__filter_out_collection(multi_collection_repo):
+def test__find_build_jobs__filter_in_collection(multi_collection_repo):
     from nbcollection.ci.scanner.utils import find_build_jobs
 
-    for job_idx, job in enumerate(find_build_jobs(multi_collection_repo, filter_out_collections=['collection_one'])):
-        assert job.collection.name == 'collection_two'
+    for job_idx, job in enumerate(find_build_jobs(multi_collection_repo, filter_in_collections=['collection_one'])):
+        assert job.collection.name == 'collection_one'
 
     assert job_idx == 1
 
-def test__find_build_jobs__filter_out_category(single_collection_repo):
+def test__find_build_jobs__filter_in_category(single_collection_repo):
     from nbcollection.ci.scanner.utils import find_build_jobs
 
-    for job_idx, job in enumerate(find_build_jobs(single_collection_repo, filter_out_collections=[], filter_out_categories=['asdf_example'])):
-        assert job.category.name == 'cube_fitting'
+    for job_idx, job in enumerate(find_build_jobs(single_collection_repo, filter_in_collections=[], filter_in_categories=['asdf_example'])):
+        assert job.category.name == 'asdf_example'
+
+    assert job_idx == 0
+
+def test__find_build_jobs__filter_in_notebook(multi_notebook_category):
+    from nbcollection.ci.scanner.utils import find_build_jobs
+
+    for job_idx, job in enumerate(find_build_jobs(multi_notebook_category, filter_in_collections=[], filter_in_categories=['alot-of-notebooks'], filter_in_notebooks=['Notebook-Two'])):
+        for notebook_idx, notebook in enumerate(job.category.notebooks):
+            assert notebook.name == 'Notebook-Two'
+
+        assert notebook_idx == 0
+
+    assert job_idx == 0
+
+def test__find_build_jobs__filter_in_notebook__zero(multi_notebook_category):
+    from nbcollection.ci.scanner.utils import find_build_jobs
+
+    for job_idx, job in enumerate(find_build_jobs(multi_notebook_category, filter_in_collections=[], filter_in_categories=['alot-of-notebooks'], filter_in_notebooks=[])):
+        for notebook_idx, notebook in enumerate(job.category.notebooks):
+            assert notebook.name in ['Notebook-One', 'Notebook-Two']
+            
+        assert notebook_idx == 1
 
     assert job_idx == 0
 
@@ -141,8 +163,8 @@ def test__generate_job_context(single_collection_repo__nth_categories):
         assert job_context.requirements.__class__ == Requirements
         assert job_context.pre_requirements.__class__ == PreRequirements
         assert job_context.pre_install.__class__ == PreInstall
-        for build_script in job_context.build_scripts:
-            assert os.path.exists(build_script)
+        for notebook_context in job_context.notebooks:
+            assert os.path.exists(notebook_context.build_script_path)
 
     assert job_idx == 1
 
@@ -153,14 +175,16 @@ def test__run_job_context(quick_build_collection):
     for job_idx, job in enumerate(find_build_jobs(quick_build_collection)):
         job_context = generate_job_context(job)
         run_job_context(job_context)
+
+        # Validate Run completed
         stdout_log = os.path.join(SCANNER_BUILD_LOG_DIR, f'{job.collection.name}-{job.category.name}.stdout')
         assert os.path.exists(stdout_log)
 
         stderr_log = os.path.join(SCANNER_BUILD_LOG_DIR, f'{job.collection.name}-{job.category.name}.stderr')
         assert os.path.exists(stderr_log)
 
-        venv_dirpath = os.path.join(SCANNER_BUILD_DIR, 'venv')
-        assert os.path.exists(venv_dirpath)
-        assert os.path.isdir(venv_dirpath)
-        import pdb; pdb.set_trace()
-        pass
+        # venv_dirpath = os.path.join(SCANNER_BUILD_DIR, 'venv')
+        # assert os.path.exists(venv_dirpath)
+        # assert os.path.isdir(venv_dirpath)
+        # import pdb; pdb.set_trace()
+        # pass

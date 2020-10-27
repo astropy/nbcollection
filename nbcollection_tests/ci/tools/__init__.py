@@ -64,3 +64,15 @@ def executed_notebook_collection(request: SubRequest) -> str:
     executed_notebook_repo = TestRepo(RepoType.Local, Template.ExecutedCollection)
     request.addfinalizer(executed_notebook_repo.destroy)
     return executed_notebook_repo.setup().repo_path
+
+@pytest.fixture
+def multi_notebook_category(request: SubRequest) -> str:
+    multi_notebook_repo = TestRepo(RepoType.Local, Template.MultiNotebookCategory)
+    request.addfinalizer(multi_notebook_repo.destroy)
+    return multi_notebook_repo.setup().repo_path
+
+@pytest.fixture
+def metadata_rich_notebooks(request: SubRequest) -> str:
+    metadata_rich_repo = TestRepo(RepoType.Local, Template.MetadataRichNotebooks)
+    request.addfinalizer(metadata_rich_repo.destroy)
+    return metadata_rich_repo.setup().repo_path
