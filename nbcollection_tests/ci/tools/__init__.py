@@ -1,4 +1,7 @@
+import os
 import pytest
+import shutil
+import tempfile
 import typing
 
 from _pytest.fixtures import SubRequest
@@ -76,3 +79,31 @@ def metadata_rich_notebooks(request: SubRequest) -> str:
     metadata_rich_repo = TestRepo(RepoType.Local, Template.MetadataRichNotebooks)
     request.addfinalizer(metadata_rich_repo.destroy)
     return metadata_rich_repo.setup().repo_path
+
+@pytest.fixture
+def empty_dir(request: SubRequest) -> str:
+    dirpath = tempfile.NamedTemporaryFile().name
+    def _remove_empty_dir():
+        shutil.rmtree(dirpath)
+
+    os.makedirs(dirpath)
+    request.addfinalizer(_remove_empty_dir)
+    return dirpath
+
+@pytest.fixture
+def immediate_level_repo(request: SubRequest) -> str:
+    immediate_level_repo = TestRepo(RepoType.Local, Template.EmptyDirWithGitRemoteUpstream)
+    request.addfinalizer(immediate_level_repo.destroy)
+    return immediate_level_repo.setup().repo_path
+
+@pytest.fixture
+def next_level_repo(request: SubRequest) -> str:
+    next_level_repo = TestRepo(RepoType.Local, Template.NextDirWithGitRemoteUpstream)
+    request.addfinalizer(next_level_repo.destroy)
+    return next_level_repo.setup().repo_path
+
+@pytest.fixture
+def git_config_file(request: SubRequest) -> str:
+    git_config_repo = TestRepo(RepoType.Local, Template.OnlyGitConfigFile)
+    request.addfinalizer(git_config_repo.destroy)
+    return git_config_repo.setup().repo_path

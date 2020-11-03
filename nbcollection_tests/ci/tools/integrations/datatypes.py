@@ -15,3 +15,6 @@ class Template(enum.Enum):
     ExecutedCollection = 'executed-collection'
     MultiNotebookCategory = 'multi-notebook-category'
     MetadataRichNotebooks = 'metadata-rich-notebooks'
+    EmptyDirWithGitRemoteUpstream = 'empty-dir-with-git-remote-upstream'
+    NextDirWithGitRemoteUpstream = 'next-dir-with-git-remote-upstream'
+    OnlyGitConfigFile = 'only-git-config-file'

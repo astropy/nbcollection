@@ -4,11 +4,11 @@ import os
 import sys
 
 from nbcollection.ci.commands.datatypes import VirtualENVType
-from nbcollection.ci.venv import \
-        enable_virtual_env, \
-        enable_python_virtual_env, \
-        enable_conda, \
-        enable_miniconda
+# from nbcollection.ci.venv import \
+#         enable_virtual_env, \
+#         enable_python_virtual_env, \
+#         enable_conda, \
+#         enable_miniconda
 
 DESCRIPTION = "Wrapper around common virtual environment utils"
 EXAMPLE_USAGE = """Example Usage:
@@ -49,4 +49,3 @@ def convert(args=None):
 
     else:
         raise NotImplementedError(f'VENV-Type not supported: {args.ci_type.value}')
-

@@ -21,8 +21,9 @@ class GithubRepo:
     name: str
     _username: str
     _password: str
-    def __init__(self: PWN, name: str) -> None:
+    def __init__(self: PWN, owner: str, name: str) -> None:
         self.name = name
+        self._owner = owner
         self._username = os.environ['GITHUB_USERNAME']
         self._password = os.environ['GITHUB_TOKEN']
         self.repo_path = tempfile.NamedTemporaryFile().name
@@ -40,15 +41,15 @@ class GithubRepo:
 
     @property
     def https_url(self: PWN) -> str:
-        return f'https://github.com/{self._username}/{self.name}.git'
+        return f'https://github.com/{self._owner}/{self.name}.git'
 
     @property
     def https_url_with_auth(self: PWN) -> str:
-        return f'https://{self._username}:{self._password}@github.com/{self._username}/{self.name}.git'
+        return f'https://{self._username}:{self._password}@github.com/{self._owner}/{self.name}.git'
 
     @property
     def git_url(self: PWN) -> str:
-        return f'git@github.com:{self._username}/{self.name}.git'
+        return f'git@github.com:{self._owner}/{self.name}.git'
 
     def create(self: PWN) -> PWN:
         url: str = 'https://api.github.com/user/repos'
@@ -70,7 +71,7 @@ class GithubRepo:
         return self
 
     def destroy(self: PWN) -> PWN:
-        url: str = f'https://api.github.com/repos/{self._username}/{self.name}'
+        url: str = f'https://api.github.com/repos/{self._owner}/{self.name}'
         logger.info(f'Destroying Repo[{self.https_url}]')
         if os.path.exists(self.repo_path):
             shutil.rmtree(self.repo_path)
@@ -113,7 +114,7 @@ class Integrate:
             self.validate()
             self.__state['validated'] = True
 
-        return GithubRepo(name)
+        return GithubRepo(os.environ['GITHUB_USERNAME'], name)
 
     def _test_connection(self: PWN) -> None:
         if os.environ.get('GITHUB_USERNAME', None) is None:
@@ -125,7 +126,7 @@ class Integrate:
 
     def _test_permissions(self: PWN) -> None:
         repo_name: str = tempfile.NamedTemporaryFile().name.rsplit('/', 1)[1]
-        repo = GithubRepo(repo_name)
+        repo = GithubRepo(os.environ['GITHUB_USERNAME'], repo_name)
         repo.create()
         repo.destroy()
 
