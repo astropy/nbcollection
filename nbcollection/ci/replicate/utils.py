@@ -3,7 +3,7 @@ import os
 import typing
 
 from nbcollection.ci.constants import ENCODING, PWN
-from nbcollection.ci.generator.datatypes import RemoteScheme, RemoteParts, GitConfigRemote, GitConfigBranch, GitConfig
+from nbcollection.ci.replicate.datatypes import RemoteScheme, RemoteParts, GitConfigRemote, GitConfigBranch, GitConfig
 
 from urllib.parse import urlparse
 
