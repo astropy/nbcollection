@@ -167,8 +167,7 @@ Replicate
       Example Usage:
       
           Replicate Github PR locally:
-          nbcollection-ci replicate --source https://github.com/spacetelescope/dat_pyinthesky/pull/111
-
+          nbcollection-ci replicate --repo-path https://github.com/spacetelescope/dat_pyinthesky/pull/111 --project-path /tmp/replicate-path
 
 
 See Also
