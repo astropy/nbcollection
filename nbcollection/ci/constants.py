@@ -15,3 +15,10 @@ SCANNER_BUILD_LOG_DIR = '/tmp/nbcollection-ci/scanner-build-logs'
 # Renderer Module
 RENDERER_ENV_CONTEXT_PATH = os.path.join(os.getcwd(), 'env-context.toml')
 RENDERER_TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'renderer/template')
+
+# Github Auth Details
+GITHUB_USERNAME = os.environ.get('GITHUB_USERNAME', None)
+GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', None)
+
+# Replicate Module
+COMMIT_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'

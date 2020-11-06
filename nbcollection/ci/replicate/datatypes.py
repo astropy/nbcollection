@@ -7,29 +7,14 @@ import os
 import tempfile
 import typing
 
+from datetime import datetime
+
 from nbcollection.ci import exceptions as ci_exceptions
-from nbcollection.ci.constants import DEFAULT_REMOTE, DEFAULT_BRANCH, PWN
+from nbcollection.ci.constants import DEFAULT_REMOTE, DEFAULT_BRANCH, PWN, GITHUB_USERNAME, GITHUB_TOKEN
+from nbcollection.ci.generator.datatypes import URLParts
 from nbcollection.ci.template import ENVIRONMENT
 
 from urllib.parse import urlparse
-
-PWN: typing.TypeVar = typing.TypeVar('PWN')
-logger = logging.getLogger(__name__)
-
-class RepoType(enum.Enum):
-    Local = 'local-path'
-    GithubGIT = 'github-git'
-    GithubHTTPS = 'github-https'
-
-class URLType(enum.Enum):
-    GithubRepoURL = 'github-repo-url'
-    GithubPullRequest = 'github-pull-request'
-
-class URLParts(typing.NamedTuple):
-    url_type: URLType
-    org: str
-    repo_name: str
-    pull_request_number: int = 0
 
 class RemoteScheme(enum.Enum):
     Git = 'git'
@@ -53,16 +38,6 @@ class RemoteParts(typing.NamedTuple):
             org, repo_name = path.split('/', 1)
             return cls(RemoteScheme.Git, netloc, org, repo_name)
 
-        elif url.startswith('http') and url.endswith('.git'):
-            url_parts = urlparse(url)
-            try:
-                scheme = RemoteScheme.__members__[[sc for sc, sv in RemoteScheme.__members__.items() if sv.value == url_parts.scheme][0]]
-            except IndexError:
-                raise NotImplementedError(url_parts.scheme)
-
-            org, repo_name = url_parts.path.rsplit('.git', 1)[0].strip('/').split('/')
-            return RemoteParts(scheme, url_parts.netloc, org, repo_name)
-
         elif url.startswith('http') and 'pull/' in url:
             url_parts = urlparse(url)
             try:
@@ -71,6 +46,16 @@ class RemoteParts(typing.NamedTuple):
                 raise NotImplementedError(url_parts.scheme)
 
             org, repo_name, rest = url_parts.path.strip('/').split('/', 2)
+            return RemoteParts(scheme, url_parts.netloc, org, repo_name)
+
+        elif url.startswith('http'):
+            url_parts = urlparse(url)
+            try:
+                scheme = RemoteScheme.__members__[[sc for sc, sv in RemoteScheme.__members__.items() if sv.value == url_parts.scheme][0]]
+            except IndexError:
+                raise NotImplementedError(url_parts.scheme)
+
+            org, repo_name = url_parts.path.rsplit('.git', 1)[0].strip('/').split('/')
             return RemoteParts(scheme, url_parts.netloc, org, repo_name)
 
         else:
@@ -96,3 +81,38 @@ class GitConfig(typing.NamedTuple):
     options: typing.Dict[str, str]
     remotes: typing.List[GitConfigRemote]
     branches: typing.List[GitConfigBranch]
+
+class PullRequestCommitInfo(typing.NamedTuple):
+    author: str
+    committer: str
+    date: datetime
+    commit_hash: str
+    message: str
+
+class PullRequestSource(typing.NamedTuple):
+    org: str
+    name: str
+    ref: str
+    label: str
+
+    @property
+    def https_url(self: PWN) -> str:
+        return f'https://github.com/{self.org}/{self.name}.git'
+
+    @property
+    def https_url_with_auth(self: PWN) -> str:
+        return f'https://{GITHUB_USERNAME}:{GITHUB_TOKEN}@github.com/{self.org}/{self.name}.git'
+
+class PullRequestInfo(typing.NamedTuple):
+    title: str
+    url: str
+    url_parts: URLParts
+    commits: typing.List[PullRequestCommitInfo]
+    info: typing.Dict[str, typing.Any]
+    source: PullRequestSource
+
+class RepoInfo(typing.NamedTuple):
+    repo: git.Repo
+    source_remote: git.Remote
+    source_ref: git.RemoteReference
+    source_head: git.Head

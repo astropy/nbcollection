@@ -34,6 +34,7 @@ class Category(typing.NamedTuple):
     path: str
     collection: Collection
     notebooks: typing.List[Notebook]
+    pre_install: PreInstall
     pre_requirements: Requirements
     requirements: Requirements
     namespaces: typing.List[Namespace]

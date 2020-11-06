@@ -76,9 +76,10 @@ def find_categories(collection: Collection, filter_in_notebooks: typing.List[str
 
             requirements = Requirements(requirements_path)
             pre_requirements = PreRequirements(os.path.join(dirpath, 'pre-requirements.txt'))
+            pre_install = PreInstall(os.path.join(dirpath, 'pre-install.sh'))
             namespaces = [Namespace(space) for space in dirpath.replace(collection.path, '').strip('/').split('/')[:-1]]
             notebooks = []
-            category = Category(dirname, dirpath, collection, notebooks, pre_requirements, requirements, namespaces)
+            category = Category(dirname, dirpath, collection, notebooks, pre_install, pre_requirements, requirements, namespaces)
             for filepath in glob.glob(f'{dirpath}/*.ipynb'):
                 name = os.path.basename(filepath).rsplit('.', 1)[0]
                 if len(filter_in_notebooks) == 0 or name in filter_in_notebooks:
@@ -174,6 +175,7 @@ def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str) -> 
     stderr_file_like_object = open(stderr_filepath, 'w')
 
     logger.info(f'Running Command[{" ".join(cmd)}]')
+    logger.info(f'Logs can be found[{SCANNER_BUILD_LOG_DIR}]/{log_filename}.*.log')
     proc = subprocess.Popen(cmd, shell=True, stdout=stdout_file_like_object, stderr=stderr_file_like_object)
 
     while proc.poll() is None:

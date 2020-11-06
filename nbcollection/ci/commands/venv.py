@@ -3,12 +3,9 @@ import enum
 import os
 import sys
 
-from nbcollection.ci.commands.datatypes import VirtualENVType
-# from nbcollection.ci.venv import \
-#         enable_virtual_env, \
-#         enable_python_virtual_env, \
-#         enable_conda, \
-#         enable_miniconda
+from nbcollection.ci.constants import PROJECT_DIR
+from nbcollection.ci.venv import virtual_env
+from nbcollection.ci.venv.datatypes import VirtualENVType
 
 DESCRIPTION = "Wrapper around common virtual environment utils"
 EXAMPLE_USAGE = """Example Usage:
@@ -25,10 +22,10 @@ def convert(args=None):
             epilog=EXAMPLE_USAGE,
             description=DESCRIPTION,
             formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-e', '--env-type', type=VirtualENVType, default=VirtualENVType.VENV,
+    parser.add_argument('-e', '--env-type', type=VirtualENVType, default=VirtualENVType.VirtualENV,
             help=f"ENVTypes Available: [{', '.join([v.value for key, v in VirtualENVType.__members__.items()])}]")
-    parser.add_argument('-d', '--directory', default=os.getcwd(),
-            help="Which directory would you like to install")
+    parser.add_argument('-p', '--project-path', default=PROJECT_DIR, type=str,
+            help="Path relative to Project DIR install")
     parser.add_argument('-o', '--overwrite', action="store_true", default=False,
             help="Overwrite ENV files?")
 
@@ -36,16 +33,16 @@ def convert(args=None):
     args = parser.parse_args(args[2:])
     args.uninstall = False
     if args.env_type is VirtualENVType.VirtualENV:
-        enable_virtual_env(args)
+        virtual_env.enable(args.project_path, args.overwrite)
 
-    elif args.env_type is VirtualENVType.VENV:
-        enable_python_virtual_env(args)
+    # elif args.env_type is VirtualENVType.VENV:
+    #     enable_python_virtual_env(args.project_path)
 
-    elif args.env_type is VirtualENVType.Conda:
-        enable_conda(args)
+    # elif args.env_type is VirtualENVType.Conda:
+    #     enable_conda(args.project_path)
 
-    elif args.env_type is VirtualENVType.MiniConda:
-        enable_miniconda(args)
+    # elif args.env_type is VirtualENVType.MiniConda:
+    #     enable_miniconda(args.project_path)
 
     else:
-        raise NotImplementedError(f'VENV-Type not supported: {args.ci_type.value}')
+        raise NotImplementedError(f'VENV-Type not supported: {args.env_type.value}')

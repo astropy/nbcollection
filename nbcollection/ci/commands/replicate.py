@@ -14,6 +14,9 @@ EXAMPLE_USAGE = """Example Usage:
 
     Replicate Github PR locally:
     nbcollection-ci replicate --repo-path https://github.com/spacetelescope/dat_pyinthesky/pull/111 /tmp/
+
+    Source Example:
+    PYTHONPATH='.' python -m nbcollection.ci replicate -r https://github.com/spacetelescope/dat_pyinthesky/pull/122 -p /tmp/repo
 """
 
 def convert(args=None):
