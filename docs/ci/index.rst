@@ -39,8 +39,9 @@ Github Personal Access Token, add the following permissions
 
 .. code-block:: bash
 
-    $ export GITHUB_USER=jbcurtin
-    $ export GITHUB_TOKEN=<personal-access-token>
+    $ export GITHUB_USERNAME=<github-username>
+    $ export GITHUB_TOKEN=<github-tokens>
+
 
 .. _Personal Access Token: https://github.com/settings/tokens
 
@@ -155,19 +156,50 @@ Replicate
 
     $ pip install nbcollection -U
     $ nbcollection-ci replicate -h
-      usage: nbcollection-ci replicate [-h] -t SOURCE
+      usage: nbcollection-ci replicate [-h] -r REPO_PATH [-p PROJECT_PATH]
       
       Replicate Notebook Environments locally
       
       optional arguments:
         -h, --help            show this help message and exit
-        -t SOURCE, --source SOURCE
-                              See Example Usage
+        -r REPO_PATH, --repo-path REPO_PATH
+                              Local or remote path to repo to be replicated
+        -p PROJECT_PATH, --project-path PROJECT_PATH
+                              Path relative to Project DIR install
       
       Example Usage:
       
           Replicate Github PR locally:
           nbcollection-ci replicate --repo-path https://github.com/spacetelescope/dat_pyinthesky/pull/111 --project-path /tmp/replicate-path
+      
+          Source Dev Example:
+          PYTHONPATH='.' python -m nbcollection.ci replicate -r https://github.com/spacetelescope/dat_pyinthesky/pull/122 -p /tmp/replicate-path
+
+
+Build Notebooks
++++++++++++++++
+
+nbcollection-ci build-notebooks is the main entry point for rendering notebooks into different formats. When this process is ran, we can
+extract information from notebooks using the metadata module such as Title and Description. Render that into other files for generation of indexes
+and SEO html-elements. The notebook is also rendered into HTML/CSS using nbconvert
+
+.. code-block:: bash
+
+    $ pip install nbcollection -U
+    $ nbcollection-ci build-notebooks --collection-names jdat_notebooks --category-names asdf_example --project-path /tmp/notebook-repository
+
+
+Metadata
+++++++++
+
+Extracts information from a Category of notebooks and produces individualized json files with extracted information from notebooks. The CLI
+aligns with Build Notebooks and there is a Pythonic interface that goes along with it.
+
+
+.. code-block:: bash
+
+    $ pip install nbcollection -U
+    $ nbcollection-ci build-notebooks --collection-names jdat_notebooks --category-names asdf_example --project-path /tmp/notebook-repository
 
 
 See Also
