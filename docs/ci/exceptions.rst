@@ -21,8 +21,4 @@ InvalidRepoPath indicates that the `--repo-path` or `-r` value entered is not a 
 
 
 .. toctree::
-    :maxdepth: 2
-
-    # exceptions.rst
-    # venv.rst
-
+    :maxdepth: 1

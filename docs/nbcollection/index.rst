@@ -23,7 +23,7 @@ Converting a directory structure of specific notebook files
 Imagine we have a directory containing Jupyter notebook files and some other
 sub-directories that also contain notebook files, such as:
 
-.. code-block:: plain
+.. code-block:: text
 
     my_notebooks
     ├── notebook1.ipynb
@@ -42,7 +42,7 @@ With no options specified, this will create a directory within the specified
 path, `my_notebooks/_build`, to store the executed notebooks and the converted
 HTML pages:
 
-.. code-block:: plain
+.. code-block:: text
 
     my_notebooks
     └── _build
@@ -64,7 +64,7 @@ If you are only interested in executing the notebooks, you can instead use the
 which still creates a new `_build` path but now only contains the executed
 notebook files:
 
-.. code-block:: plain
+.. code-block:: text
 
     my_notebooks
     └── _build
@@ -91,7 +91,7 @@ build products here will instead be written to the current working directory by
 default (but see the command option `--build-path` below to customize). So, the
 above command would result in:
 
-.. code-block:: plain
+.. code-block:: text
 
     _build
     ├── notebook1.ipynb
@@ -133,7 +133,7 @@ than reproduce the relative path structure of your content. To enable this, use
 the `--flatten` boolean flag. For example, if your content has the following
 path structure:
 
-.. code-block:: plain
+.. code-block:: text
 
     my_notebooks
     ├── notebook1.ipynb
@@ -149,7 +149,7 @@ You can convert all of the notebooks to a single build path with:
 
 This will result in:
 
-.. code-block:: plain
+.. code-block:: text
 
     my_notebooks
     └── _build

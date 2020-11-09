@@ -18,7 +18,7 @@ install: clean
 	python setup.py install
 
 build-docs:
-	pip install sphinx sphinx_rtd_theme pip setuptools -U
+	pip install sphinx sphinx_rtd_theme pip setuptools sphinxcontrib-spelling -U
 	mkdir -p /tmp/docs
 	rm -rf /tmp/docs/*
-	sphinx-build -b html docs/ /tmp/docs
+	sphinx-build -b spelling -b html docs/ /tmp/docs

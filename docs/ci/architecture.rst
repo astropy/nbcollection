@@ -12,9 +12,15 @@ https://nbcollection.readthedocs.io/en/latest/
 
 ### Isolated Build Environments
 
-Isolated build environments allow for notebooks to be built and rendered per PR. The build process shall not build
-all notebooks in the branch submitted to the PR. Instead, it'll do its best to detect a change in a notebook file and
-schedule those notebooks for render
+Isolated build environments allow for notebooks to be built and rendered sequentially, concurrently, or in a Github PR.
+
+For Github PRs, the way nbcollection-ci detects changes in the repository is by checking out a clone into a temporary
+directory. It scans Github for all commits associated with the Pull Request and builds a diff from those objects.
+Collections and Categories are detected on the filesystem and then built sequentially
+
+For full builds on CircleCI. A `config.yaml` file is rendered each time a branch or fork is merged into master.
+`config.yaml` is generated in a way to run all builds concurrently. The limitation with this type of deployment
+is in how many CircleCI jobs can run concurrently.
 
 ### Replication
 
@@ -23,10 +29,11 @@ all environments easier. We'll implement a command that'll allow us to install a
 can than install this software and quickly install the requirements of a notebook locally and start working
 
 The replicate command will analyze metadata of a PR, or other type of URL, and create an environment locally
-```
-$ pip install nbcollection
-$ nbcollection-ci replicate --environment https://github.com/spacetelescope/dat_pyinthesky/pull/111 --directory /tmp/spacetelescope/dat_pyinthesky/pull/111
-```
+
+.. code-block:: bash
+
+    $ pip install nbcollection
+    $ nbcollection-ci replicate --environment https://github.com/spacetelescope/dat_pyinthesky/pull/111 --directory /tmp/spacetelescope/dat_pyinthesky/pull/111
 
 ### Install Build Machinery
 
@@ -34,10 +41,13 @@ Installing and updating build machinery can be a task. We'll like to reduce the 
 the installation and update of all build machinery Astropy provides.
 
 The `install` command will analyze metadata of a Repository and install build machinery
-```
-$ pip install nbcollection
-$ nbcollection-ci install -t circle-ci -r https://github.com/adrn/nbcollection
-```
+
+.. code-block:: bash
+
+    $ pip install nbcollection
+    $ nbcollection-ci install -t circle-ci -r https://github.com/adrn/nbcollection
+
+
 ### Uninstall Build Machinery
 
 ### Notebook Testing
@@ -54,15 +64,17 @@ with this, but we should be able to analyze the cell-output to see if anything h
 both Local Repositories and Github Repositories. There is room to expand the API to include support for GitLab and
 Bitbucket. Support for `mercurial` can also be added
 
-```
-nbcollection-ci install --ci-type circle-ci --repo-path git@github.com:jbcurtin/nbcollection-notebook-test-repo.git
-nbcollection-ci install --ci-type circle-ci --repo-path https://github.com/jbcurtin/nbcollection-notebook-test-repo
-nbcollection-ci install --ci-type circle-ci --repo-path /tmp/local-repo
 
-nbcollection-ci install --ci-type guthub-actions --repo-path git@github.com:jbcurtin/nbcollection-notebook-test-repo.git
-nbcollection-ci install --ci-type github-actions --repo-path https://github.com/jbcurtin/nbcollection-notebook-test-repo
-nbcollection-ci install --ci-type github-actions --repo-path /tmp/local-repo
-```
+.. code-block:: bash
+
+    nbcollection-ci install --ci-type circle-ci --repo-path git@github.com:jbcurtin/nbcollection-notebook-test-repo.git
+    nbcollection-ci install --ci-type circle-ci --repo-path https://github.com/jbcurtin/nbcollection-notebook-test-repo
+    nbcollection-ci install --ci-type circle-ci --repo-path /tmp/local-repo
+    
+    nbcollection-ci install --ci-type guthub-actions --repo-path git@github.com:jbcurtin/nbcollection-notebook-test-repo.git
+    nbcollection-ci install --ci-type github-actions --repo-path https://github.com/jbcurtin/nbcollection-notebook-test-repo
+    nbcollection-ci install --ci-type github-actions --repo-path /tmp/local-repo
+
 
 ### nbcollection-ci uninstall
 
@@ -97,9 +109,8 @@ CI/CD solution is choosen https://github.com/astropy/nbcollection/issues/2
 `ci_requirements.txt` contains everything needed to run tests for `nbcollection-ci`
 
 
+Additional Documentation
+------------------------
+
 .. toctree::
-    :maxdepth: 2
-
-    # exceptions.rst
-    # venv.rst
-
+    :maxdepth: 1

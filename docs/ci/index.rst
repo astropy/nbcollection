@@ -83,9 +83,11 @@ Github Personal Access Token, add the following permissions
 Install
 +++++++
 
+
 `nbcollection-ci install` accepts an enum `--ci-type` and string `--repo-path`. 
 
-.. code-block:: python
+
+.. code-block:: bash
 
     $ pip install nbcollection -U
     $ nbcollection-ci install -h
@@ -113,7 +115,7 @@ Install
 Uninstall
 +++++++++
 
-.. code-block:: python
+.. code-block:: bash
 
     $ pip install nbcollection -U
     $ nbcollection-ci uninstall -h
@@ -244,6 +246,5 @@ Additional Documentation
 .. toctree::
     :maxdepth: 1
 
+    architecture.rst
     exceptions.rst
-    # venv.rst
-
