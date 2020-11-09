@@ -13,42 +13,44 @@ BSD 3-clause
 Folder Structure
 ----------------
 
-`nbcollection-ci` assumes a `notebooks`_ folder exists in the root level of the repository. The folder layout of
-`notebooks` implements expectations set fourth by `nbcollection`_. An example of this implementation can be found
-in `nbcollection-notebook-test-repo`_
+`nbcollection-ci` interprets all folders in the root level of the repository to be a collection. Each subsequent
+folder is determined to be a Namespace or a Category. What makes a folder into a Category is, it contains `.ipynb` and
+other files required for building notebooks. Such as a `requirements.txt` or `pre-install.sh`.
 
-.. _nbcollection-notebook-test-repo: https://github.com/jbcurtin/nbcollection-notebook-test-repo
-.. _notebooks: https://github.com/jbcurtin/nbcollection-notebook-test-repo/tree/master/notebooks
-.. _nbcollection: ../nbcollection/index.html#converting-a-directory-structure-of-specific-notebook-files
+.. code-block:: text
+
+    notebook_repo ( Repository )
+    ├── notebook_collection_one
+        └── first_level
+            └── second_level
+                └── notebook_category
+                    ├── requirements.txt
+                    ├── pre-install.sh
+                    └── notebook.ipynb
+    └── notebook_collection_two
+        └── notebook_category
+            ├── requirements.txt
+            ├── pre-install.sh
+            └── notebook.ipynb
+
 
 Getting Started
 ---------------
 
-Support for building notebooks sequentially is already complete. With the creation of a properly laid out folder
+Support for building notebooks sequentially with the creation of a properly laid out folder
 structure, the command to build all notebooks is
-
-
-Example
-+++++++
-
-Folder Structure
-
-
-.. code-block:: text
-
-    notebook_repo
-    └── jdat_notebooks
-        ├── IFU_cube_continuum_fit
-        └── asdf_example
-            └── asdf_example.ipynb
-
-
-Build asdf_example with nbcollection-ci
 
 .. code-block:: bash
 
     $ pip install -U pip nbcollection
-    $ nbcollection-ci build-notebooks --collection-names jdat_notebooks --category-names asdf_example
+    $ nbcollection-ci build-notebooks --collection-names notebook_collection_one --category notebook_category
+
+
+Explained
+=========
+
+The command will search the folder structure for a collection named `notebook_collection_one` and a category under the
+`second_level` namespace called `notebook_category`
 
 
 Command Descriptions
