@@ -6,32 +6,23 @@ Explanations about exceptions that can arise from `nbcollection-ci`
 NBCollectionCI_InstallException
 -------------------------------
 
-To provent users from overwriting files in repositories, `--overwrite` or `-o` must be passed when running
-`nbcollection-ci install`
-
-Example Usage
-*************
-
-.. code-block:: bash
-
-    $ nbcollection-ci install -t circle-ci -r git@github.com:jbcurtin/nbcollection.git -o
-
+NBCollectionCI_InstallException raises when users attempt to overwrite an installation of `nbcollection` into
+a local or remote repository. It prevents re-installation or overwriting an already functioning CI Pipeline
 
 NBCollectionCI_InvalidRepoPath
 ------------------------------
 
-InvalidRepoPath indicates that the `--repo-path` or `-r` value entered is not a supported. Supported formats are
+InvalidRepoPath indicates that the `--repo-path` or `-r` value entered is not a supported. Supported formats are:
 
 * git@github.com:jbcurtin/nbcollection.git
-* https://github.com/jbcurtin/nbcollection
+* https://github.com/astropy/nbcollection
 * /tmp/local-repo-path
+* https://github.com/astropy/nbcollection/pull/10
 
 
-Example Usage
-*************
+.. toctree::
+    :maxdepth: 2
 
-.. code-block:: bash
-
-    $ nbcollection-ci install -t circle-ci -r git@github.com:jbcurtin/nbcollection.git
-    $ nbcollection-ci uninstall -t circle-ci -r git@github.com:jbcurtin/nbcollection.git
+    # exceptions.rst
+    # venv.rst
 

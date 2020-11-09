@@ -1,7 +1,7 @@
 nbcollection-ci Overview
 ########################
 
-nbcollection-ci provides a collection of commands to manage Jupyter Notebook build machinery. It aims to monitor and
+`nbcollection-ci` provides a collection of commands to manage Jupyter Notebook build machinery. It aims to monitor and
 manage repositories at scale so the build engineer may provide a seemless experiance for the Scientific Reviewers
 
 License
@@ -18,8 +18,38 @@ in `nbcollection-notebook-test-repo`_
 .. _notebooks: https://github.com/jbcurtin/nbcollection-notebook-test-repo/tree/master/notebooks
 .. _nbcollection: ../nbcollection/index.html#converting-a-directory-structure-of-specific-notebook-files
 
-Example usage
--------------
+Getting Started
+---------------
+
+Support for building notebooks sequentially is already complete. With the creation of a properly laid out folder
+structure, the command to build all notebooks is
+
+
+Example
++++++++
+
+Folder Structure
+
+
+.. code-block:: text
+
+    notebook_repo
+    └── jdat_notebooks
+        ├── IFU_cube_continuum_fit
+        └── asdf_example
+            └── asdf_example.ipynb
+
+
+Build asdf_example with nbcollection-ci
+
+.. code-block:: bash
+
+    $ pip install -U pip nbcollection
+    $ nbcollection-ci build-notebooks --collection-names jdat_notebooks --category-names asdf_example
+
+
+Command Descriptions
+--------------------
 
 Environment
 +++++++++++
@@ -202,12 +232,13 @@ aligns with Build Notebooks and there is a Pythonic interface that goes along wi
     $ nbcollection-ci build-notebooks --collection-names jdat_notebooks --category-names asdf_example --project-path /tmp/notebook-repository
 
 
-See Also
---------
+Additional Documentation
+------------------------
+
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
-    # exceptions.rst
+    exceptions.rst
     # venv.rst
 

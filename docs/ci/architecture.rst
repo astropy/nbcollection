@@ -96,3 +96,10 @@ CI/CD solution is choosen https://github.com/astropy/nbcollection/issues/2
 
 `ci_requirements.txt` contains everything needed to run tests for `nbcollection-ci`
 
+
+.. toctree::
+    :maxdepth: 2
+
+    # exceptions.rst
+    # venv.rst
+

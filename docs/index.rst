@@ -14,9 +14,9 @@ nbcollection-ci
 nbcollection-ci provides a set of tools to streamline the Scientific Review process of Jupyter Notebooks in astronomy.
 Reporting for bugs and feature requests can be found on `Github`_
 
-`Architecture`_
 
 .. _Github: https://github.com/astropy/nbcollection/issues
+
 
 See Also
 --------
