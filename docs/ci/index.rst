@@ -2,7 +2,8 @@ nbcollection-ci Overview
 ########################
 
 `nbcollection-ci` provides a collection of commands to manage Jupyter Notebook build machinery. It aims to monitor and
-manage repositories at scale so the build engineer may provide a seemless experiance for the Scientific Reviewers
+manage repositories at scale so the build engineer may provide a seamless experience for the Scientific Reviewers
+
 
 License
 -------
