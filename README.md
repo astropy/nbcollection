@@ -166,8 +166,9 @@ notebooks):
 
 # nbcollection-ci
 
-`nbcollection-ci` is a suite of CLI tools designed to make working with jupyter-lab seemless. The goal is to empower
-communities using Github, CircleCI, Jenkins and simular tools, to quickly build and review Jupyter Notebooks. 
+`nbcollection-ci` is a suite of CLI tools designed to simplify maintaining, converting, and testing collections 
+of Jupyter notebooks. The goal is to empower communities using CircleCI, Github Actions, Jenkins and similar CI 
+tools, to assist with building and reviewing Jupyter notebooks.
 
 ## Documentation URL
 
