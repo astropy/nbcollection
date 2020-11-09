@@ -8,6 +8,8 @@ manage repositories at scale so the build engineer may provide a seamless experi
 License
 -------
 
+BSD 3-clause
+
 Folder Structure
 ----------------
 
