@@ -1,10 +1,11 @@
 import json
+import os
 import typing
 
 from nbcollection.ci.constants import ENCODING
 from nbcollection.ci.exceptions import MetadataExtractionError
 from nbcollection.ci.datatypes import NotebookContext, MetadataContext
-from nbcollection.ci.scanner.utils import validate_and_parse_inputs
+from nbcollection.ci.commands.utils import validate_and_parse_inputs
 
 def reset_notebook_execution(notebook_data: typing.Dict[str, typing.Any]) -> None:
     for cell in notebook_data['cells']:
@@ -36,6 +37,10 @@ def extract_metadata(notebook: NotebookContext) -> None:
             if idx == 1 and cell['cell_type'] in ['markdown']:
                 details['description'] = ' '.join(cell['source'])
                 details['description'] = details['description'].strip('\n')
+
+    dirpath = os.path.dirname(notebook.metadata.path)
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
 
     with open(notebook.metadata.path, 'wb') as stream:
         stream.write(json.dumps(details, indent=2).encode(ENCODING))

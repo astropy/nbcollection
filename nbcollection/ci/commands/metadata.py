@@ -2,9 +2,10 @@ import argparse
 import enum
 import sys
 
+from nbcollection.ci.constants import PROJECT_DIR
 from nbcollection.ci.generator import render_circle_ci
 from nbcollection.ci.commands.datatypes import CIType
-from nbcollection.ci.metadata import extract_metadata, reset_notebooks
+from nbcollection.ci.metadata.factory import run_reset_notebook_execution, run_extract_metadata
 
 DESCRIPTION = "Extract DevNotes and other data from Jupyter Notebooks"
 EXAMPLE_USAGE = """Example Usage:
@@ -27,7 +28,8 @@ def convert(args=None):
             description=DESCRIPTION,
             formatter_class=argparse.RawTextHelpFormatter,
             epilog=EXAMPLE_USAGE)
-    parser.add_argument('-m', '--mode', required=True,
+    formatted_mode_members = ','.join([mem.value for name, mem in Mode.__members__.items()])
+    parser.add_argument('-m', '--mode', type=Mode, required=True,
             help="Which mode to run metadata in? \n Available Modes:[formatted_mode_members]")
     parser.add_argument('-c', '--collection-names', required=False, default=None,
             help="Select a subset of Collections to be built, or all will be built")
@@ -35,13 +37,15 @@ def convert(args=None):
             help="Select a subset of Categories to be built, or all will be built")
     parser.add_argument('-n', '--notebook-names', required=False, default=None,
             help="Select a subset of Notebooks to be built, or all will be built")
+    parser.add_argument('-p', '--project-path', default=PROJECT_DIR, type=str,
+            help="Path relative to Project DIR install")
 
     args = parser.parse_args(args[2:])
     if args.mode is Mode.ResetNotebooks:
-        reset_notebooks(args)
+        run_reset_notebook_execution(args)
 
     elif args.mode is Mode.ExtractMetadata:
-        extract_metadata(args)
+        run_extract_metadata(args)
 
     else:
         raise NotImplementedError(args.mode)
