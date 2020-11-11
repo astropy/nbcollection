@@ -177,14 +177,19 @@ def test__run_job_context(quick_build_collection):
         run_job_context(job_context)
 
         # Validate Run completed
-        stdout_log = os.path.join(SCANNER_BUILD_LOG_DIR, f'{job.collection.name}-{job.category.name}.stdout')
+        stdout_log = os.path.join(SCANNER_BUILD_LOG_DIR, f'{job.collection.name}-{job.category.name}.stdout.log')
         assert os.path.exists(stdout_log)
 
-        stderr_log = os.path.join(SCANNER_BUILD_LOG_DIR, f'{job.collection.name}-{job.category.name}.stderr')
+        stderr_log = os.path.join(SCANNER_BUILD_LOG_DIR, f'{job.collection.name}-{job.category.name}.stderr.log')
         assert os.path.exists(stderr_log)
 
-        # venv_dirpath = os.path.join(SCANNER_BUILD_DIR, 'venv')
-        # assert os.path.exists(venv_dirpath)
-        # assert os.path.isdir(venv_dirpath)
-        # import pdb; pdb.set_trace()
-        # pass
+        assert os.path.exists(job_context.setup_script)
+        for notebook in job_context.notebooks:
+            assert os.path.exists(notebook.path)
+            assert os.path.exists(notebook.artifact.path)
+            assert os.path.exists(notebook.metadata.path)
+
+        build_dir = os.path.join(SCANNER_BUILD_DIR, job.collection.name, job.category.name)
+        venv_dirpath = os.path.join(build_dir, 'venv')
+        assert os.path.exists(venv_dirpath)
+        assert build_dir == job_context.build_dir

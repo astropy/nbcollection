@@ -4,8 +4,9 @@ set -e
 cd {{ build_context.build_dir }}
 virtualenv -p $(which python) venv
 source venv/bin/activate
+pip install -U GitPython==3.1.1 Jinja2==2.11.2 nbconvert==5.6.1 requests==2.23.0 toml==0.10.1
 
-pip install -U pip setuptools --use-feature=2020-resolver
+pip install -U pip setuptools
 if [ -f "pre-install.sh" ]; then
     bash pre-install.sh
 fi
@@ -17,7 +18,10 @@ if [ -f "environment.sh" ]; then
     source environment.sh
 fi
 if ! pip freeze |grep 'jupyter==' >/dev/null 2>/dev/null; then
-    pip install -U jupyter --use-feature=2020-resolver
+    pip install -U jupyter
+fi
+if ! pip freeze |grep 'jupyter-client==' >/dev/null 2>/dev/null; then
+    jupyter-client==6.1.3
 fi
 cd -
 exit 0

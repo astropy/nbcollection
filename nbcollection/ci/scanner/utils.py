@@ -14,17 +14,13 @@ from nbcollection.ci.constants import ENCODING, PROJECT_DIR, SCANNER_BUILD_DIR, 
 from nbcollection.ci.datatypes import Collection, Category, Notebook, PreRequirements, Requirements, Namespace, \
         BuildJob, JobContext, BuildContext, PreInstall, IgnoreData, NotebookContext, ArtifactContext, Metadata, MetadataContext
 from nbcollection.ci.exceptions import BuildError
+from nbcollection.ci.metadata.utils import extract_metadata
 from nbcollection.ci.renderer import render_template
 
 DEFAULT_IGNORE_ENTRIES = ['.gitignore', 'venv', 'env', 'virtual-env', 'virutalenv', '.ipynb_checkpoints']
 STRIP_CHARS = ' \n'
 
 logger = logging.getLogger(__name__)
-
-def validate_and_parse_inputs(options: argparse.Namespace) -> argparse.Namespace:
-    options.collection_names = options.collection_names.split(',')
-    options.category_names = options.category_names.split(',')
-    options.notebook_names = options.notebook_names.split(',')
 
 def load_ignore_data(start_path: str, root_level_only: bool = False) -> IgnoreData:
     entries = []
@@ -129,8 +125,10 @@ def generate_job_context(job: BuildJob) -> JobContext:
 
         artifact_path = os.path.join(SCANNER_ARTIFACT_DEST_DIR, job.semantic_path())
         artifact = ArtifactContext(
-                os.path.dirname(artifact_path),
-                f'{artifact_path}.html', f'{artifact_path}.json')
+                artifact_path,
+                os.path.join(artifact_path, f'{notebook.name}.html'))
+        metadata = MetadataContext(
+                os.path.join(artifact_path, f'{notebook.name}.metadata.json'))
 
         notebook_context = NotebookContext(
             notebook,
@@ -138,8 +136,7 @@ def generate_job_context(job: BuildJob) -> JobContext:
             job.category.name,
             os.path.join(build_dir, f'{notebook.name}.ipynb'),
             os.path.join(build_dir, f'{notebook.name}.build.sh'),
-            MetadataContext(os.path.join(build_dir, f'{notebook.name}.metadata.json')),
-            artifact)
+            metadata, artifact)
 
         with open(notebook_context.build_script_path, 'wb') as stream:
             stream.write(render_template('build.tmpl.sh', {
@@ -185,8 +182,10 @@ def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str) -> 
         raise BuildError(f'Process Exit Code[{proc.poll()}]. CMD: [{" ".join(cmd)}]')
 
 def run_job_context(context: JobContext) -> None:
+    logger.info(f'Setting up build environment: {context.job.collection.name}.{context.job.category.name}')
     run_command(f'bash {context.setup_script}', context.logfile_name)
-    for build_script_filepath in context.build_scripts:
-        script_filename = os.path.basename(build_script_filepath)
-        build_script_log_filename = f'{context.logfile_name}-{script_filename}'
-        run_command(f'bash {build_script_filepath}', build_script_log_filename)
+    for notebook in context.notebooks:
+        logger.info('Extracting Metadata: {context.job.collection.name}.{context.job.category.name}')
+        extract_metadata(notebook)
+        logger.info(f'Building Notebook: {context.job.collection.name}.{context.job.category.name}')
+        run_command(f'bash {notebook.build_script_path}', context.logfile_name)

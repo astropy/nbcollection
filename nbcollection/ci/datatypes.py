@@ -56,7 +56,6 @@ class MetadataContext(typing.NamedTuple):
 class ArtifactContext(typing.NamedTuple):
     dirpath: str
     path: str
-    metadata_path: str
 
 class NotebookContext(typing.NamedTuple):
     notebook: Notebook
@@ -70,7 +69,6 @@ class NotebookContext(typing.NamedTuple):
 class JobContext(typing.NamedTuple):
     build_dir: str
     setup_script: str
-    # build_scripts: typing.List[str]
     notebooks: typing.List[NotebookContext]
     job: BuildJob
     pre_install: PreInstall
