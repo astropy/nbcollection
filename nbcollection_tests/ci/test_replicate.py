@@ -99,4 +99,3 @@ def test__find_repo_path_by_remote__next_level_repo(next_level_repo):
     repo = git.Repo(repo_path)
     assert repo.remotes[0].name == 'upstream'
     assert repo.remotes[0].url == f'git@github.com:jbcurtin/{folder_name}.git'
-

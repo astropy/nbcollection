@@ -10,9 +10,8 @@ import typing
 from datetime import datetime
 
 from nbcollection.ci import exceptions as ci_exceptions
-from nbcollection.ci.constants import DEFAULT_REMOTE, DEFAULT_BRANCH, PWN, GITHUB_USERNAME, GITHUB_TOKEN
+from nbcollection.ci.constants import PWN, GITHUB_USERNAME, GITHUB_TOKEN
 from nbcollection.ci.generator.datatypes import URLParts
-from nbcollection.ci.template import ENVIRONMENT
 
 from urllib.parse import urlparse
 
@@ -60,6 +59,12 @@ class RemoteParts(typing.NamedTuple):
 
         else:
             raise NotImplementedError(url)
+
+    def is_match(self: PWN, url: str) -> bool:
+        other_remote_parts = self.__class__.ParseURLToRemoteParts(url)
+        return other_remote_parts.netloc == self.netloc and \
+                other_remote_parts.org == self.org and \
+                other_remote_parts.name == self.name
 
 class GitConfigRemote(typing.NamedTuple):
     name: str

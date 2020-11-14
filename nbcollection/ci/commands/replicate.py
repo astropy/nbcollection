@@ -6,7 +6,7 @@ import sys
 from nbcollection.ci.constants import PROJECT_DIR
 from nbcollection.ci.generator import render_circle_ci
 from nbcollection.ci.commands.datatypes import CIType
-from nbcollection.ci.replicate import run_replication
+from nbcollection.ci.replicate.factory import run_replication
 
 
 DESCRIPTION = "Replicate Notebook Environments locally"

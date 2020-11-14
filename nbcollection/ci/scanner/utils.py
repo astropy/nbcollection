@@ -152,28 +152,32 @@ def generate_job_context(job: BuildJob) -> JobContext:
     logfile_name = f'{job.collection.name}-{job.category.name}'
     return JobContext(build_dir, build_setup_script, notebook_contexts, job, pre_install, pre_requirements, requirements, logfile_name)
 
-def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str) -> None:
+def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str, std_logoutput: bool = False) -> None:
     if isinstance(cmd, str):
         cmd = [cmd]
 
-    if not os.path.exists(SCANNER_BUILD_LOG_DIR):
-        os.makedirs(SCANNER_BUILD_LOG_DIR)
+    if std_logoutput is False:
+        if not os.path.exists(SCANNER_BUILD_LOG_DIR):
+            os.makedirs(SCANNER_BUILD_LOG_DIR)
 
-    log_filename = log_filename or os.path.basename(tempfile.NamedTemporaryFile().name)
+        log_filename = log_filename or os.path.basename(tempfile.NamedTemporaryFile().name)
 
-    stdout_filepath = f'{SCANNER_BUILD_LOG_DIR}/{log_filename}.stdout.log'
-    with open(stdout_filepath, 'w') as stream:
-        stream.write('')
-    stdout_file_like_object = open(stdout_filepath, 'w')
+        stdout_filepath = f'{SCANNER_BUILD_LOG_DIR}/{log_filename}.stdout.log'
+        with open(stdout_filepath, 'w') as stream:
+            stream.write('')
+        stdout_file_like_object = open(stdout_filepath, 'w')
 
-    stderr_filepath = f'{SCANNER_BUILD_LOG_DIR}/{log_filename}.stderr.log'
-    with open(stderr_filepath, 'w') as stream:
-        stream.write('')
-    stderr_file_like_object = open(stderr_filepath, 'w')
+        stderr_filepath = f'{SCANNER_BUILD_LOG_DIR}/{log_filename}.stderr.log'
+        with open(stderr_filepath, 'w') as stream:
+            stream.write('')
+        stderr_file_like_object = open(stderr_filepath, 'w')
 
-    logger.info(f'Running Command[{" ".join(cmd)}]')
-    logger.info(f'Logs can be found[{SCANNER_BUILD_LOG_DIR}]/{log_filename}.*.log')
-    proc = subprocess.Popen(cmd, shell=True, stdout=stdout_file_like_object, stderr=stderr_file_like_object)
+        logger.info(f'Running Command[{" ".join(cmd)}]')
+        logger.info(f'Logs can be found[{SCANNER_BUILD_LOG_DIR}]/{log_filename}.*.log')
+        proc = subprocess.Popen(cmd, shell=True, stdout=stdout_file_like_object, stderr=stderr_file_like_object)
+
+    else:
+        proc = subprocess.Popen(cmd, shell=True)
 
     while proc.poll() is None:
         time.sleep(.1)
@@ -181,11 +185,11 @@ def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str) -> 
     if proc.poll() > 0:
         raise BuildError(f'Process Exit Code[{proc.poll()}]. CMD: [{" ".join(cmd)}]')
 
-def run_job_context(context: JobContext) -> None:
+def run_job_context(context: JobContext, std_logoutput: bool = False) -> None:
     logger.info(f'Setting up build environment: {context.job.collection.name}.{context.job.category.name}')
-    run_command(f'bash {context.setup_script}', context.logfile_name)
+    run_command(f'bash {context.setup_script}', context.logfile_name, std_logoutput)
     for notebook in context.notebooks:
         logger.info('Extracting Metadata: {context.job.collection.name}.{context.job.category.name}')
         extract_metadata(notebook)
         logger.info(f'Building Notebook: {context.job.collection.name}.{context.job.category.name}')
-        run_command(f'bash {notebook.build_script_path}', context.logfile_name)
+        run_command(f'bash {notebook.build_script_path}', context.logfile_name, std_logoutput)
