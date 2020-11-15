@@ -1,5 +1,6 @@
-import sys
 import argparse
+import os
+import sys
 
 from nbcollection.ci.commands import install, uninstall, venv, replicate, pull_request
 
@@ -39,6 +40,9 @@ def main() -> argparse.Namespace:
     # Run the command
     commands[options.command].convert(args)
 
+def run_from_cli():
+    sys.path.append(os.getcwd())
+    main()
 
 if __name__ == "__main__":
     main()
