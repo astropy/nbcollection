@@ -5,7 +5,7 @@ from nbcollection.ci.constants import PROJECT_DIR
 from nbcollection.ci.build_notebooks.factory import run_build
 
 
-DESCRIPTION = "Build Notebooks"
+DESCRIPTION = "Build categories of notebooks"
 EXAMPLE_USAGE = """Example Usage:
 
     Replicate Github PR locally:
