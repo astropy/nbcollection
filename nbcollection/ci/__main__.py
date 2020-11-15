@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-from nbcollection.ci.commands import install, uninstall, venv, replicate, pull_request
+from nbcollection.ci.commands import install, uninstall, venv, replicate, pull_request, build_notebooks
 
 commands = {
   'install': install,
@@ -10,6 +10,7 @@ commands = {
   'venv': venv,
   'replicate': replicate,
   'pull-request': pull_request,
+  'build-notebooks': build_notebooks,
 }
 
 DESCRIPTION = """Type `nbcollection-ci <command> -h` for help.
@@ -21,6 +22,7 @@ The allowed commands are:
     nbcollection-ci env
     nbcollection-ci replicate
     nbcollection-ci pull-request
+    nbcollection-ci build-notebooks
 """
 
 def main() -> argparse.Namespace:
