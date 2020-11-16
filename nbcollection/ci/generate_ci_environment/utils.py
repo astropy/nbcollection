@@ -5,7 +5,8 @@ import typing
 import yaml
 
 from nbcollection.ci.constants import ENCODING, SCANNER_ARTIFACT_DEST_DIR
-from nbcollection.ci.generate_ci_environment.constants import NBCOLLECTION_BUILDER, CONFIG_TEMPLATE, JOB_TEMPLATE
+from nbcollection.ci.generate_ci_environment.constants import NBCOLLECTION_BUILDER, CONFIG_TEMPLATE, JOB_TEMPLATE, \
+        PULL_REQUEST_TEMPLATE, NBCOLLECTION_WORKFLOW_NAME
 from nbcollection.ci.commands.datatypes import CIEnvironment
 from nbcollection.ci.datatypes import BuildJob
 
@@ -31,8 +32,11 @@ def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path:
         job['steps'][2]['store_artifacts']['path'] = SCANNER_ARTIFACT_DEST_DIR
 
         config['jobs'][job_name] = job
-        config['workflows']['Build']['jobs'].append(job_name)
+        config['workflows'][NBCOLLECTION_WORKFLOW_NAME]['jobs'].append(job_name)
 
+    pr_job_name = 'Pull Request'
+    config['jobs'][pr_job_name] = copy.deepcopy(PULL_REQUEST_TEMPLATE)
+    config['workflows'][NBCOLLECTION_WORKFLOW_NAME]['jobs'].append(pr_job_name)
     config_path = os.path.join(project_path, '.circleci/config.yml')
     config_dirpath = os.path.dirname(config_path)
     if not os.path.exists(config_dirpath):
