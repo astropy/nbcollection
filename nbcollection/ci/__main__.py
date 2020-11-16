@@ -2,7 +2,8 @@ import argparse
 import os
 import sys
 
-from nbcollection.ci.commands import install, uninstall, venv, replicate, pull_request, build_notebooks, metadata
+from nbcollection.ci.commands import install, uninstall, venv, replicate, pull_request, build_notebooks, metadata, \
+        generate_ci_environment
 
 commands = {
   'install': install,
@@ -12,6 +13,7 @@ commands = {
   'replicate': replicate,
   'pull-request': pull_request,
   'build-notebooks': build_notebooks,
+  'generate-ci-env': generate_ci_environment,
 }
 
 DESCRIPTION = """Type `nbcollection-ci <command> -h` for help.
