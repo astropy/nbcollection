@@ -2,12 +2,13 @@ import argparse
 import os
 import sys
 
-from nbcollection.ci.commands import install, uninstall, venv, replicate, pull_request, build_notebooks
+from nbcollection.ci.commands import install, uninstall, venv, replicate, pull_request, build_notebooks, metadata
 
 commands = {
   'install': install,
   'uninstall': uninstall,
   'venv': venv,
+  'metadata': metadata,
   'replicate': replicate,
   'pull-request': pull_request,
   'build-notebooks': build_notebooks,

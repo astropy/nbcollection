@@ -1,10 +1,11 @@
 import argparse
 import json
 
+from nbcollection.ci.commands.utils import validate_and_parse_inputs
 from nbcollection.ci.constants import ENCODING
 from nbcollection.ci.datatypes import Metadata
-from nbcollection.ci.scanner.utils import find_build_jobs, validate_and_parse_inputs, generate_job_context
-from nbcollection.ci.metadata.utils import reset_notebook_execution, validate_and_parse_inputs, extract_metadata
+from nbcollection.ci.scanner.utils import find_build_jobs, generate_job_context
+from nbcollection.ci.metadata.utils import reset_notebook_execution, extract_metadata
 
 def run_reset_notebook_execution(options: argparse.Namespace) -> None:
     validate_and_parse_inputs(options)
