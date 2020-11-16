@@ -187,9 +187,9 @@ def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str, std
 
 def run_job_context(context: JobContext, std_logoutput: bool = False) -> None:
     logger.info(f'Setting up build environment: {context.job.collection.name}.{context.job.category.name}')
-    run_command(f'bash {context.setup_script}', context.logfile_name, std_logoutput)
+    run_command(f'bash "{context.setup_script}"', context.logfile_name, std_logoutput)
     for notebook in context.notebooks:
-        logger.info('Extracting Metadata: {context.job.collection.name}.{context.job.category.name}')
+        logger.info(f'Extracting Metadata: {context.job.collection.name}.{context.job.category.name}')
         extract_metadata(notebook)
         logger.info(f'Building Notebook: {context.job.collection.name}.{context.job.category.name}')
-        run_command(f'bash {notebook.build_script_path}', context.logfile_name, std_logoutput)
+        run_command(f'bash "{notebook.build_script_path}"', context.logfile_name, std_logoutput)
