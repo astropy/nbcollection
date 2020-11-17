@@ -3,7 +3,7 @@ import os
 import sys
 
 from nbcollection.ci.commands import install, uninstall, venv, replicate, pull_request, build_notebooks, metadata, \
-        generate_ci_environment
+        generate_ci_environment, merge_artifacts
 
 commands = {
   'install': install,
@@ -14,6 +14,7 @@ commands = {
   'pull-request': pull_request,
   'build-notebooks': build_notebooks,
   'generate-ci-env': generate_ci_environment,
+  'merge-artifacts': merge_artifacts
 }
 
 DESCRIPTION = """Type `nbcollection-ci <command> -h` for help.
@@ -26,6 +27,8 @@ The allowed commands are:
     nbcollection-ci replicate
     nbcollection-ci pull-request
     nbcollection-ci build-notebooks
+    nbcollection-ci generate-ci-env
+    nbcollection-ci merge-artifacts
 """
 
 def main() -> argparse.Namespace:
