@@ -9,13 +9,24 @@ nbcollection-ci to Github Actions, Jenkins or another CI/CD solution.
 
 This document covers what nbcollection-ci expects to see in a repository and associated pull request. Let's start with
 an example project called `nbcollection-demo`_. nbcollection-demo has all the moving parts of `nbcollection-ci pull-request` implemented.
-https://github.com/jbcurtin/nbcollection-demo/pull/2
+https://github.com/jbcurtin/nbcollection-demo/pull/2. It concludes with building a website by merging artifacts from CircleCI, which can
+than be commited into a Github Pages complient repository on Github.
+
+
+How to install
+==============
+
+Please look to `nbcollection-builder Dockerfile`_ for an installation example.
+
+.. _`nbcollection-builder Dockerfile`: https://github.com/jbcurtin/nbcollection-builder/blob/main/build-tools/install-nbcollection.sh
+
 
 How to manage a Pull Request
 ============================
 
-Pull Request 2 has all the elements you'd expect to see when running a build, because the PR has `nbcollection-ci` running, it'll
-be aware enough to skip build processes and only proceed with the "Pull Request" build in the CI panel. 
+Pull Request 2 has all the elements you'd expect to see when running a build. The PR has `nbcollection-ci` installed, 
+nbcollection-ci will be aware that it has been trigger inside a Pull Request and skip build processes and only fully build
+the "Pull Request" build in the CI Panel
 
 .. image:: images/circleci-builds-in-github.png
     :width: 650
@@ -39,11 +50,11 @@ errors relative to context the error may exist within. For example, if a `requir
 will raise an error indicating that the file is missing.
 
 This translates will into how Jupyter Notebooks are built too. The errors shown within the CircleCI Build Logs will
-indicate the exact stack trace that caused the error, however the exact cell will still need to be correctly interpreted. 
-This is a limitation of Jupyter Notebooks and the way it counts/tallies Jupyter Cells
+indicate the exact stack trace that caused the error, however the exact cell will still need to be correctly interpreted 
+by the maintainer. This is a limitation of Jupyter Notebooks and the way it counts/tallies Jupyter Cells/Kernels.
 
-`nbcollection-ci` introduces a few new concepts. Collections, Categories, and Notebooks. Contexts used to generate and
-invoke isolated build environments.
+`nbcollection-ci` introduces a few new concepts. Collections, Categories, and Notebooks. All contexts used to generate and
+invoke an isolated build environment.
 
 Collections are folders found in the root level of a repository. In the example of `spacetelescope/dat_pyinthesky`_. Collections are,
 
@@ -62,7 +73,7 @@ The attributes that elevate these folders into a collection are
 * The collection exists at the root of the repository
 * The collection contains one or more categories
 
-Categories are a little more complex as they are responsible for seting up and running the build environments for notebooks.
+Categories are a little more complex. Categories are responsible for setting up and running build environments for notebooks.
 Looking into `jdat_notebooks`, some categories are
 
 * asdf_example
@@ -75,7 +86,7 @@ The attributes that elevate these folders into a category are
 
 Categories are somewhat special, they don't need to be directly inside a collection. Instead, categories can be
 semantically present in a deeply nested folder structure. The folder names between the collection and category are
-turned into namespaces by `nbcollection-ci`. These namespaces can then be used as semantic dividers when rendering merging
+turned into namespaces by `nbcollection-ci`. These namespaces can than be used as semantic dividers when merging
 artifacts and generating a website
 
 How to manage Main Branch
@@ -92,7 +103,8 @@ what to do on the main branch after the pull request has been merged.
 
 We've recently closed `https://github.com/jbcurtin/nbcollection-demo/pull/1` and need to update the CircleCI `config.yml` file
 to run concurrent builds. `nbcollection-ci` expects this kind of workflow and has created a set of commands to make this process
-as seemless as possible. We'll run the commands and explain them at the end of this tutorial.
+as seemless as possible. We'll run a command to render a new `config.yml` file to add the a category in `jdat_notebooks` collection, 
+called background_estimation_imaging notebooks.
 
 .. code-block:: bash
 
@@ -104,8 +116,8 @@ as seemless as possible. We'll run the commands and explain them at the end of t
     $ git push jbcurtin main
 
 
-`nbcollection-ci generate-ci-env` destroys and creates `.circleci/config.yml` for all collections and categories found in
-`$HOME/nbcollection-demo`. Commit the changes and push them up to Github and this'll invoke a full run with all build jobs
+`nbcollection-ci generate-ci-env` has destroyed and created the `.circleci/config.yml` for all collections and categories found in
+`$HOME/nbcollection-demo`. With these changes pushed to Github and the new `config.yml` file will invoke a full run with all build jobs
 running in a concurrent manor.
 
 
