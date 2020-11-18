@@ -10,6 +10,12 @@ License
 
 BSD 3-clause
 
+Getting Started
+---------------
+
+Follow this `walkthrough <ci_example.html>`_ for an indepth guide into using `nbcollection-ci`
+
+
 Folder Structure
 ----------------
 
