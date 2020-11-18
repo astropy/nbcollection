@@ -7,6 +7,11 @@ manage repositories at scale so the build engineer may provide a seemless experi
 License
 -------
 
+Getting Started
+---------------
+
+Follow this `walkthrough <ci_example.html>`_ for an indepth guide into using `nbcollection-ci`
+
 Folder Structure
 ----------------
 
