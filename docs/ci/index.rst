@@ -1,25 +1,66 @@
 nbcollection-ci Overview
 ########################
 
-nbcollection-ci provides a collection of commands to manage Jupyter Notebook build machinery. It aims to monitor and
-manage repositories at scale so the build engineer may provide a seemless experiance for the Scientific Reviewers
+`nbcollection-ci` provides a collection of commands to manage Jupyter Notebook build machinery. It aims to monitor and
+manage repositories at scale so the build engineer may provide a seamless experience for the Scientific Reviewers
+
 
 License
 -------
 
+BSD 3-clause
+
+Getting Started
+---------------
+
+Follow this `walkthrough <ci_example.html>`_ for an indepth guide into using `nbcollection-ci`
+
+
 Folder Structure
 ----------------
 
-`nbcollection-ci` assumes a `notebooks`_ folder exists in the root level of the repository. The folder layout of
-`notebooks` implements expectations set fourth by `nbcollection`_. An example of this implementation can be found
-in `nbcollection-notebook-test-repo`_
+`nbcollection-ci` interprets all folders in the root level of the repository to be a collection. Each subsequent
+folder is determined to be a Namespace or a Category. What makes a folder into a Category is, it contains `.ipynb` and
+other files required for building notebooks. Such as a `requirements.txt` or `pre-install.sh`.
 
-.. _nbcollection-notebook-test-repo: https://github.com/jbcurtin/nbcollection-notebook-test-repo
-.. _notebooks: https://github.com/jbcurtin/nbcollection-notebook-test-repo/tree/master/notebooks
-.. _nbcollection: ../nbcollection/index.html#converting-a-directory-structure-of-specific-notebook-files
+.. code-block:: text
 
-Example usage
--------------
+    notebook_repo ( Repository )
+    ├── notebook_collection_one
+        └── first_level
+            └── second_level
+                └── notebook_category
+                    ├── requirements.txt
+                    ├── pre-install.sh
+                    └── notebook.ipynb
+    └── notebook_collection_two
+        └── notebook_category
+            ├── requirements.txt
+            ├── pre-install.sh
+            └── notebook.ipynb
+
+
+Getting Started
+---------------
+
+Support for building notebooks sequentially with the creation of a properly laid out folder
+structure, the command to build all notebooks is
+
+.. code-block:: bash
+
+    $ pip install -U pip nbcollection
+    $ nbcollection-ci build-notebooks --collection-names notebook_collection_one --category notebook_category
+
+
+Explained
+=========
+
+The command will search the folder structure for a collection named `notebook_collection_one` and a category under the
+`second_level` namespace called `notebook_category`
+
+
+Command Descriptions
+--------------------
 
 Environment
 +++++++++++
@@ -39,17 +80,20 @@ Github Personal Access Token, add the following permissions
 
 .. code-block:: bash
 
-    $ export GITHUB_USER=jbcurtin
-    $ export GITHUB_TOKEN=<personal-access-token>
+    $ export GITHUB_USERNAME=<github-username>
+    $ export GITHUB_TOKEN=<github-tokens>
+
 
 .. _Personal Access Token: https://github.com/settings/tokens
 
 Install
 +++++++
 
+
 `nbcollection-ci install` accepts an enum `--ci-type` and string `--repo-path`. 
 
-.. code-block:: python
+
+.. code-block:: bash
 
     $ pip install nbcollection -U
     $ nbcollection-ci install -h
@@ -77,7 +121,7 @@ Install
 Uninstall
 +++++++++
 
-.. code-block:: python
+.. code-block:: bash
 
     $ pip install nbcollection -U
     $ nbcollection-ci uninstall -h
@@ -155,28 +199,58 @@ Replicate
 
     $ pip install nbcollection -U
     $ nbcollection-ci replicate -h
-      usage: nbcollection-ci replicate [-h] -t SOURCE
+      usage: nbcollection-ci replicate [-h] -r REPO_PATH [-p PROJECT_PATH]
       
       Replicate Notebook Environments locally
       
       optional arguments:
         -h, --help            show this help message and exit
-        -t SOURCE, --source SOURCE
-                              See Example Usage
+        -r REPO_PATH, --repo-path REPO_PATH
+                              Local or remote path to repo to be replicated
+        -p PROJECT_PATH, --project-path PROJECT_PATH
+                              Path relative to Project DIR install
       
       Example Usage:
       
           Replicate Github PR locally:
-          nbcollection-ci replicate --source https://github.com/spacetelescope/dat_pyinthesky/pull/111
+          nbcollection-ci replicate --repo-path https://github.com/spacetelescope/dat_pyinthesky/pull/111 --project-path /tmp/replicate-path
+      
+          Source Dev Example:
+          PYTHONPATH='.' python -m nbcollection.ci replicate -r https://github.com/spacetelescope/dat_pyinthesky/pull/122 -p /tmp/replicate-path
 
 
+Build Notebooks
++++++++++++++++
 
-See Also
---------
+nbcollection-ci build-notebooks is the main entry point for rendering notebooks into different formats. When this process is ran, we can
+extract information from notebooks using the metadata module such as Title and Description. Render that into other files for generation of indexes
+and SEO html-elements. The notebook is also rendered into HTML/CSS using nbconvert
+
+.. code-block:: bash
+
+    $ pip install nbcollection -U
+    $ nbcollection-ci build-notebooks --collection-names jdat_notebooks --category-names asdf_example --project-path /tmp/notebook-repository
+
+
+Metadata
+++++++++
+
+Extracts information from a Category of notebooks and produces individualized json files with extracted information from notebooks. The CLI
+aligns with Build Notebooks and there is a Pythonic interface that goes along with it.
+
+
+.. code-block:: bash
+
+    $ pip install nbcollection -U
+    $ nbcollection-ci build-notebooks --collection-names jdat_notebooks --category-names asdf_example --project-path /tmp/notebook-repository
+
+
+Additional Documentation
+------------------------
+
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
-    # exceptions.rst
-    # venv.rst
-
+    architecture.rst
+    exceptions.rst
