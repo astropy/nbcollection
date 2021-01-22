@@ -13,6 +13,7 @@ def run_build(options: argparse.ArgumentParser) -> None:
         return None
 
     validate_and_parse_inputs(options)
+    artifact_paths = {}
     for job_idx, job in enumerate(find_build_jobs(
                                     options.project_path,
                                     options.collection_names,
@@ -20,3 +21,9 @@ def run_build(options: argparse.ArgumentParser) -> None:
                                     options.notebook_names)):
         job_context = generate_job_context(job)
         run_job_context(job_context, True)
+        for notebook in job_context.notebooks:
+            hash_name = f'{notebook.collection_name}-{notebook.category_name}'
+            artifact_paths[hash_name] = notebook.artifact.path
+
+    for name, path in artifact_paths.items():
+        logger.info(f'Artifact[{name}] created here: {path}')
