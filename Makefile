@@ -5,18 +5,15 @@ release:
 	make clean
 	python setup.py sdist
 	python -m twine upload --verbose dist/*
-
 clean:
 	rm -rf dist
 	rm -rf build
 	rm -rf nbcollection.egg-info
 	rm -rf .tox
-    
 install: clean
 	pip uninstall nbcollection
 	python setup.py build
 	python setup.py install
-
 build-docs:
 	pip install sphinx sphinx_rtd_theme pip setuptools -U
 	mkdir -p /tmp/docs

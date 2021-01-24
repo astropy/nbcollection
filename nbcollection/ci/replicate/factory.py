@@ -8,7 +8,6 @@ import typing
 
 from datetime import datetime
 
-from nbcollection.ci.constants import GITHUB_USERNAME, GITHUB_TOKEN, PWN, COMMIT_DATE_FORMAT
 from nbcollection.ci.replicate.utils import find_repo_path_by_remote, obtain_pull_request_info, select_build_jobs, extract_repo_info
 from nbcollection.ci.replicate.datatypes import RemoteParts, PullRequestCommitInfo, PullRequestSource, PullRequestInfo, RepoInfo
 from nbcollection.ci.generator.datatypes import select_repo_type, select_url_type, URLType, RepoType

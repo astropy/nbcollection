@@ -24,8 +24,8 @@ class GithubRepo:
     def __init__(self: PWN, owner: str, name: str) -> None:
         self.name = name
         self._owner = owner
-        self._username = os.environ['GITHUB_USERNAME']
-        self._password = os.environ['GITHUB_TOKEN']
+        self._username = os.environ['AUTH_USERNAME']
+        self._password = os.environ['AUTH_TOKEN']
         self.repo_path = tempfile.NamedTemporaryFile().name
 
     @property
@@ -114,19 +114,19 @@ class Integrate:
             self.validate()
             self.__state['validated'] = True
 
-        return GithubRepo(os.environ['GITHUB_USERNAME'], name)
+        return GithubRepo(os.environ['AUTH_USERNAME'], name)
 
     def _test_connection(self: PWN) -> None:
-        if os.environ.get('GITHUB_USERNAME', None) is None:
-            raise ci_test_exceptions.MissingENVVarException('GITHUB_USERNAME')
+        if os.environ.get('AUTH_USERNAME', None) is None:
+            raise ci_test_exceptions.MissingENVVarException('AUTH_USERNAME')
 
-        if os.environ.get('GITHUB_TOKEN', None) is None:
-            raise ci_test_exceptions.MissingENVVarException('GITHUB_TOKEN')
+        if os.environ.get('AUTH_TOKEN', None) is None:
+            raise ci_test_exceptions.MissingENVVarException('AUTH_TOKEN')
 
 
     def _test_permissions(self: PWN) -> None:
         repo_name: str = tempfile.NamedTemporaryFile().name.rsplit('/', 1)[1]
-        repo = GithubRepo(os.environ['GITHUB_USERNAME'], repo_name)
+        repo = GithubRepo(os.environ['AUTH_USERNAME'], repo_name)
         repo.create()
         repo.destroy()
 

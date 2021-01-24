@@ -8,7 +8,7 @@ import typing
 
 from datetime import datetime
 
-from nbcollection.ci.constants import ENCODING, PWN, GITHUB_USERNAME, GITHUB_TOKEN, COMMIT_DATE_FORMAT
+from nbcollection.ci.constants import ENCODING, PWN, AUTH_USERNAME, AUTH_TOKEN, COMMIT_DATE_FORMAT
 from nbcollection.ci.generator.datatypes import URLParts
 from nbcollection.ci.replicate.datatypes import RemoteScheme, RemoteParts, GitConfigRemote, GitConfigBranch, GitConfig, \
         PullRequestCommitInfo, PullRequestSource, PullRequestInfo, RepoInfo
@@ -100,8 +100,8 @@ def find_repo_path_by_remote(remote: str, start_path: str) -> str:
 
 def obtain_pull_request_info(url_parts: URLParts) -> typing.Any:
     url = f'https://api.github.com/repos/{url_parts.org}/{url_parts.repo_name}/pulls/{url_parts.pull_request_number}'
-    if GITHUB_USERNAME and GITHUB_TOKEN:
-        auth = HTTPBasicAuth(GITHUB_USERNAME, GITHUB_TOKEN)
+    if AUTH_USERNAME and AUTH_TOKEN:
+        auth = HTTPBasicAuth(AUTH_USERNAME, AUTH_TOKEN)
 
     else:
         auth = None
@@ -114,7 +114,7 @@ def obtain_pull_request_info(url_parts: URLParts) -> typing.Any:
         raise NotImplementedError
 
     commits_url = f'https://api.github.com/repos/{url_parts.org}/{url_parts.repo_name}/pulls/{url_parts.pull_request_number}/commits'
-    commits_response = requests.get(commits_url, auth=HTTPBasicAuth(GITHUB_USERNAME, GITHUB_TOKEN), headers={
+    commits_response = requests.get(commits_url, auth=HTTPBasicAuth(AUTH_USERNAME, AUTH_TOKEN), headers={
         'Accept': 'application/vnd.github.v3+json'
     })
     if not commits_response.status_code in [200]:

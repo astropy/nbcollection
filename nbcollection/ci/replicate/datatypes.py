@@ -10,7 +10,7 @@ import typing
 from datetime import datetime
 
 from nbcollection.ci import exceptions as ci_exceptions
-from nbcollection.ci.constants import PWN, GITHUB_USERNAME, GITHUB_TOKEN
+from nbcollection.ci.constants import PWN, AUTH_USERNAME, AUTH_TOKEN
 from nbcollection.ci.generator.datatypes import URLParts
 
 from urllib.parse import urlparse
@@ -106,7 +106,7 @@ class PullRequestSource(typing.NamedTuple):
 
     @property
     def https_url_with_auth(self: PWN) -> str:
-        return f'https://{GITHUB_USERNAME}:{GITHUB_TOKEN}@github.com/{self.org}/{self.name}.git'
+        return f'https://{AUTH_USERNAME}:{AUTH_TOKEN}@github.com/{self.org}/{self.name}.git'
 
 class PullRequestInfo(typing.NamedTuple):
     title: str

@@ -8,7 +8,7 @@ import tempfile
 import typing
 
 from nbcollection.ci import exceptions as ci_exceptions
-from nbcollection.ci.constants import DEFAULT_REMOTE, DEFAULT_BRANCH, PWN, GITHUB_USERNAME, GITHUB_TOKEN
+from nbcollection.ci.constants import DEFAULT_REMOTE, DEFAULT_BRANCH, PWN, AUTH_USERNAME, AUTH_TOKEN
 from nbcollection.ci.template import ENVIRONMENT
 
 from urllib.parse import urlparse
@@ -41,7 +41,7 @@ class URLParts(typing.NamedTuple):
     @property
     def https_url_with_auth(self: PWN) -> str:
         if self.url_type in [URLType.GithubPullRequest, URLType.GithubPullRequest]:
-            return f'https://{GITHUB_USERNAME}:{GITHUB_TOKEN}@github.com/{self.org}/{self.repo_name}'
+            return f'https://{AUTH_USERNAME}:{AUTH_TOKEN}@github.com/{self.org}/{self.repo_name}'
 
 def select_url_type(url: str, repo_type: RepoType) -> URLParts:
     # https://github.com/spacetelescope/dat_pyinthesky/pull/125

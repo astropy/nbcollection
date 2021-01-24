@@ -44,8 +44,8 @@ Github Personal Access Token, add the following permissions
 
 .. code-block:: bash
 
-    $ export GITHUB_USER=jbcurtin
-    $ export GITHUB_TOKEN=<personal-access-token>
+    $ export AUTH_USERNAME=jbcurtin
+    $ export AUTH_TOKEN=<personal-access-token>
 
 .. _Personal Access Token: https://github.com/settings/tokens
 
