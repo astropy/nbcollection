@@ -36,8 +36,10 @@ def test__reset_notebook_execution(executed_notebook_collection):
 
 def test__reset_notebook_execution__interface(executed_notebook_collection):
     import json
+    import os
 
-    from nbcollection.ci.scanner.utils import find_build_jobs
+    from nbcollection.ci.constants import SCANNER_BUILD_DIR
+    from nbcollection.ci.scanner.utils import find_build_jobs, generate_job_context
     from nbcollection.ci.metadata.factory import run_reset_notebook_execution
     from nbcollection.ci.metadata.utils import validate_and_parse_inputs, reset_notebook_execution
     from nbcollection_tests.ci.tools.utils import collection_set_to_namespace
@@ -45,6 +47,7 @@ def test__reset_notebook_execution__interface(executed_notebook_collection):
     options = collection_set_to_namespace(executed_notebook_collection)
     run_reset_notebook_execution(options)
     for job in find_build_jobs(options.project_path, options.collection_names, options.category_names, options.notebook_names):
+        job_context = generate_job_context(job)
         for notebook in job.category.notebooks:
             notebook_path = os.path.join(SCANNER_BUILD_DIR, job.semantic_path(), f'{notebook.name}.ipynb')
             assert os.path.exists(notebook_path)
@@ -55,11 +58,6 @@ def test__reset_notebook_execution__interface(executed_notebook_collection):
                 assert cell.get('execution_count', None) is None
                 assert len(cell.get('outputs', [])) == 0
 
-    #     import pdb; pdb.set_trace()
-    #     pass
-
-    # validative_options = collection_set_to_namespace(executed_notebook_collection)
-    # validate_and_parse_inputs(validative_options)
 
 def test__extract_metadata(metadata_rich_notebooks):
     import json
@@ -73,12 +71,10 @@ def test__extract_metadata(metadata_rich_notebooks):
     metadata_keys = ['title', 'description']
     for job in find_build_jobs(metadata_rich_notebooks):
         job_context = generate_job_context(job)
-        metadata_filepath = os.path.join(SCANNER_BUILD_DIR, job.semantic_path(), f'{job.category.notebooks[0].name}.metadata.json')
-        assert not os.path.exists(metadata_filepath)
         for notebook_context in job_context.notebooks:
             extract_metadata(notebook_context)
-            assert os.path.exists(metadata_filepath)
-            with open(metadata_filepath, 'rb') as stream:
+            assert os.path.exists(notebook_context.metadata.path)
+            with open(notebook_context.metadata.path, 'rb') as stream:
                 extracted_data = json.loads(stream.read().decode(ENCODING))
                 assert extracted_data['title'] == 'Notebook One'
                 assert not extracted_data['description'] is None
@@ -102,8 +98,8 @@ def test__extract_metadata__interface(metadata_rich_notebooks):
     run_extract_metadata(options)
     for job_idx, job in enumerate(find_build_jobs(options.project_path, options.collection_names, options.category_names, options.notebook_names)):
         for notebook in job.category.notebooks:
-            metadata_filepath = os.path.join(SCANNER_BUILD_DIR, job.semantic_path(), f'{notebook.name}.metadata.json')
-            with open(metadata_filepath, 'rb') as stream:
+            extract_metadata(notebook)
+            with open(notebook.metadata.path, 'rb') as stream:
                 metadata = json.loads(stream.read().decode(ENCODING))
                 for key in metadata_keys:
                     assert key in metadata.keys()
