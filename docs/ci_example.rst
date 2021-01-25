@@ -8,7 +8,7 @@ install and assist in managing CI/CD Pipelines. Only CirclCI is supported, howev
 nbcollection-ci to Github Actions, Jenkins or another CI/CD solution.
 
 This document covers what nbcollection-ci expects to see in a repository and associated pull request. Let's start with
-an example project called `nbcollection-demo`_. nbcollection-demo has all the moving parts of `nbcollection-ci pull-request` implemented.
+an example project called `nbcollection-demo`. nbcollection-demo has all the moving parts of `nbcollection-ci pull-request` implemented.
 https://github.com/jbcurtin/nbcollection-demo/pull/2. It concludes with building a website by merging artifacts from CircleCI, which can
 than be commited into a Github Pages complient repository on Github.
 
@@ -146,6 +146,6 @@ With the artifacts created in `/tmp/merge-artifacts`, lets copy the files into `
     $ git push jbcurtin gh-pages
 
 
-Give Github Pages some time to update, then navigate to https://jbcurtin.github.io/nbcollection-demo
+Give Github Pages some time to update, then navigate to https://github.io/jbcurtin/nbcollection-demo
 
 
