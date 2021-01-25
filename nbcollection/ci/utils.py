@@ -3,6 +3,7 @@ import os
 import typing
 import types
 
+
 @contextlib.contextmanager
 def ActivateENVVars(env_vars: typing.Dict[str, str]) -> types.GeneratorType:
     for key, value in env_vars.items():
@@ -18,4 +19,3 @@ def ActivateENVVars(env_vars: typing.Dict[str, str]) -> types.GeneratorType:
 
     for key, value in env_vars.items():
         del os.environ[key]
-

@@ -1,5 +1,6 @@
 import enum
 
+
 class VirtualENVType(enum.Enum):
     # https://docs.python.org/3/library/venv.html
     VENV = 'python-venv'
@@ -11,4 +12,3 @@ class VirtualENVType(enum.Enum):
     MiniConda = 'mini-conda'
     # https://github.com/jhunkeler/spmc
     SPM = 'smpc'
-

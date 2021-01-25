@@ -31,12 +31,13 @@ The allowed commands are:
     nbcollection-ci merge-artifacts
 """
 
+
 def main() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description=DESCRIPTION,
             formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("command",
-            help=f"The command you'd like to run. Allowed commands: {list(commands.keys())}")
+                        help=f"The command you'd like to run. Allowed commands: {list(commands.keys())}")
 
     args = sys.argv
     options = parser.parse_args(args[1:2])
@@ -48,9 +49,11 @@ def main() -> argparse.Namespace:
     # Run the command
     commands[options.command].convert(args)
 
+
 def run_from_cli():
     sys.path.append(os.getcwd())
     main()
+
 
 if __name__ == "__main__":
     main()

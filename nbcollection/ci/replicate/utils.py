@@ -1,4 +1,3 @@
-import enum
 import git
 import os
 import logging
@@ -8,15 +7,16 @@ import typing
 
 from datetime import datetime
 
-from nbcollection.ci.constants import ENCODING, PWN, AUTH_USERNAME, AUTH_TOKEN, COMMIT_DATE_FORMAT
+from nbcollection.ci.constants import ENCODING, AUTH_USERNAME, AUTH_TOKEN, COMMIT_DATE_FORMAT
 from nbcollection.ci.generator.datatypes import URLParts
-from nbcollection.ci.replicate.datatypes import RemoteScheme, RemoteParts, GitConfigRemote, GitConfigBranch, GitConfig, \
-        PullRequestCommitInfo, PullRequestSource, PullRequestInfo, RepoInfo
+from nbcollection.ci.replicate.datatypes import RemoteParts, GitConfigRemote, GitConfigBranch, \
+        GitConfig, PullRequestCommitInfo, PullRequestSource, PullRequestInfo, RepoInfo
 from nbcollection.ci.scanner.utils import find_build_jobs
 
 from requests.auth import HTTPBasicAuth
 
 logger = logging.getLogger(__name__)
+
 
 def parse_git_config(filepath: str) -> GitConfig:
     if not os.path.exists(filepath):
@@ -50,7 +50,9 @@ def parse_git_config(filepath: str) -> GitConfig:
                         remote_options[head] = tail
 
                     remote_options['name'] = latest_header_type.split('"')[1]
-                    remotes.append(GitConfigRemote(remote_options['name'], RemoteParts.ParseURLToRemoteParts(remote_options['url']), remote_options['fetch']))
+                    remotes.append(GitConfigRemote(remote_options['name'],
+                                                   RemoteParts.ParseURLToRemoteParts(remote_options['url']),
+                                                   remote_options['fetch']))
 
                 elif 'branch' in latest_header_type:
                     branch_options = {}
@@ -77,6 +79,7 @@ def parse_git_config(filepath: str) -> GitConfig:
 
     return GitConfig(filepath, options, remotes, branches)
 
+
 def find_repo_path_by_remote(remote: str, start_path: str) -> str:
     for root, dirnames, filenames in os.walk(start_path):
         if '.git' in dirnames:
@@ -98,6 +101,7 @@ def find_repo_path_by_remote(remote: str, start_path: str) -> str:
 
         break
 
+
 def obtain_pull_request_info(url_parts: URLParts) -> typing.Any:
     url = f'https://api.github.com/repos/{url_parts.org}/{url_parts.repo_name}/pulls/{url_parts.pull_request_number}'
     if AUTH_USERNAME and AUTH_TOKEN:
@@ -109,15 +113,22 @@ def obtain_pull_request_info(url_parts: URLParts) -> typing.Any:
     response = requests.get(url, auth=auth, headers={
         'Accept': 'application/vnd.github.v3+json'
     })
-    if not response.status_code in [200]:
-        import pdb; pdb.set_trace()
+    if response.status_code not in [200]:
         raise NotImplementedError
 
-    commits_url = f'https://api.github.com/repos/{url_parts.org}/{url_parts.repo_name}/pulls/{url_parts.pull_request_number}/commits'
+    commits_url = '/'.join([
+        'https://api.github.com',
+        'repos',
+        url_parts.org,
+        url_parts.repo_name,
+        'pulls',
+        url_parts.pull_request_number,
+        'commits'
+    ])
     commits_response = requests.get(commits_url, auth=HTTPBasicAuth(AUTH_USERNAME, AUTH_TOKEN), headers={
         'Accept': 'application/vnd.github.v3+json'
     })
-    if not commits_response.status_code in [200]:
+    if commits_response.status_code not in [200]:
         raise NotImplementedError
 
     commit_infos = []
@@ -133,9 +144,11 @@ def obtain_pull_request_info(url_parts: URLParts) -> typing.Any:
             continue
 
         commit_infos.append(
-                PullRequestCommitInfo(author, committer, date,
-                    commit['sha'],
-                    commit['commit']['message']))
+                PullRequestCommitInfo(author,
+                                      committer,
+                                      date,
+                                      commit['sha'],
+                                      commit['commit']['message']))
 
     content = response.json()
     source = PullRequestSource(
@@ -143,7 +156,13 @@ def obtain_pull_request_info(url_parts: URLParts) -> typing.Any:
             content['head']['repo']['name'],
             content['head']['ref'],
             content['head']['label'])
-    return PullRequestInfo(content['title'], content['url'], url_parts, [info for info in reversed(commit_infos)], content, source)
+    return PullRequestInfo(content['title'],
+                           content['url'],
+                           url_parts,
+                           [info for info in reversed(commit_infos)],
+                           content,
+                           source)
+
 
 def select_build_jobs_by_pr_author_commits(repo_info: RepoInfo, pr_info: PullRequestInfo) -> types.GeneratorType:
     source_files = {}
@@ -165,16 +184,10 @@ def select_build_jobs_by_pr_author_commits(repo_info: RepoInfo, pr_info: PullReq
 
         collection_name = path.split('/', 1)[0]
         category_name = os.path.dirname(path).rsplit('/', 1)[1]
-        if len(path.split('/')) > 2:
-            rest = path.split('/', 1)[1]
-            namespaces = rest.rsplit('/', 1)[0].split('/')
-
-        else:
-            namespaces = []
-
         for build_job in find_build_jobs(repo_info.repo.working_dir, [collection_name], [category_name]):
             yield build_job
-            
+
+
 def select_build_jobs(repo_info: RepoInfo, pr_info: PullRequestInfo) -> types.GeneratorType:
     rel_paths_with_notebooks = []
     for diff in repo_info.repo.index.diff(pr_info.commits[-1].commit_hash):
@@ -183,28 +196,20 @@ def select_build_jobs(repo_info: RepoInfo, pr_info: PullRequestInfo) -> types.Ge
             rel_paths_with_notebooks.append(rel_path)
 
     rel_paths_with_notebooks = [path for path in set(rel_paths_with_notebooks)]
-    build_job_inputs = []
     for path in rel_paths_with_notebooks:
         collection_name = path.split('/', 1)[0]
         category_name = path.rsplit('/', 1)[1]
-
-        if len(path.split('/')) > 2:
-            rest = path.split('/', 1)[1]
-            namespaces = rest.rsplit('/', 1)[0].split('/')
-
-        else:
-            namespaces = []
-
         for build_job in find_build_jobs(repo_info.repo.working_dir, [collection_name], [category_name]):
             yield build_job
 
+
 def extract_repo_info(repo: git.Repo, pr_info: PullRequestInfo) -> RepoInfo:
     source_remote = getattr(repo.remotes, pr_info.source.org, None)
-    assert not source_remote is None # edge case check
+    assert source_remote is not None  # edge case check
     logger.info(f'Fetching Remote[{pr_info.source.label}]')
     source_remote.fetch()
     source_ref = getattr(source_remote.refs, pr_info.source.ref, None)
-    assert not source_ref is None # edge case check
+    assert source_ref is not None  # edge case check
     source_head = repo.create_head(pr_info.source.org, source_ref)
     source_head.checkout()
     return RepoInfo(repo, source_remote, source_ref, source_head)

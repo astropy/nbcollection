@@ -22,3 +22,6 @@ AUTH_TOKEN = os.environ.get('AUTH_TOKEN', None)
 
 # Replicate Module
 COMMIT_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
+# Merge Artifacts
+AUTHOR_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.000Z'

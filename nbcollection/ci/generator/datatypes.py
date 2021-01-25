@@ -1,7 +1,5 @@
-import argparse
 import enum
 import git
-import jinja2
 import logging
 import os
 import tempfile
@@ -9,21 +7,22 @@ import typing
 
 from nbcollection.ci import exceptions as ci_exceptions
 from nbcollection.ci.constants import DEFAULT_REMOTE, DEFAULT_BRANCH, PWN, AUTH_USERNAME, AUTH_TOKEN
-from nbcollection.ci.template import ENVIRONMENT
 
 from urllib.parse import urlparse
 
-PWN: typing.TypeVar = typing.TypeVar('PWN')
 logger = logging.getLogger(__name__)
+
 
 class RepoType(enum.Enum):
     Local = 'local-path'
     GithubGIT = 'github-git'
     GithubHTTPS = 'github-https'
 
+
 class URLType(enum.Enum):
     GithubRepoURL = 'github-repo-url'
     GithubPullRequest = 'github-pull-request'
+
 
 class URLParts(typing.NamedTuple):
     url_type: URLType
@@ -42,6 +41,7 @@ class URLParts(typing.NamedTuple):
     def https_url_with_auth(self: PWN) -> str:
         if self.url_type in [URLType.GithubPullRequest, URLType.GithubPullRequest]:
             return f'https://{AUTH_USERNAME}:{AUTH_TOKEN}@github.com/{self.org}/{self.repo_name}'
+
 
 def select_url_type(url: str, repo_type: RepoType) -> URLParts:
     # https://github.com/spacetelescope/dat_pyinthesky/pull/125
@@ -69,6 +69,7 @@ def select_url_type(url: str, repo_type: RepoType) -> URLParts:
     else:
         raise NotImplementedError(repo_type)
 
+
 def select_repo_type(repo_path: str) -> typing.Tuple[str, RepoType]:
     if os.path.exists(repo_path):
         try:
@@ -87,6 +88,7 @@ def select_repo_type(repo_path: str) -> typing.Tuple[str, RepoType]:
 
     else:
         raise ci_exceptions.InvalidRepoPath(f'RepoPath[{repo_path}] does not exist')
+
 
 class Repo:
     repo_path: str
@@ -154,4 +156,3 @@ class Repo:
 
     def uninstall(self: PWN) -> None:
         raise NotImplementedError
-

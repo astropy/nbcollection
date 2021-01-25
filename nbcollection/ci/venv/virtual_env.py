@@ -10,6 +10,7 @@ from nbcollection.ci.scanner.utils import run_command
 
 logger = logging.getLogger(__name__)
 
+
 def enable(build_job: BuildJob, repo_info, pr_info) -> None:
     install_script = f'''#!/usr/bin/env python
 cd {repo_info.repo.working_dir}
@@ -46,8 +47,9 @@ exit 0
     try:
         while proc.poll() is None:
             time.sleep(.1)
+
     except KeyboardInterrupt:
-        logger.info(f'Exiting Notebook Session')
+        logger.info('Exiting Notebook Session')
         pass
 
     proc.send_signal(signal.SIGINT)

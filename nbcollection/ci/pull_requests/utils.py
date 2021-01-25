@@ -2,12 +2,18 @@ import git
 import os
 import typing
 
-from nbcollection.ci.replicate.utils import obtain_pull_request_info, select_build_jobs_by_pr_author_commits, extract_repo_info
+from nbcollection.ci.replicate.utils import obtain_pull_request_info, select_build_jobs_by_pr_author_commits, \
+        extract_repo_info
 from nbcollection.ci.generator.datatypes import select_repo_type, select_url_type, URLType
 from nbcollection.ci.replicate.datatypes import RemoteParts
 from nbcollection.ci.scanner.utils import generate_job_context, run_job_context, find_build_jobs
 
-def pull_request_build(url: str, project_path: str, collection_names: typing.List[str] = [], category_names: typing.List[str] = []) -> None:
+
+def pull_request_build(
+        url: str,
+        project_path: str,
+        collection_names: typing.List[str] = [],
+        category_names: typing.List[str] = []) -> None:
     repo_path, repo_type = select_repo_type(url)
     url_parts = select_url_type(url, repo_type)
     if url_parts.url_type is URLType.GithubPullRequest:
@@ -16,7 +22,7 @@ def pull_request_build(url: str, project_path: str, collection_names: typing.Lis
             git.Repo.clone_from(url_parts.https_url, repo_path)
 
         repo = git.Repo(repo_path)
-        origin_parts = RemoteParts.ParseURLToRemoteParts(repo.remotes.origin.url)
+        RemoteParts.ParseURLToRemoteParts(repo.remotes.origin.url)
         pr_info = obtain_pull_request_info(url_parts)
         if getattr(repo.remotes, pr_info.source.org, None) is None:
             repo.create_remote(pr_info.source.org, pr_info.source.https_url)

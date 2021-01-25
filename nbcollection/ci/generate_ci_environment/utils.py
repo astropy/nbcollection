@@ -12,8 +12,9 @@ from nbcollection.ci.datatypes import BuildJob
 
 logger = logging.getLogger(__name__)
 
+
 def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path: str) -> None:
-    if not ci_env is CIEnvironment.CircleCI:
+    if ci_env is not CIEnvironment.CircleCI:
         raise NotImplementedError(f'CIEnvironment "{ci_env}" not supported')
 
     config = copy.deepcopy(CONFIG_TEMPLATE)
@@ -27,7 +28,11 @@ def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path:
         job_name = '-'.join([formatted_col_name, formatted_cat_name])
         logger.info(f'Generating job for "{job_name}"')
         job = copy.deepcopy(JOB_TEMPLATE)
-        job['steps'][1]['run']['command'] = f'nbcollection-ci build-notebooks --collection-names {build_job.collection.name} --category-names {build_job.category.name}'
+        job['steps'][1]['run']['command'] = ' '.join([
+            'nbcollection-ci build-notebooks',
+            f'--collection-names {build_job.collection.name}',
+            f'--category-names {build_job.category.name}',
+        ])
         job['steps'][1]['run']['name'] = f'Build {job_name} notebooks'
         job['steps'][2]['store_artifacts']['path'] = SCANNER_ARTIFACT_DEST_DIR
 

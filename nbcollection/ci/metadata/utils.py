@@ -4,14 +4,15 @@ import typing
 
 from nbcollection.ci.constants import ENCODING
 from nbcollection.ci.exceptions import MetadataExtractionError
-from nbcollection.ci.datatypes import NotebookContext, MetadataContext
-from nbcollection.ci.commands.utils import validate_and_parse_inputs
+from nbcollection.ci.datatypes import NotebookContext
+
 
 def reset_notebook_execution(notebook_data: typing.Dict[str, typing.Any]) -> None:
     for cell in notebook_data['cells']:
         if cell['cell_type'] == 'code':
             cell['outputs'] = []
             cell['execution_count'] = None
+
 
 def extract_metadata(notebook: NotebookContext) -> None:
     details = {key: None for key in ['title', 'description']}

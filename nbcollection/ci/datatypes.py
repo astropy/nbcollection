@@ -2,32 +2,41 @@ import typing
 
 from nbcollection.ci.constants import PWN
 
+
 class IgnoreData(typing.NamedTuple):
     entries: typing.List[str]
+
 
 class Collection(typing.NamedTuple):
     name: str
     path: str
 
+
 class Metadata(typing.NamedTuple):
     path: str
+
 
 class Notebook(typing.NamedTuple):
     name: str
     path: str
     metadata: Metadata
 
+
 class Namespace(typing.NamedTuple):
     name: str
+
 
 class PreRequirements(typing.NamedTuple):
     path: str
 
+
 class Requirements(typing.NamedTuple):
     path: str
 
+
 class PreInstall(typing.NamedTuple):
     path: str
+
 
 class Category(typing.NamedTuple):
     name: str
@@ -39,9 +48,11 @@ class Category(typing.NamedTuple):
     requirements: Requirements
     namespaces: typing.List[Namespace]
 
+
 class BuildJob(typing.NamedTuple):
     collection: Collection
     category: Category
+
     def semantic_path(self) -> PWN:
         formatted_namespaces = '/'.join([ns.name for ns in self.category.namespaces])
         if formatted_namespaces:
@@ -50,12 +61,15 @@ class BuildJob(typing.NamedTuple):
         else:
             return '/'.join([self.collection.name, self.category.name])
 
+
 class MetadataContext(typing.NamedTuple):
     path: str
+
 
 class ArtifactContext(typing.NamedTuple):
     dirpath: str
     path: str
+
 
 class NotebookContext(typing.NamedTuple):
     notebook: Notebook
@@ -66,6 +80,7 @@ class NotebookContext(typing.NamedTuple):
     metadata: MetadataContext
     artifact: ArtifactContext
 
+
 class JobContext(typing.NamedTuple):
     build_dir: str
     setup_script: str
@@ -75,6 +90,7 @@ class JobContext(typing.NamedTuple):
     pre_requirements: PreRequirements
     requirements: Requirements
     logfile_name: str
+
 
 class BuildContext(typing.NamedTuple):
     build_dir: str

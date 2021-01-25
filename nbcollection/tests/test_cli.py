@@ -80,7 +80,7 @@ def test_index(tmp_path):
     index_tpl_path = os.path.join(test_root_path, 'data/default.tpl')
 
     # Make an index file with more complex notebook path structure
-    build_path = tmp_path / f'test_index'
+    build_path = tmp_path / 'test_index'
     _ = main(['nbcollection', 'convert', nb_root_path,
               f'--build-path={str(build_path)}',
               '--make-index', f'--index-template={index_tpl_path}'])

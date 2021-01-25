@@ -14,6 +14,7 @@ EXAMPLE_USAGE = """Example Usage:
     PYTHONPATH='.' python -m nbcollection.ci merge-artifacts --collection-names jdat_notebooks
 """
 
+
 def convert(options=None):
     options = options or sys.argv
 
@@ -23,17 +24,17 @@ def convert(options=None):
             epilog=EXAMPLE_USAGE,
             formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-c', '--collection-names', required=False, default=None,
-            help="Select a subset of Collections to be built, or all will be built")
+                        help="Select a subset of Collections to be built, or all will be built")
     parser.add_argument('-t', '--category-names', required=False, default=None,
-            help="Select a subset of Categories to be built, or all will be built")
+                        help="Select a subset of Categories to be built, or all will be built")
     parser.add_argument('-n', '--notebook-names', required=False, default=None,
-            help="Select a subset of Notebooks to be built, or all will be built")
+                        help="Select a subset of Notebooks to be built, or all will be built")
     parser.add_argument('-p', '--project-path', default=PROJECT_DIR, type=str,
-            help="Path relative to Project DIR install")
+                        help="Path relative to Project DIR install")
     parser.add_argument('-r', '--repo-name', required=True, type=str,
-            help="Which CI Project should be merged?")
+                        help="Which CI Project should be merged?")
     parser.add_argument('-o', '--org', required=True, type=str,
-            help="Which org runs the CI Project?")
+                        help="Which org runs the CI Project?")
 
     options = parser.parse_args(options[2:])
     run_merge_artifacts(options)

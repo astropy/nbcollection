@@ -13,8 +13,10 @@ CI_DIRECTORY: str = '.circleci'
 PWN: typing.TypeVar = typing.TypeVar('PWN')
 logger = logging.getLogger(__name__)
 
+
 class CircleCiRepo(generator_datatypes.Repo):
     _ci_directory_path: str
+
     def __init__(self: PWN, *args, **kwargs) -> None:
         super(CircleCiRepo, self).__init__(*args, **kwargs)
         self._ci_directory_path = os.path.join(self.repo_path, CI_DIRECTORY)
@@ -56,4 +58,3 @@ class CircleCiRepo(generator_datatypes.Repo):
     def uninstall(self: PWN) -> None:
         if os.path.exists(self._ci_directory_path):
             shutil.rmtree(self._ci_directory_path)
-

@@ -1,11 +1,14 @@
 import enum
 
+
 class CIEnvironment(enum.Enum):
     CircleCI = 'circle-ci'
+
 
 class CIType(enum.Enum):
     CircleCI = 'circle-ci'
     GithubAcitons = 'github-actions'
+
 
 class VirtualENVType(enum.Enum):
     # https://docs.python.org/3/library/venv.html
@@ -18,4 +21,3 @@ class VirtualENVType(enum.Enum):
     MiniConda = 'mini-conda'
     # https://github.com/jhunkeler/spmc
     SPM = 'smpc'
-

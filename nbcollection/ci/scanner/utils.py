@@ -1,4 +1,3 @@
-import argparse
 import glob
 import logging
 import os
@@ -9,10 +8,10 @@ import time
 import types
 import typing
 
-from nbcollection.ci.constants import ENCODING, PROJECT_DIR, SCANNER_BUILD_DIR, SCANNER_ARTIFACT_DEST_DIR, \
-        SCANNER_BUILD_LOG_DIR
+from nbcollection.ci.constants import ENCODING, SCANNER_BUILD_DIR, SCANNER_ARTIFACT_DEST_DIR, SCANNER_BUILD_LOG_DIR
 from nbcollection.ci.datatypes import Collection, Category, Notebook, PreRequirements, Requirements, Namespace, \
-        BuildJob, JobContext, BuildContext, PreInstall, IgnoreData, NotebookContext, ArtifactContext, Metadata, MetadataContext
+        BuildJob, JobContext, BuildContext, PreInstall, IgnoreData, NotebookContext, ArtifactContext, Metadata, \
+        MetadataContext
 from nbcollection.ci.exceptions import BuildError
 from nbcollection.ci.metadata.utils import extract_metadata
 from nbcollection.ci.renderer import render_template
@@ -22,6 +21,7 @@ STRIP_CHARS = ' \n'
 
 logger = logging.getLogger(__name__)
 
+
 def load_ignore_data(start_path: str, root_level_only: bool = False) -> IgnoreData:
     entries = []
     for root, dirnames, filenames in os.walk(start_path):
@@ -29,7 +29,10 @@ def load_ignore_data(start_path: str, root_level_only: bool = False) -> IgnoreDa
             if filename == '.gitignore':
                 filepath = os.path.join(root, filename)
                 with open(filepath, 'rb') as stream:
-                    entries.extend([line.strip(STRIP_CHARS) for line in stream.read().decode(ENCODING).split('\n') if line])
+                    entries.extend([
+                                    line.strip(STRIP_CHARS)
+                                    for line in stream.read().decode(ENCODING).split('\n')
+                                    if line])
 
         if root_level_only:
             break
@@ -37,13 +40,14 @@ def load_ignore_data(start_path: str, root_level_only: bool = False) -> IgnoreDa
     entries.extend(DEFAULT_IGNORE_ENTRIES)
     return IgnoreData(entries)
 
+
 def find_collections(start_path: str) -> types.GeneratorType:
     ignore_data = load_ignore_data(start_path)
     for root, dirnames, filenames in os.walk(start_path):
         for dirname in dirnames:
             if any([
-                dirname.startswith('.'),
-                dirname in ignore_data.entries]):
+                    dirname.startswith('.'),
+                    dirname in ignore_data.entries]):
                 continue
 
             c_path = os.path.join(start_path, dirname)
@@ -51,18 +55,19 @@ def find_collections(start_path: str) -> types.GeneratorType:
 
         break
 
+
 def find_categories(collection: Collection, filter_in_notebooks: typing.List[str] = []) -> types.GeneratorType:
     ignore_data = load_ignore_data(collection.path, root_level_only=True)
     for root, dirnames, filenames in os.walk(collection.path):
         if any([
-            'requirements.txt' in filenames,
-            len(glob.glob('*.ipynb')) > 0]):
+                'requirements.txt' in filenames,
+                len(glob.glob('*.ipynb')) > 0]):
             continue
 
         for dirname in dirnames:
             if any([
-                dirname.startswith('.'),
-                dirname in ignore_data.entries]):
+                    dirname.startswith('.'),
+                    dirname in ignore_data.entries]):
                 continue
 
             dirpath = os.path.join(root, dirname)
@@ -73,9 +78,19 @@ def find_categories(collection: Collection, filter_in_notebooks: typing.List[str
             requirements = Requirements(requirements_path)
             pre_requirements = PreRequirements(os.path.join(dirpath, 'pre-requirements.txt'))
             pre_install = PreInstall(os.path.join(dirpath, 'pre-install.sh'))
-            namespaces = [Namespace(space) for space in dirpath.replace(collection.path, '').strip('/').split('/')[:-1]]
+            namespaces = [
+                Namespace(space)
+                for space in dirpath.replace(collection.path, '').strip('/').split('/')[:-1]
+            ]
             notebooks = []
-            category = Category(dirname, dirpath, collection, notebooks, pre_install, pre_requirements, requirements, namespaces)
+            category = Category(dirname,
+                                dirpath,
+                                collection,
+                                notebooks,
+                                pre_install,
+                                pre_requirements,
+                                requirements,
+                                namespaces)
             for filepath in glob.glob(f'{dirpath}/*.ipynb'):
                 name = os.path.basename(filepath).rsplit('.', 1)[0]
                 if len(filter_in_notebooks) == 0 or name in filter_in_notebooks:
@@ -88,15 +103,17 @@ def find_categories(collection: Collection, filter_in_notebooks: typing.List[str
 
             yield category
 
+
 def find_build_jobs(start_path: str,
-        filter_in_collections: typing.List[str] = [],
-        filter_in_categories: typing.List[str] = [],
-        filter_in_notebooks: typing.List[str] = []) -> types.GeneratorType:
+                    filter_in_collections: typing.List[str] = [],
+                    filter_in_categories: typing.List[str] = [],
+                    filter_in_notebooks: typing.List[str] = []) -> types.GeneratorType:
     for collection in find_collections(start_path):
         if len(filter_in_collections) == 0 or collection.name in filter_in_collections:
             for category in find_categories(collection, filter_in_notebooks):
                 if len(filter_in_categories) == 0 or category.name in filter_in_categories:
                     yield BuildJob(collection, category)
+
 
 def generate_job_context(job: BuildJob) -> JobContext:
     # Constants
@@ -150,7 +167,16 @@ def generate_job_context(job: BuildJob) -> JobContext:
     pre_requirements = PreRequirements(os.path.join(build_dir, 'pre-requirements.txt'))
     pre_install = PreInstall(os.path.join(build_dir, 'pre-install.sh'))
     logfile_name = f'{job.collection.name}-{job.category.name}'
-    return JobContext(build_dir, build_setup_script, notebook_contexts, job, pre_install, pre_requirements, requirements, logfile_name)
+    return JobContext(
+            build_dir,
+            build_setup_script,
+            notebook_contexts,
+            job,
+            pre_install,
+            pre_requirements,
+            requirements,
+            logfile_name)
+
 
 def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str, std_logoutput: bool = False) -> None:
     if isinstance(cmd, str):
@@ -184,6 +210,7 @@ def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str, std
 
     if proc.poll() > 0:
         raise BuildError(f'Process Exit Code[{proc.poll()}]. CMD: [{" ".join(cmd)}]')
+
 
 def run_job_context(context: JobContext, std_logoutput: bool = False) -> None:
     logger.info(f'Setting up build environment: {context.job.collection.name}.{context.job.category.name}')

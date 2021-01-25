@@ -2,21 +2,15 @@ import argparse
 import git
 import logging
 import os
-import requests
-import types
-import typing
 
-from datetime import datetime
-
-from nbcollection.ci.replicate.utils import find_repo_path_by_remote, obtain_pull_request_info, select_build_jobs, extract_repo_info
-from nbcollection.ci.replicate.datatypes import RemoteParts, PullRequestCommitInfo, PullRequestSource, PullRequestInfo, RepoInfo
-from nbcollection.ci.generator.datatypes import select_repo_type, select_url_type, URLType, RepoType
-from nbcollection.ci.scanner.utils import find_build_jobs
+from nbcollection.ci.replicate.utils import find_repo_path_by_remote, obtain_pull_request_info, \
+        select_build_jobs, extract_repo_info
+from nbcollection.ci.replicate.datatypes import RemoteParts
+from nbcollection.ci.generator.datatypes import select_repo_type, select_url_type, URLType
 from nbcollection.ci.venv import virtual_env
 
-from requests.auth import HTTPBasicAuth
-
 logger = logging.getLogger(__name__)
+
 
 def run_replication(options: argparse.Namespace):
     repo_path, repo_type = select_repo_type(options.repo_path)
@@ -29,9 +23,10 @@ def run_replication(options: argparse.Namespace):
         if os.path.exists(repo_path):
             import shutil
             shutil.rmtree(repo_path)
-            pull_request_info = obtain_pull_request_info(url_parts)
+            obtain_pull_request_info(url_parts)
 
-        logger.info(f'Loading Pull Request [{url_parts.pull_request_number}] info for {url_parts.org}/{url_parts.repo_name} in {repo_path}')
+        url_parts_ref = f'{url_parts.org}/{url_parts.repo_name}'
+        logger.info(f'Loading Pull Request [{url_parts.pull_request_number}] info for {url_parts_ref} in {repo_path}')
         pr_info = obtain_pull_request_info(url_parts)
         logger.info(f'Replicating Pull Request [{pr_info.title}] from {url_parts.org}/{url_parts.repo_name}')
         if os.path.exists(repo_path):

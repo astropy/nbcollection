@@ -12,6 +12,7 @@ ENVIRONMENT: Environment = jinja2.Environment(
         loader=jinja2.FileSystemLoader(TEMPLATES_DIR),
         autoescape=jinja2.select_autoescape(['html', 'xml']))
 
+
 def render(template_path: str, template_context: typing.Dict[str, typing.Any], render_path: str = None) -> None:
     template: Template = ENVIRONMENT.get_template(template_path)
 

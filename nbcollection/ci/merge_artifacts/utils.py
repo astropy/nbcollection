@@ -11,18 +11,18 @@ from datetime import datetime
 
 from jinja2.environment import Template, Environment
 
-from nbcollection.ci.constants import ENCODING
-from nbcollection.ci.datatypes import BuildJob
+from nbcollection.ci.constants import ENCODING, AUTHOR_DATE_FORMAT
 from nbcollection.ci.merge_artifacts.constants import CIRCLECI_TOKEN
 from nbcollection.ci.scanner.utils import find_build_jobs
 
 logger = logging.getLogger(__name__)
 
-AUTHOR_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.000Z'
+
 class CircleCIAuth(requests.auth.AuthBase):
     def __call__(self, request):
         request.headers['Circle-Token'] = CIRCLECI_TOKEN
         return request
+
 
 class NotebookSource(typing.NamedTuple):
     filename: str
@@ -32,40 +32,48 @@ class NotebookSource(typing.NamedTuple):
     url: str
     meta_file: bool
 
+
 class ArtifactNotebook(typing.NamedTuple):
     title: str
     metadata: typing.Dict[str, typing.Any]
     filepath: str
     filename: str
 
+
 class ArtifactCategory(typing.NamedTuple):
     name: str
     notebooks: typing.List[ArtifactNotebook]
+
 
 class ArtifactCollection(typing.NamedTuple):
     name: str
     categories: typing.List[ArtifactCategory]
 
-def artifact_merge(project_path: str, repo_name: str, org: str,
-        collection_names: typing.List[str], category_names: typing.List[str], notebook_names: typing.List[str]) -> None:
-    assert not CIRCLECI_TOKEN is None
+
+def artifact_merge(project_path: str,
+                   repo_name: str,
+                   org: str,
+                   collection_names: typing.List[str],
+                   category_names: typing.List[str],
+                   notebook_names: typing.List[str]) -> None:
+    assert CIRCLECI_TOKEN is not None
     artifact_dest_dir = os.path.join(project_path, 'pages')
     if os.path.exists(artifact_dest_dir):
         shutil.rmtree(artifact_dest_dir)
 
+    # Filesystem modifications
     os.makedirs(artifact_dest_dir)
     module_dirpath = os.path.dirname(__file__)
-    asserts_dir = os.path.join(module_dirpath, 'assets')
+    # asserts_dir = os.path.join(module_dirpath, 'assets')
     template_dir = os.path.join(module_dirpath, 'template')
     environment_path = os.path.join(template_dir, 'environment.toml')
     site_dir = os.path.join(project_path, 'site')
 
-
+    # CircleCI
     base_url = 'https://circleci.com/api/v1.1'
-    recent_builds = f'{base_url}/recent-builds'
     project_url = f'{base_url}/project/github/{org}/{repo_name}'
 
-    workspace_id = None
+    # Containers
     ci_jobs = []
     artifact_urls = []
     project_builds = requests.get(project_url, auth=CircleCIAuth()).json()
@@ -83,7 +91,15 @@ def artifact_merge(project_path: str, repo_name: str, org: str,
         break
 
     for ci_job in ci_jobs:
-        url = f'{base_url}/project/{ci_job["vcs_type"]}/{ci_job["username"]}/{ci_job["reponame"]}/{ci_job["build_num"]}/artifacts'
+        url = '/'.join([
+            base_url,
+            'project',
+            ci_job['vcs_type'],
+            ci_job['username'],
+            ci_job['reponame'],
+            ci_job['build_num'],
+            'artifacts'
+        ])
         resp = requests.get(url, auth=CircleCIAuth())
         artifact_urls.extend([a['url'] for a in resp.json() if not a['url'].endswith('index.html')])
 
@@ -109,14 +125,33 @@ def artifact_merge(project_path: str, repo_name: str, org: str,
             continue
 
         for notebook in job.category.notebooks:
-            html_filepath = f'{artifact_dest_dir}/{job.collection.name}/{job.category.name}/{notebook.name}.html'
-            meta_filepath = f'{artifact_dest_dir}/{job.collection.name}/{job.category.name}/{notebook.name}.metadata.json'
-
+            html_filepath = '/'.join([
+                artifact_dest_dir,
+                job.collection.name,
+                job.category.name,
+                f'{notebook.name}.html'])
+            meta_filepath = '/'.join([
+                artifact_dest_dir,
+                job.collection.name,
+                job.category.name,
+                f'{notebook.name}.metadata.json'])
             html_filename = os.path.basename(html_filepath)
-            notebook_sources.append(NotebookSource(html_filename, html_filepath, job.category.name, job.collection.name, 'local-file', meta_filepath))
+            notebook_sources.append(
+                                    NotebookSource(html_filename,
+                                                   html_filepath,
+                                                   job.category.name,
+                                                   job.collection.name,
+                                                   'local-file',
+                                                   meta_filepath))
 
             meta_filename = os.path.basename(meta_filepath)
-            notebook_sources.append(NotebookSource(meta_filename, meta_filepath, job.category.name, job.collection.name, 'local-file', meta_filepath))
+            notebook_sources.append(
+                                    NotebookSource(meta_filename,
+                                                   meta_filepath,
+                                                   job.category.name,
+                                                   job.collection.name,
+                                                   'local-file',
+                                                   meta_filepath))
 
     collections = {}
     for notebook in notebook_sources:
@@ -166,6 +201,7 @@ def artifact_merge(project_path: str, repo_name: str, org: str,
         shutil.rmtree(site_dir)
 
     os.makedirs(site_dir)
+
     def _add_jinja2_filters(environment: Environment) -> None:
         def _render_human_datetime(datetime: datetime) -> str:
             return datetime.strftime('%A, %d. %B %Y %I:%M%p')
@@ -188,7 +224,8 @@ def artifact_merge(project_path: str, repo_name: str, org: str,
         environment['today'] = datetime.utcnow()
         return environment
 
-    jinja2_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), undefined=jinja2.StrictUndefined)
+    jinja2_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
+                                            undefined=jinja2.StrictUndefined)
     _add_jinja2_filters(jinja2_environment)
     index: Template = jinja2_environment.get_template('index.html')
     environment = load_environment()

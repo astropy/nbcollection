@@ -8,7 +8,8 @@ from datetime import datetime
 from nbcollection.ci.exceptions import RendererException
 from nbcollection.ci.constants import RENDERER_ENV_CONTEXT_PATH, RENDERER_TEMPLATE_DIR, ENCODING
 
-from jinja2.environment import Environment, Template
+from jinja2.environment import Environment
+
 
 def _add_jinja2_filters(environment: Environment) -> None:
     def _render_human_datetime(datetime: datetime) -> str:
@@ -24,6 +25,7 @@ def _add_jinja2_filters(environment: Environment) -> None:
     environment.filters['machine_date'] = _render_machine_datetime
     environment.filters['machine_date_with_time'] = _render_machine_datetime_with_time
 
+
 def load_env_context() -> typing.Dict[str, typing.Any]:
     environment: typing.Dict[str, typing.Any]
     if os.path.exists(RENDERER_ENV_CONTEXT_PATH):
@@ -36,8 +38,10 @@ def load_env_context() -> typing.Dict[str, typing.Any]:
     environment['today'] = datetime.utcnow()
     return environment
 
+
 def render_template(template_path: str, context: typing.Dict[str, typing.Any]) -> str:
-    environment = jinja2.Environment(loader=jinja2.FileSystemLoader(RENDERER_TEMPLATE_DIR), undefined=jinja2.StrictUndefined)
+    environment = jinja2.Environment(loader=jinja2.FileSystemLoader(RENDERER_TEMPLATE_DIR),
+                                     undefined=jinja2.StrictUndefined)
     _add_jinja2_filters(environment)
     template = environment.get_template(template_path)
     context['environment'] = load_env_context()
