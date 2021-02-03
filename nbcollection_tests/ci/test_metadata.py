@@ -41,7 +41,8 @@ def test__reset_notebook_execution__interface(executed_notebook_collection):
     from nbcollection.ci.constants import SCANNER_BUILD_DIR
     from nbcollection.ci.scanner.utils import find_build_jobs, generate_job_context
     from nbcollection.ci.metadata.factory import run_reset_notebook_execution
-    from nbcollection.ci.metadata.utils import validate_and_parse_inputs, reset_notebook_execution
+    from nbcollection.ci.commands.utils import validate_and_parse_inputs
+    from nbcollection.ci.metadata.utils import reset_notebook_execution
     from nbcollection_tests.ci.tools.utils import collection_set_to_namespace
 
     options = collection_set_to_namespace(executed_notebook_collection)
@@ -87,7 +88,8 @@ def test__extract_metadata__interface(metadata_rich_notebooks):
     from nbcollection.ci.datatypes import Metadata
     from nbcollection.ci.scanner.utils import find_build_jobs, generate_job_context
     from nbcollection.ci.metadata.factory import run_extract_metadata
-    from nbcollection.ci.metadata.utils import extract_metadata, validate_and_parse_inputs
+    from nbcollection.ci.metadata.utils import extract_metadata
+    from nbcollection.ci.commands.utils import validate_and_parse_inputs
     from nbcollection_tests.ci.tools.utils import collection_set_to_namespace
 
     metadata_keys = ['title', 'description']

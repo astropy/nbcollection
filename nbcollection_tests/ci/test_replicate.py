@@ -4,7 +4,7 @@ def test__replicate():
     pass
 
 def test__parse_url_to_remote_parts__git_github():
-    from nbcollection.ci.replicate.utils import RemoteScheme, RemoteParts, RemoteScheme
+    from nbcollection.ci.replicate.datatypes import RemoteScheme, RemoteParts, RemoteScheme
     remote = 'git@github.com:owner/repo_name.git'
     parts = RemoteParts.ParseURLToRemoteParts(remote)
     assert RemoteScheme.Git is parts.scheme
@@ -13,7 +13,7 @@ def test__parse_url_to_remote_parts__git_github():
     assert parts.name =='repo_name'
 
 def test__parse_url_to_remote_parts__https_github():
-    from nbcollection.ci.replicate.utils import RemoteParts, RemoteScheme
+    from nbcollection.ci.replicate.datatypes import RemoteParts, RemoteScheme
     remote = 'https://github.com/owner/repo_name.git'
     parts = RemoteParts.ParseURLToRemoteParts(remote)
     assert parts.scheme is RemoteScheme.Https
@@ -22,7 +22,7 @@ def test__parse_url_to_remote_parts__https_github():
     assert parts.name == 'repo_name'
 
 def test__parse_url_to_remote_parts__https_github_pull_request():
-    from nbcollection.ci.replicate.utils import RemoteParts, RemoteScheme
+    from nbcollection.ci.replicate.datatypes import RemoteParts, RemoteScheme
     remote = 'https://github.com/astropy/nbcollection/pull/10'
     parts = RemoteParts.ParseURLToRemoteParts(remote)
     assert parts.scheme is RemoteScheme.Https
