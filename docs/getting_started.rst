@@ -16,9 +16,9 @@ than be commited into a Github Pages complient repository on Github.
 How to install
 ==============
 
-Please look to `nbcollection-builder Dockerfile`_ for an installation example.
+.. code-block:: bash
 
-.. _`nbcollection-builder Dockerfile`: https://github.com/jbcurtin/nbcollection-builder/blob/main/build-tools/install-nbcollection.sh
+    $ pip install git+https://github.com/jbcurtin/nbcollection.git
 
 
 How to manage a Pull Request
