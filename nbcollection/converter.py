@@ -177,9 +177,8 @@ class nbcollectionConverter:
         if isinstance(template_file, str):
             # Load jinja2 template for index page:
             path, fn = os.path.split(template_file)
-            env = jinja2.Environment(
-                loader=jinja2.FileSystemLoader(path),
-                autoescape=jinja2.select_autoescape(['html', 'xml']))
+            env = jinja2.Environment(loader=jinja2.FileSystemLoader(path),  # nosec
+                                     autoescape=jinja2.select_autoescape(['html', 'xml']))  # nosec
             templ = env.get_template(fn)
 
         elif isinstance(template_file, jinja2.Template):

@@ -9,9 +9,9 @@ from jinja2.environment import Environment
 from nbcollection.ci.generator.circle_ci import CircleCiRepo
 
 TEMPLATES_DIR: str = os.path.join(os.path.dirname(__file__), 'templates')
-ENVIRONMENT: Environment = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(TEMPLATES_DIR),
-        autoescape=jinja2.select_autoescape(['html', 'xml']))
+ENVIRONMENT: Environment = jinja2.Environment(  # nosec
+        loader=jinja2.FileSystemLoader(TEMPLATES_DIR),  # nosec
+        autoescape=jinja2.select_autoescape(['html', 'xml']))  # nosec
 logger = logging.getLogger(__name__)
 
 

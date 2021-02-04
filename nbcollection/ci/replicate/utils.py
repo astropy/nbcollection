@@ -205,11 +205,15 @@ def select_build_jobs(repo_info: RepoInfo, pr_info: PullRequestInfo) -> types.Ge
 
 def extract_repo_info(repo: git.Repo, pr_info: PullRequestInfo) -> RepoInfo:
     source_remote = getattr(repo.remotes, pr_info.source.org, None)
-    assert source_remote is not None  # edge case check
+    if source_remote is None:  # edge case check
+        raise Exception
+
     logger.info(f'Fetching Remote[{pr_info.source.label}]')
     source_remote.fetch()
     source_ref = getattr(source_remote.refs, pr_info.source.ref, None)
-    assert source_ref is not None  # edge case check
+    if source_ref is None:  # edge case check
+        raise Exception
+
     source_head = repo.create_head(pr_info.source.org, source_ref)
     source_head.checkout()
     return RepoInfo(repo, source_remote, source_ref, source_head)

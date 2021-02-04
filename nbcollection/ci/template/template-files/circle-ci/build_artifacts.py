@@ -3,7 +3,7 @@
 import logging
 import json
 import os
-import subprocess
+import subprocess  # nosec
 import shutil
 import sys
 import tarfile
@@ -28,9 +28,9 @@ logger = logging.getLogger(__file__)
 
 IPYDB_REQUIRED_FILES: typing.List[str] = ['requirements.txt']
 ENCODING: str = 'utf-8'
-ARTIFACT_DEST_DIR: str = '/tmp/artifacts'
-ARTIFACT_HTML_DIR: str = '/tmp/artifacts-html'
-TEST_OUTPUT_DIR: str = '/tmp/test-results'
+ARTIFACT_DEST_DIR: str = '/tmp/artifacts'  # nosec
+ARTIFACT_HTML_DIR: str = '/tmp/artifacts-html'  # nosec
+TEST_OUTPUT_DIR: str = '/tmp/test-results'  # nosec
 if not os.path.exists(TEST_OUTPUT_DIR):
     os.makedirs(TEST_OUTPUT_DIR)
 TEST_CASES: typing.List[TestCase] = []
@@ -47,7 +47,7 @@ def run_command(cmd: typing.Union[str, typing.List[str]]) -> None:
         cmd = [cmd]
 
     buffer_size: int = 1024
-    proc = subprocess.Popen(cmd, shell=True)
+    proc = subprocess.Popen(cmd, shell=True)  # nosec
     while proc.poll() is None:
         time.sleep(.1)
 

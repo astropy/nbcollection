@@ -8,9 +8,9 @@ ENCODING = 'utf-8'
 PROJECT_DIR = os.getcwd()
 
 # Scanner Module
-SCANNER_BUILD_DIR = '/tmp/nbcollection-ci/scanner-build-dir'
-SCANNER_ARTIFACT_DEST_DIR = '/tmp/nbcollection-ci-artifacts'
-SCANNER_BUILD_LOG_DIR = '/tmp/nbcollection-ci/scanner-build-logs'
+SCANNER_BUILD_DIR = '/tmp/nbcollection-ci/scanner-build-dir'  # nosec
+SCANNER_ARTIFACT_DEST_DIR = '/tmp/nbcollection-ci-artifacts'  # nosec
+SCANNER_BUILD_LOG_DIR = '/tmp/nbcollection-ci/scanner-build-logs'  # nosec
 
 # Renderer Module
 RENDERER_ENV_CONTEXT_PATH = os.path.join(os.getcwd(), 'env-context.toml')

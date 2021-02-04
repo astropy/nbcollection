@@ -9,7 +9,7 @@ import typing
 
 from nbpages import make_html_index
 
-ARTIFACT_HTML_DIR: str = '/tmp/artifacts-html'
+ARTIFACT_HTML_DIR: str = '/tmp/artifacts-html'  # nosec
 INDEX_TEMPLATE: str = os.path.join(os.getcwd(), 'index.tpl')
 INDEX_PATH: str = f'{ARTIFACT_HTML_DIR}/index.html'
 PAGE_HOME: str = 'pages'

@@ -40,8 +40,8 @@ def load_env_context() -> typing.Dict[str, typing.Any]:
 
 
 def render_template(template_path: str, context: typing.Dict[str, typing.Any]) -> str:
-    environment = jinja2.Environment(loader=jinja2.FileSystemLoader(RENDERER_TEMPLATE_DIR),
-                                     undefined=jinja2.StrictUndefined)
+    environment = jinja2.Environment(loader=jinja2.FileSystemLoader(RENDERER_TEMPLATE_DIR),  # nosec
+                                     undefined=jinja2.StrictUndefined)  # nosec
     _add_jinja2_filters(environment)
     template = environment.get_template(template_path)
     context['environment'] = load_env_context()

@@ -1,7 +1,7 @@
 import logging
 import os
 import signal
-import subprocess
+import subprocess  # nosec
 import time
 
 from nbcollection.ci.constants import ENCODING
@@ -43,7 +43,7 @@ exit 0
     with open(run_script_path, 'wb') as stream:
         stream.write(run_script.encode(ENCODING))
 
-    proc = subprocess.Popen(f'bash {run_script_path}', shell=True)
+    proc = subprocess.Popen(f'bash {run_script_path}', shell=True)  # nosec
     try:
         while proc.poll() is None:
             time.sleep(.1)

@@ -2,7 +2,7 @@ import glob
 import logging
 import os
 import shutil
-import subprocess
+import subprocess  # nosec
 import tempfile
 import time
 import types
@@ -200,10 +200,13 @@ def run_command(cmd: typing.Union[str, typing.List[str]], log_filename: str, std
 
         logger.info(f'Running Command[{" ".join(cmd)}]')
         logger.info(f'Logs can be found[{SCANNER_BUILD_LOG_DIR}]/{log_filename}.*.log')
-        proc = subprocess.Popen(cmd, shell=True, stdout=stdout_file_like_object, stderr=stderr_file_like_object)
+        proc = subprocess.Popen(cmd,  # nosec
+                                shell=True,  # nosec
+                                stdout=stdout_file_like_object,  # nosec
+                                stderr=stderr_file_like_object)  # nosec
 
     else:
-        proc = subprocess.Popen(cmd, shell=True)
+        proc = subprocess.Popen(cmd, shell=True)  # nosec
 
     while proc.poll() is None:
         time.sleep(.1)

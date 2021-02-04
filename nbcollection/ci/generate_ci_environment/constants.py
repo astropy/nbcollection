@@ -29,7 +29,7 @@ JOB_TEMPLATE = {
         },
         {
             'store_artifacts': {
-                'path': '/tmp/nbcollection-ci-artifacts',
+                'path': '/tmp/nbcollection-ci-artifacts',  # nosec
             }
         }
     ]
@@ -47,7 +47,7 @@ PULL_REQUEST_TEMPLATE = {
         },
         {
             'store_artifacts': {
-                'path': '/tmp/nbcollection-ci-artifacts',
+                'path': '/tmp/nbcollection-ci-artifacts',  # nosec
             }
         }
     ]

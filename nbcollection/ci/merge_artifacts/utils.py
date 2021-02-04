@@ -56,7 +56,9 @@ def artifact_merge(project_path: str,
                    collection_names: typing.List[str],
                    category_names: typing.List[str],
                    notebook_names: typing.List[str]) -> None:
-    assert CIRCLECI_TOKEN is not None
+    if CIRCLECI_TOKEN is None:
+        raise NotImplementedError('Missing ENVVar: CIRCLECI_TOKEN')
+
     artifact_dest_dir = os.path.join(project_path, 'pages')
     if os.path.exists(artifact_dest_dir):
         shutil.rmtree(artifact_dest_dir)
@@ -224,8 +226,8 @@ def artifact_merge(project_path: str,
         environment['today'] = datetime.utcnow()
         return environment
 
-    jinja2_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
-                                            undefined=jinja2.StrictUndefined)
+    jinja2_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),  # nosec
+                                            undefined=jinja2.StrictUndefined)  # nosec
     _add_jinja2_filters(jinja2_environment)
     index: Template = jinja2_environment.get_template('index.html')
     environment = load_environment()

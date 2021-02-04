@@ -15,8 +15,11 @@ def test_default(tmp_path, command):
 
     # Default behavior, one notebook input, no specified build path
     _ = main(['nbcollection', command, nb_path])
-    assert '_build' in os.listdir(nb_root_path)
-    assert nb_name in os.listdir(os.path.join(nb_root_path, '_build'))
+    if '_build' not in os.listdir(nb_root_path):
+        raise Exception
+
+    if nb_name not in os.listdir(os.path.join(nb_root_path, '_build')):
+        raise Exception
 
     # Default behavior, one notebook input, specified build path
     build_path = tmp_path / f'test_{command}_{counter}'
@@ -24,14 +27,19 @@ def test_default(tmp_path, command):
     build_path.mkdir()
     _ = main(['nbcollection', command, nb_path,
               f'--build-path={str(build_path)}'])
-    assert '_build' in os.listdir(str(build_path))
-    assert nb_name in os.listdir(os.path.join(build_path, '_build'))
+    if '_build' not in os.listdir(str(build_path)):
+        raise Exception
+
+    if nb_name not in os.listdir(os.path.join(build_path, '_build')):
+        raise Exception
 
     # Default behavior, one notebook path, no specified build path
     _ = main(['nbcollection', command, nb_root_path])
-    assert '_build' in os.listdir(os.path.join(nb_root_path, '..'))
-    assert nb_name in os.listdir(os.path.join(nb_root_path,
-                                              '../_build/nb_test1'))
+    if '_build' not in os.listdir(os.path.join(nb_root_path, '..')):
+        raise Exception
+
+    if nb_name not in os.listdir(os.path.join(nb_root_path, '../_build/nb_test1')):
+        raise Exception
 
     # Default behavior, one notebook path, specified build path
     build_path = tmp_path / f'test_{command}_{counter}'
@@ -39,8 +47,10 @@ def test_default(tmp_path, command):
     build_path.mkdir()
     _ = main(['nbcollection', command, nb_root_path,
               f'--build-path={str(build_path)}'])
-    assert '_build' in os.listdir(str(build_path))
-    assert nb_name in os.listdir(os.path.join(build_path, '_build/nb_test1'))
+    if '_build' not in os.listdir(str(build_path)):
+        raise Exception
+    if nb_name not in os.listdir(os.path.join(build_path, '_build/nb_test1')):
+        raise Exception
 
     # Two notebook files, specified build path
     nb_path1 = os.path.join(test_root_path, 'data/nb_test1/notebook1.ipynb')
@@ -50,9 +60,12 @@ def test_default(tmp_path, command):
     build_path.mkdir()
     _ = main(['nbcollection', command, f'--build-path={str(build_path)}',
               nb_path1, nb_path2])
-    assert '_build' in os.listdir(str(build_path))
+    if '_build' not in os.listdir(str(build_path)):
+        raise Exception
+
     for nb_name in ['notebook1.ipynb', 'notebook2.ipynb']:
-        assert nb_name in os.listdir(os.path.join(build_path, '_build'))
+        if nb_name not in os.listdir(os.path.join(build_path, '_build')):
+            raise Exception
 
 
 @pytest.mark.parametrize('command', ['execute', 'convert'])
@@ -63,14 +76,15 @@ def test_flatten(tmp_path, command):
 
     # One notebook path, no specified build path, but flatten the file structure
     _ = main(['nbcollection', command, nb_root_path, '--flatten'])
-    assert '_build' in os.listdir(os.path.join(nb_root_path, '..'))
+    if '_build' not in os.listdir(os.path.join(nb_root_path, '..')):
+        raise Exception
     for nb_name in ['notebook1', 'notebook2', 'notebook3']:
-        assert f'{nb_name}.ipynb' in os.listdir(os.path.join(nb_root_path,
-                                                             '../_build/'))
+        if f'{nb_name}.ipynb' not in os.listdir(os.path.join(nb_root_path, '../_build/')):
+            raise Exception
 
         if command == 'convert':
-            assert f'{nb_name}.html' in os.listdir(os.path.join(nb_root_path,
-                                                                '../_build/'))
+            if f'{nb_name}.html' not in os.listdir(os.path.join(nb_root_path, '../_build/')):
+                raise Exception
 
 
 def test_index(tmp_path):
@@ -84,15 +98,21 @@ def test_index(tmp_path):
     _ = main(['nbcollection', 'convert', nb_root_path,
               f'--build-path={str(build_path)}',
               '--make-index', f'--index-template={index_tpl_path}'])
-    assert '_build' in os.listdir(str(build_path))
-    assert 'index.html' in os.listdir(str(build_path / '_build'))
+    if '_build' not in os.listdir(str(build_path)):
+        raise Exception
+
+    if 'index.html' not in os.listdir(str(build_path / '_build')):
+        raise Exception
 
     # Flatten the build directory structure and make an index file
     _ = main(['nbcollection', 'convert', nb_root_path, '--flatten',
               '--make-index', f'--index-template={index_tpl_path}'])
-    assert '_build' in os.listdir(os.path.join(nb_root_path, '..'))
+    if '_build' not in os.listdir(os.path.join(nb_root_path, '..')):
+        raise Exception
+
     build_path = os.path.join(nb_root_path, '../_build/')
-    assert 'index.html' in os.listdir(build_path)
+    if 'index.html' not in os.listdir(build_path):
+        raise Exception
 
 
 # Too scary...

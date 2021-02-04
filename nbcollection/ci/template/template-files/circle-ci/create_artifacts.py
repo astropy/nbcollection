@@ -20,7 +20,7 @@ logger = logging.getLogger(__file__)
 
 IPYDB_REQUIRED_FILES: typing.List[str] = ['requirements.txt']
 ENCODING: str = 'utf-8'
-ARTIFACT_DEST_DIR: str = '/tmp/artifacts'
+ARTIFACT_DEST_DIR: str = '/tmp/artifacts'  # nosec
 if os.path.exists(ARTIFACT_DEST_DIR):
     shutil.rmtree(ARTIFACT_DEST_DIR)
 
