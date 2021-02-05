@@ -2,11 +2,12 @@ import argparse
 import git
 import logging
 import os
+import shutil
 
 from nbcollection.ci.replicate.utils import find_repo_path_by_remote, obtain_pull_request_info, \
         select_build_jobs, extract_repo_info
+from nbcollection.ci.replicate import virtual_env
 from nbcollection.ci.replicate.datatypes import RemoteParts, select_repo_type, select_url_type, URLType
-from nbcollection.ci.venv import virtual_env
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,6 @@ def run_replication(options: argparse.Namespace):
             repo_path = os.path.join(options.project_path, url_parts.org, url_parts.repo_name)
 
         if os.path.exists(repo_path):
-            import shutil
             shutil.rmtree(repo_path)
             obtain_pull_request_info(url_parts)
 
