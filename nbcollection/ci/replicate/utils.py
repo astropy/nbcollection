@@ -8,9 +8,8 @@ import typing
 from datetime import datetime
 
 from nbcollection.ci.constants import ENCODING, AUTH_USERNAME, AUTH_TOKEN, COMMIT_DATE_FORMAT
-from nbcollection.ci.generator.datatypes import URLParts
 from nbcollection.ci.replicate.datatypes import RemoteParts, GitConfigRemote, GitConfigBranch, \
-        GitConfig, PullRequestCommitInfo, PullRequestSource, PullRequestInfo, RepoInfo
+        GitConfig, PullRequestCommitInfo, PullRequestSource, PullRequestInfo, RepoInfo, URLParts
 from nbcollection.ci.scanner.utils import find_build_jobs
 
 from requests.auth import HTTPBasicAuth

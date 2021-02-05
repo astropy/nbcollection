@@ -126,7 +126,7 @@ def test__find_build_jobs__filter_in_notebook__zero(multi_notebook_category):
     for job_idx, job in enumerate(find_build_jobs(multi_notebook_category, filter_in_collections=[], filter_in_categories=['alot-of-notebooks'], filter_in_notebooks=[])):
         for notebook_idx, notebook in enumerate(job.category.notebooks):
             assert notebook.name in ['Notebook-One', 'Notebook-Two']
-            
+
         assert notebook_idx == 1
 
     assert job_idx == 0
@@ -150,7 +150,8 @@ def test__run_command():
     assert os.path.exists(expected_dirpath)
     assert os.path.isdir(expected_dirpath)
     shutil.rmtree(expected_dirpath)
-    
+
+
 def test__generate_job_context(single_collection_repo__nth_categories):
     from nbcollection.ci.scanner.utils import find_build_jobs, generate_job_context
     from nbcollection.ci.datatypes import Requirements, PreRequirements, PreInstall
@@ -167,6 +168,7 @@ def test__generate_job_context(single_collection_repo__nth_categories):
             assert os.path.exists(notebook_context.build_script_path)
 
     assert job_idx == 1
+
 
 def test__run_job_context(quick_build_collection):
     from nbcollection.ci.constants import SCANNER_BUILD_LOG_DIR, SCANNER_BUILD_DIR

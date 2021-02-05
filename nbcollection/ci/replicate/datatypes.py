@@ -5,9 +5,45 @@ import typing
 from datetime import datetime
 
 from nbcollection.ci.constants import PWN, AUTH_USERNAME, AUTH_TOKEN
-from nbcollection.ci.generator.datatypes import URLParts
 
 from urllib.parse import urlparse
+
+
+class RepoInfo(typing.NamedTuple):
+    repo: git.Repo
+    source_remote: git.Remote
+    source_ref: git.RemoteReference
+    source_head: git.Head
+
+
+class RepoType(enum.Enum):
+    Local = 'local-path'
+    GithubGIT = 'github-git'
+    GithubHTTPS = 'github-https'
+
+
+class URLType(enum.Enum):
+    GithubRepoURL = 'github-repo-url'
+    GithubPullRequest = 'github-pull-request'
+
+
+class URLParts(typing.NamedTuple):
+    url_type: URLType
+    org: str
+    repo_name: str
+    pull_request_number: int = 0
+
+    @property
+    def https_url(self: PWN) -> str:
+        if self.url_type in [URLType.GithubPullRequest, URLType.GithubPullRequest]:
+            return f'https://github.com/{self.org}/{self.repo_name}'
+
+        raise NotImplementedError(self.url_type)
+
+    @property
+    def https_url_with_auth(self: PWN) -> str:
+        if self.url_type in [URLType.GithubPullRequest, URLType.GithubPullRequest]:
+            return f'https://{AUTH_USERNAME}:{AUTH_TOKEN}@github.com/{self.org}/{self.repo_name}'
 
 
 class RemoteScheme(enum.Enum):
@@ -126,8 +162,49 @@ class PullRequestInfo(typing.NamedTuple):
     source: PullRequestSource
 
 
-class RepoInfo(typing.NamedTuple):
-    repo: git.Repo
-    source_remote: git.Remote
-    source_ref: git.RemoteReference
-    source_head: git.Head
+def select_url_type(url: str, repo_type: RepoType) -> URLParts:
+    # https://github.com/spacetelescope/dat_pyinthesky/pull/125
+    if repo_type in [RepoType.GithubGIT, RepoType.GithubHTTPS]:
+        url_parts = urlparse(url)
+        try:
+            org, repo_name, rest = url_parts.path.strip('/').split('/', 2)
+        except ValueError:
+            org, repo_name = url_parts.path.strip('/').split('/', 2)
+            rest = None
+
+        if rest is None:
+            return URLParts(URLType.GithubRepoURL, org, repo_name, 0)
+
+        elif rest.startswith('pull'):
+            pr_num = rest.strip('pull/').split('/', 1)[0]
+            if '/' in pr_num:
+                raise NotImplementedError(f'Unable to parse pr_num[{pr_num}]')
+
+            return URLParts(URLType.GithubPullRequest, org, repo_name, pr_num)
+
+        else:
+            raise NotImplementedError
+
+    else:
+        raise NotImplementedError(repo_type)
+
+
+def select_repo_type(repo_path: str) -> typing.Tuple[str, RepoType]:
+    if os.path.exists(repo_path):
+        try:
+            git.Repo(repo_path)
+        except git.exc.InvalidGitRepositoryError:
+            raise ci_exceptions.InvalidRepoPath(f'RepoPath[{repo_path}] is not a Repository')
+
+        else:
+            return repo_path, RepoType.Local
+
+    elif repo_path.startswith('git@github.com'):
+        return tempfile.NamedTemporaryFile().name, RepoType.GithubGIT
+
+    elif repo_path.startswith('https://github.com'):
+        return tempfile.NamedTemporaryFile().name, RepoType.GithubHTTPS
+
+    else:
+        raise ci_exceptions.InvalidRepoPath(f'RepoPath[{repo_path}] does not exist')
+

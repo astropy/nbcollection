@@ -2,8 +2,7 @@ import argparse
 import os
 import sys
 
-from nbcollection.ci.commands import install, uninstall, replicate, build_notebooks, metadata, \
-        generate_ci_environment, merge_artifacts
+from nbcollection.ci.commands import replicate, build_notebooks, metadata, generate_ci_environment, merge_artifacts
 
 commands = {
   'metadata': metadata,

@@ -32,7 +32,6 @@ def test__reset_notebook_execution(executed_notebook_collection):
             assert cell.get('execution_count', None) is None
             assert len(cell.get('outputs', [])) == 0
 
-    # Execute Notebooks
 
 def test__reset_notebook_execution__interface(executed_notebook_collection):
     import json
