@@ -17,81 +17,81 @@ jobs:
       matrix:
         include:
           - name: Code style checks
-            os: ubuntu-latest
+            os: ubuntu-20.04
             python: 3.x
             toxenv: codestyle
 
           - name: PEP 517
-            os: ubuntu-latest
+            os: ubuntu-20.04
             python: 3.x
             toxenv: pep517
 
           - name: Security audit
-            os: ubuntu-latest
+            os: ubuntu-20.04
             python: 3.x
             toxenv: securityaudit
 
           # Python 3.6
           - name: Linux - Python 3.6
-            os: ubuntu-latest
+            os: ubuntu-20.04
             python: 3.6
             toxenv: py36-test
 
           - name: OS X - Python 3.6
-            os: macos-latest
+            os: macos-10.15
             python: 3.6
             toxenv: py36-test
 
           - name: Windows - Python 3.6
-            os: windows-latest
+            os: windows-2019
             python: 3.6
             toxenv: py36-test
 
           # Python 3.7
           - name: Linux - Python 3.7
-            os: ubuntu-latest
+            os: ubuntu-20.04
             python: 3.7
             toxenv: py37-test
 
           - name: OS X - Python 3.7
-            os: macos-latest
+            os: macos-10.15
             python: 3.7
             toxenv: py37-test
 
           - name: Windows - Python 3.7
-            os: windows-latest
+            os: windows-2019
             python: 3.7
             toxenv: py37-test
 
           # Python 3.8
           - name: Linux - Python 3.8
-            os: ubuntu-latest
+            os: ubuntu-20.04
             python: 3.8
             toxenv: py38-test
 
           - name: OS X - Python 3.8
-            os: macos-latest
+            os: macos-10.15
             python: 3.8
             toxenv: py38-test
 
           - name: Windows - Python 3.8
-            os: windows-latest
+            os: windows-2019
             python: 3.8
             toxenv: py38-test
 
           # Python 3.9
           - name: Linux - Python 3.9
-            os: ubuntu-latest
+            os: ubuntu-20.04
             python: 3.9
             toxenv: py39-test
 
           - name: OS X - Python 3.9
-            os: macos-latest
+            os: macos-10.15
             python: 3.9
             toxenv: py39-test
 
           - name: Windows - Python 3.9
-            os: windows-latest
+            os: windows-2019
             python: 3.9
             toxenv: py39-test
 
