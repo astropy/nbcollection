@@ -1,11 +1,11 @@
 import os
-import pytest
 
 from nbcollection_tests.ci.tools import multi_level_ignore_repo,    \
         single_collection_repo, multi_collection_repo, single_collection_repo__immediate_categories, \
-        single_collection_repo__nth_categories, quick_build_collection, multi_notebook_category
+        single_collection_repo__nth_categories, quick_build_collection, multi_notebook_category  # noqa F401
 
-def test__load_ignore_data(multi_level_ignore_repo):
+
+def test__load_ignore_data(multi_level_ignore_repo):  # noqa F811
     from nbcollection.ci.scanner.utils import IgnoreData, load_ignore_data, \
             DEFAULT_IGNORE_ENTRIES
     ignore_data = load_ignore_data(multi_level_ignore_repo)
@@ -17,8 +17,10 @@ def test__load_ignore_data(multi_level_ignore_repo):
     assert ignore_data.__class__ is IgnoreData
     assert len(ignore_data.entries) == 8
 
-def test__load_ignore_data__root_level_only(multi_level_ignore_repo):
+
+def test__load_ignore_data__root_level_only(multi_level_ignore_repo):  # noqa F811
     from nbcollection.ci.scanner.utils import IgnoreData, load_ignore_data, DEFAULT_IGNORE_ENTRIES
+
     ignore_data = load_ignore_data(multi_level_ignore_repo, root_level_only=True)
     for entry in ignore_data.entries:
         assert \
@@ -28,7 +30,8 @@ def test__load_ignore_data__root_level_only(multi_level_ignore_repo):
     assert ignore_data.__class__ is IgnoreData
     assert len(ignore_data.entries) == 7
 
-def test__find_collections__single(single_collection_repo):
+
+def test__find_collections__single(single_collection_repo):  # noqa F811
     import os
 
     from nbcollection.ci.scanner.utils import find_collections
@@ -37,7 +40,8 @@ def test__find_collections__single(single_collection_repo):
         assert coll.name == 'collection_one'
         assert coll.path == os.path.join(single_collection_repo, 'collection_one')
 
-def test__find_collections__multi(multi_collection_repo):
+
+def test__find_collections__multi(multi_collection_repo):  # noqa F811
     import os
 
     from nbcollection.ci.datatypes import Collection
@@ -50,7 +54,8 @@ def test__find_collections__multi(multi_collection_repo):
                 os.path.join(multi_collection_repo, 'collection_two')]
         assert coll.__class__ is Collection
 
-def test__find_categories__immediate(single_collection_repo__immediate_categories):
+
+def test__find_categories__immediate(single_collection_repo__immediate_categories):  # noqa F811
     from nbcollection.ci.datatypes import Collection, Category
     from nbcollection.ci.scanner.utils import find_collections, find_categories
 
@@ -60,12 +65,12 @@ def test__find_categories__immediate(single_collection_repo__immediate_categorie
             assert category.__class__ is Category
             assert category.name in ['asdf_example', 'cube_fitting']
 
-
         assert cat_idx == 1
 
-    coll_idx is 0
+    assert coll_idx == 0
 
-def test__find_categories__nth_categories(single_collection_repo__nth_categories):
+
+def test__find_categories__nth_categories(single_collection_repo__nth_categories):  # noqa F811
     from nbcollection.ci.datatypes import Collection, Category
     from nbcollection.ci.scanner.utils import find_collections, find_categories
 
@@ -82,18 +87,20 @@ def test__find_categories__nth_categories(single_collection_repo__nth_categories
 
     assert coll_idx == 0
 
-def test__find_build_jobs(single_collection_repo__nth_categories):
+
+def test__find_build_jobs(single_collection_repo__nth_categories):  # noqa F811
     from nbcollection.ci.scanner.utils import find_build_jobs
     from nbcollection.ci.datatypes import BuildJob, Requirements, PreRequirements
 
     for job_idx, job in enumerate(find_build_jobs(single_collection_repo__nth_categories)):
-        assert job.__class__ is BuildJob 
+        assert job.__class__ is BuildJob
         assert job.collection.name == 'collection_one'
         assert job.category.name in ['asdf_example', 'cube_fitting']
         assert job.category.requirements.__class__ is Requirements
         assert job.category.pre_requirements.__class__ is PreRequirements
 
-def test__find_build_jobs__filter_in_collection(multi_collection_repo):
+
+def test__find_build_jobs__filter_in_collection(multi_collection_repo):  # noqa F811
     from nbcollection.ci.scanner.utils import find_build_jobs
 
     for job_idx, job in enumerate(find_build_jobs(multi_collection_repo, filter_in_collections=['collection_one'])):
@@ -101,18 +108,27 @@ def test__find_build_jobs__filter_in_collection(multi_collection_repo):
 
     assert job_idx == 1
 
-def test__find_build_jobs__filter_in_category(single_collection_repo):
+
+def test__find_build_jobs__filter_in_category(single_collection_repo):  # noqa F811
     from nbcollection.ci.scanner.utils import find_build_jobs
 
-    for job_idx, job in enumerate(find_build_jobs(single_collection_repo, filter_in_collections=[], filter_in_categories=['asdf_example'])):
+    for job_idx, job in enumerate(
+                                  find_build_jobs(single_collection_repo,
+                                                  filter_in_collections=[],
+                                                  filter_in_categories=['asdf_example'])):
         assert job.category.name == 'asdf_example'
 
     assert job_idx == 0
 
-def test__find_build_jobs__filter_in_notebook(multi_notebook_category):
+
+def test__find_build_jobs__filter_in_notebook(multi_notebook_category):  # noqa F811
     from nbcollection.ci.scanner.utils import find_build_jobs
 
-    for job_idx, job in enumerate(find_build_jobs(multi_notebook_category, filter_in_collections=[], filter_in_categories=['alot-of-notebooks'], filter_in_notebooks=['Notebook-Two'])):
+    for job_idx, job in enumerate(
+                                  find_build_jobs(multi_notebook_category,
+                                                  filter_in_collections=[],
+                                                  filter_in_categories=['alot-of-notebooks'],
+                                                  filter_in_notebooks=['Notebook-Two'])):
         for notebook_idx, notebook in enumerate(job.category.notebooks):
             assert notebook.name == 'Notebook-Two'
 
@@ -120,16 +136,22 @@ def test__find_build_jobs__filter_in_notebook(multi_notebook_category):
 
     assert job_idx == 0
 
-def test__find_build_jobs__filter_in_notebook__zero(multi_notebook_category):
+
+def test__find_build_jobs__filter_in_notebook__zero(multi_notebook_category):  # noqa F811
     from nbcollection.ci.scanner.utils import find_build_jobs
 
-    for job_idx, job in enumerate(find_build_jobs(multi_notebook_category, filter_in_collections=[], filter_in_categories=['alot-of-notebooks'], filter_in_notebooks=[])):
+    for job_idx, job in enumerate(
+                                  find_build_jobs(multi_notebook_category,
+                                                  filter_in_collections=[],
+                                                  filter_in_categories=['alot-of-notebooks'],
+                                                  filter_in_notebooks=[])):
         for notebook_idx, notebook in enumerate(job.category.notebooks):
             assert notebook.name in ['Notebook-One', 'Notebook-Two']
 
         assert notebook_idx == 1
 
     assert job_idx == 0
+
 
 def test__run_command():
     import shutil
@@ -152,7 +174,7 @@ def test__run_command():
     shutil.rmtree(expected_dirpath)
 
 
-def test__generate_job_context(single_collection_repo__nth_categories):
+def test__generate_job_context(single_collection_repo__nth_categories):  # noqa F811
     from nbcollection.ci.scanner.utils import find_build_jobs, generate_job_context
     from nbcollection.ci.datatypes import Requirements, PreRequirements, PreInstall
 
@@ -170,7 +192,7 @@ def test__generate_job_context(single_collection_repo__nth_categories):
     assert job_idx == 1
 
 
-def test__run_job_context(quick_build_collection):
+def test__run_job_context(quick_build_collection):  # noqa F811
     from nbcollection.ci.constants import SCANNER_BUILD_LOG_DIR, SCANNER_BUILD_DIR
     from nbcollection.ci.scanner.utils import run_job_context, generate_job_context, find_build_jobs
 

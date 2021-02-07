@@ -1,9 +1,12 @@
 import enum
 import git
+import os
+import tempfile
 import typing
 
 from datetime import datetime
 
+from nbcollection.ci import exceptions as ci_exceptions
 from nbcollection.ci.constants import PWN, AUTH_USERNAME, AUTH_TOKEN
 
 from urllib.parse import urlparse
@@ -207,4 +210,3 @@ def select_repo_type(repo_path: str) -> typing.Tuple[str, RepoType]:
 
     else:
         raise ci_exceptions.InvalidRepoPath(f'RepoPath[{repo_path}] does not exist')
-

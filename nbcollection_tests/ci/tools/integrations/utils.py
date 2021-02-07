@@ -5,12 +5,9 @@ from nbcollection_tests.ci.tools.constants import TEMPLATE_DIRECTORY
 from nbcollection_tests.ci.tools.integrations.datatypes import Template
 from nbcollection_tests.ci.tools.utils import run_command
 
-def generate_template(template: Template, dirpath: str) -> None:
-    if template is Template.Initial:
-        template_path = os.path.join(TEMPLATE_DIRECTORY, 'nbcollection-notebook-test-repo')
-        shutil.copytree(template_path, dirpath)
 
-    elif template is Template.EmptyDirWithGitRemoteUpstream:
+def generate_template(template: Template, dirpath: str) -> None:
+    if template is Template.EmptyDirWithGitRemoteUpstream:
         owner = 'jbcurtin'
         folder_name = os.path.basename(dirpath)
         os.makedirs(dirpath)

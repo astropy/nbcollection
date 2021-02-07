@@ -10,6 +10,7 @@ from nbcollection_tests.ci.tools.integrations.utils import generate_template
 PWN: typing.TypeVar = typing.TypeVar('PWN')
 logger = logging.getLogger(__name__)
 
+
 class LocalRepo:
     """
     This integration makes sure that all repos created don't already exists. If the exist, the logic is meant to fail.
@@ -42,16 +43,11 @@ class LocalRepo:
             for filepath in self._repo.untracked_files:
                 self._repo.index.add(filepath)
 
-            self._repo.index.commit('Generated Repository from https://github.com/astropy/nbcollection - Integration Testing')
+            self._repo.index.commit('Generated Repository from https://github.com/astropy/nbcollection - Integration Testing')  # noqa: E501
 
-            # shutil.copytree(constants.CI_REPO_TEMPLATE_PATH, self.repo_path)
-            # self._repo = git.Repo.init(self.repo_path)
-            # for filepath in self._repo.untracked_files:
-            #     self._repo.index.add(filepath)
-
-            # self._repo.index.commit('Generated Repository for https://github.com/adrn/nbcollection Integration Testing')
         else:
             raise NotImplementedError
+
 
 class Integrate:
     """
@@ -59,6 +55,7 @@ class Integrate:
         once during the lifecycle of the program. Handling service outages is currently out of scope
     """
     __state: typing.Dict[str, str] = {}
+
     def Repo(self: PWN, repo_path: str) -> str:
         if self.__state.get('validated', False) is False:
             self.validate()
@@ -68,4 +65,3 @@ class Integrate:
 
     def validate(self: PWN) -> None:
         pass
-

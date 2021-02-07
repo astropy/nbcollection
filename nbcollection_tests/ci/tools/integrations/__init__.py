@@ -1,24 +1,16 @@
-import collections
-import enum
-import git
 import logging
-import json
-import os
-import requests
-import subprocess
 import tempfile
 import typing
 
-from nbcollection_tests.ci import exceptions as ci_test_exceptions
 from nbcollection_tests.ci.tools.integrations import \
         github as github_integration, \
         local as local_integration
 from nbcollection_tests.ci.tools.integrations.datatypes import RepoType, Template
 
-from requests.auth import HTTPBasicAuth
 
 PWN: typing.TypeVar = typing.TypeVar('PWN')
 logger = logging.getLogger(__name__)
+
 
 class TestRepo:
     repo_type: RepoType
@@ -41,8 +33,7 @@ class TestRepo:
 
     def setup(self: PWN) -> typing.Union[
             github_integration.GithubRepo,
-            local_integration.LocalRepo,
-        ]:
+            local_integration.LocalRepo]:
         if self.repo_type is RepoType.Github:
             github_repo = github_integration.Integrate().Repo(self.repo_name).create()
             github_repo.fill(self.template)
@@ -69,4 +60,3 @@ class TestRepo:
             raise NotImplementedError(self.repo_type)
 
         self.repo_type = None
-

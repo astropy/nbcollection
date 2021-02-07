@@ -2,29 +2,11 @@ import os
 import pytest
 import shutil
 import tempfile
-import typing
 
 from _pytest.fixtures import SubRequest
 from nbcollection_tests.ci.tools.integrations import TestRepo
 from nbcollection_tests.ci.tools.integrations.datatypes import Template, RepoType
 
-@pytest.fixture
-def repo_local_path(request: SubRequest) -> str:
-    local_repo = TestRepo(RepoType.Local, Template.Initial)
-    request.addfinalizer(local_repo.destroy)
-    return local_repo.setup().repo_path
-
-@pytest.fixture
-def repo_git_url(request: SubRequest) -> str:
-    remote_repo = TestRepo(RepoType.Github, Template.Initial)
-    request.addfinalizer(remote_repo.destroy)
-    return remote_repo.setup().git_url
-
-@pytest.fixture
-def repo_https_url(request: SubRequest) -> str:
-    remote_repo = TestRepo(RepoType.Github, Template.Initial)
-    request.addfinalizer(remote_repo.destroy)
-    return remote_repo.setup().https_url
 
 @pytest.fixture
 def multi_level_ignore_repo(request: SubRequest):
@@ -32,11 +14,13 @@ def multi_level_ignore_repo(request: SubRequest):
     request.addfinalizer(ignore_repo.destroy)
     return ignore_repo.setup().repo_path
 
+
 @pytest.fixture
 def single_collection_repo(request: SubRequest):
     single_collection_repo = TestRepo(RepoType.Local, Template.SingleCollection)
     request.addfinalizer(single_collection_repo.destroy)
     return single_collection_repo.setup().repo_path
+
 
 @pytest.fixture
 def multi_collection_repo(request: SubRequest):
@@ -44,11 +28,13 @@ def multi_collection_repo(request: SubRequest):
     request.addfinalizer(multi_collection_repo.destroy)
     return multi_collection_repo.setup().repo_path
 
+
 @pytest.fixture
 def single_collection_repo__immediate_categories(request: SubRequest) -> str:
     immediate_categories_repo = TestRepo(RepoType.Local, Template.SingleCollectionImmediateCategories)
     request.addfinalizer(immediate_categories_repo.destroy)
     return immediate_categories_repo.setup().repo_path
+
 
 @pytest.fixture
 def single_collection_repo__nth_categories(request: SubRequest) -> str:
@@ -56,11 +42,13 @@ def single_collection_repo__nth_categories(request: SubRequest) -> str:
     request.addfinalizer(nth_categories_repo.destroy)
     return nth_categories_repo.setup().repo_path
 
+
 @pytest.fixture
 def quick_build_collection(request: SubRequest) -> str:
     quick_build_repo = TestRepo(RepoType.Local, Template.QuickBuild)
     request.addfinalizer(quick_build_repo.destroy)
     return quick_build_repo.setup().repo_path
+
 
 @pytest.fixture
 def executed_notebook_collection(request: SubRequest) -> str:
@@ -68,11 +56,13 @@ def executed_notebook_collection(request: SubRequest) -> str:
     request.addfinalizer(executed_notebook_repo.destroy)
     return executed_notebook_repo.setup().repo_path
 
+
 @pytest.fixture
 def multi_notebook_category(request: SubRequest) -> str:
     multi_notebook_repo = TestRepo(RepoType.Local, Template.MultiNotebookCategory)
     request.addfinalizer(multi_notebook_repo.destroy)
     return multi_notebook_repo.setup().repo_path
+
 
 @pytest.fixture
 def metadata_rich_notebooks(request: SubRequest) -> str:
@@ -80,9 +70,11 @@ def metadata_rich_notebooks(request: SubRequest) -> str:
     request.addfinalizer(metadata_rich_repo.destroy)
     return metadata_rich_repo.setup().repo_path
 
+
 @pytest.fixture
 def empty_dir(request: SubRequest) -> str:
     dirpath = tempfile.NamedTemporaryFile().name
+
     def _remove_empty_dir():
         shutil.rmtree(dirpath)
 
@@ -90,17 +82,20 @@ def empty_dir(request: SubRequest) -> str:
     request.addfinalizer(_remove_empty_dir)
     return dirpath
 
+
 @pytest.fixture
 def immediate_level_repo(request: SubRequest) -> str:
     immediate_level_repo = TestRepo(RepoType.Local, Template.EmptyDirWithGitRemoteUpstream)
     request.addfinalizer(immediate_level_repo.destroy)
     return immediate_level_repo.setup().repo_path
 
+
 @pytest.fixture
 def next_level_repo(request: SubRequest) -> str:
     next_level_repo = TestRepo(RepoType.Local, Template.NextDirWithGitRemoteUpstream)
     request.addfinalizer(next_level_repo.destroy)
     return next_level_repo.setup().repo_path
+
 
 @pytest.fixture
 def git_config_file(request: SubRequest) -> str:

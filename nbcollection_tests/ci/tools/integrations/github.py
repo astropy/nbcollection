@@ -8,7 +8,6 @@ import shutil
 import typing
 
 from nbcollection_tests.ci import exceptions as ci_test_exceptions
-from nbcollection_tests.ci.tools import constants
 from nbcollection_tests.ci.tools.integrations.datatypes import Template
 from nbcollection_tests.ci.tools.integrations.utils import generate_template
 
@@ -17,10 +16,12 @@ from requests.auth import HTTPBasicAuth
 PWN: typing.TypeVar = typing.TypeVar('PWN')
 logger = logging.getLogger(__name__)
 
+
 class GithubRepo:
     name: str
     _username: str
     _password: str
+
     def __init__(self: PWN, owner: str, name: str) -> None:
         self.name = name
         self._owner = owner
@@ -34,7 +35,7 @@ class GithubRepo:
             try:
                 self._repo = git.Repo(self.repo_path)
             except git.exc.InvalidGitRepositoryError:
-                logger.info(f'Cloning Repo Locally')
+                logger.info('Cloning Repo Locally')
                 self._repo = git.Repo.clone_from(self.https_url_with_auth, self._repo_path)
 
         return self._repo
@@ -66,7 +67,7 @@ class GithubRepo:
 
         else:
             if response.status_code != 201:
-                raise ci_test_exceptions.GithubInvalidAuthorization("Unable to create repo. Please regenerate token with correct perms: https://github.com/settings/tokens/")
+                raise ci_test_exceptions.GithubInvalidAuthorization("Unable to create repo. Please regenerate token with correct perms: https://github.com/settings/tokens/")  # noqa: E501
 
         return self
 
@@ -78,14 +79,14 @@ class GithubRepo:
 
         try:
             response: requests.models.Response = requests.delete(url,
-                    auth=HTTPBasicAuth(self._username, self._password))
+                                                                 auth=HTTPBasicAuth(self._username, self._password))
         except Exception as err:
             # import pdb; pdb.set_trace()
             raise err
 
         else:
             if response.status_code != 204:
-                raise ci_test_exceptions.GithubInvalidAuthorization(f"'delete_repo' auth required. https://developer.github.com/v3/repos/#delete-a-repository. Please regenerate token with correct perms: https://github.com/settings/tokens/")
+                raise ci_test_exceptions.GithubInvalidAuthorization("'delete_repo' auth required. https://developer.github.com/v3/repos/#delete-a-repository. Please regenerate token with correct perms: https://github.com/settings/tokens/")  # noqa: E501
 
     def fill(self: PWN, template: Template) -> None:
         """
@@ -107,8 +108,10 @@ class GithubRepo:
         new_head.checkout()
         self.repo.remotes[0].push(branch_name)
 
+
 class Integrate:
     __state: typing.Dict[str, str] = {}
+
     def Repo(self: PWN, name: str) -> str:
         if self.__state.get('validated', False) is False:
             self.validate()
@@ -123,7 +126,6 @@ class Integrate:
         if os.environ.get('AUTH_TOKEN', None) is None:
             raise ci_test_exceptions.MissingENVVarException('AUTH_TOKEN')
 
-
     def _test_permissions(self: PWN) -> None:
         repo_name: str = tempfile.NamedTemporaryFile().name.rsplit('/', 1)[1]
         repo = GithubRepo(os.environ['AUTH_USERNAME'], repo_name)
@@ -133,4 +135,3 @@ class Integrate:
     def validate(self: PWN) -> None:
         self._test_connection()
         self._test_permissions()
-

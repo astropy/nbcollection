@@ -1,7 +1,9 @@
-import pytest
 import subprocess
 import time
 import typing
+
+from nbcollection.ci import __main__ as main_module
+
 
 def run_command(cmd: typing.Union[str, typing.List[str]]) -> None:
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -11,10 +13,9 @@ def run_command(cmd: typing.Union[str, typing.List[str]]) -> None:
     if proc.poll() > 0:
         raise NotImplementedError(f'Exit Code: {proc.poll()}')
 
-def test__all_command_help():
-    from nbcollection.ci import __main__ as main_module
 
+def test__all_command_help():
     for name, command in main_module.commands.items():
-        python_bin = '/home/jbcurtin/.pyenv/shims/python'
-        cmd = f"""PYTHONPATH='.' python -m nbcollection.ci {name} -h"""
+        python_bin = 'python'
+        cmd = f"""PYTHONPATH='.' {python_bin} -m nbcollection.ci {name} -h"""
         run_command(cmd)

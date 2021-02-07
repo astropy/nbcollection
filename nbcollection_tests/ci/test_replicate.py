@@ -1,19 +1,20 @@
-from nbcollection_tests.ci.tools import immediate_level_repo, next_level_repo, empty_dir, git_config_file
+from nbcollection_tests.ci.tools import immediate_level_repo, next_level_repo, empty_dir, git_config_file  # noqa F401
 
-def test__replicate():
-    pass
 
 def test__parse_url_to_remote_parts__git_github():
-    from nbcollection.ci.replicate.datatypes import RemoteScheme, RemoteParts, RemoteScheme
+    from nbcollection.ci.replicate.datatypes import RemoteScheme, RemoteParts
+
     remote = 'git@github.com:owner/repo_name.git'
     parts = RemoteParts.ParseURLToRemoteParts(remote)
     assert RemoteScheme.Git is parts.scheme
     assert parts.netloc == 'github.com'
     assert parts.org == 'owner'
-    assert parts.name =='repo_name'
+    assert parts.name == 'repo_name'
+
 
 def test__parse_url_to_remote_parts__https_github():
     from nbcollection.ci.replicate.datatypes import RemoteParts, RemoteScheme
+
     remote = 'https://github.com/owner/repo_name.git'
     parts = RemoteParts.ParseURLToRemoteParts(remote)
     assert parts.scheme is RemoteScheme.Https
@@ -21,8 +22,10 @@ def test__parse_url_to_remote_parts__https_github():
     assert parts.org == 'owner'
     assert parts.name == 'repo_name'
 
+
 def test__parse_url_to_remote_parts__https_github_pull_request():
     from nbcollection.ci.replicate.datatypes import RemoteParts, RemoteScheme
+
     remote = 'https://github.com/astropy/nbcollection/pull/10'
     parts = RemoteParts.ParseURLToRemoteParts(remote)
     assert parts.scheme is RemoteScheme.Https
@@ -30,14 +33,16 @@ def test__parse_url_to_remote_parts__https_github_pull_request():
     assert parts.org == 'astropy'
     assert parts.name == 'nbcollection'
 
-def test__parse_git_config__none(empty_dir):
+
+def test__parse_git_config__none(empty_dir):  # noqa F811
     import os
 
     from nbcollection.ci.replicate.utils import parse_git_config
     git_config_filepath = os.path.join(empty_dir, '.git/config')
     assert parse_git_config(git_config_filepath) is None
 
-def test__parse_git_config(git_config_file):
+
+def test__parse_git_config(git_config_file):  # noqa F811
     import os
 
     from nbcollection.ci.replicate.datatypes import GitConfig, GitConfigRemote, RemoteParts
@@ -65,14 +70,16 @@ def test__parse_git_config(git_config_file):
     assert git_config.remotes[1].parts.org == 'astropy'
     assert git_config.remotes[1].parts.name == 'nbcollection'
 
-def test__find_repo_path_by_remote__none(empty_dir):
+
+def test__find_repo_path_by_remote__none(empty_dir):  # noqa F811
     from nbcollection.ci.replicate.utils import find_repo_path_by_remote
 
     remote = 'git@github.com:astropy/nbcollection.git'
     repo_path = find_repo_path_by_remote(remote, empty_dir)
     assert repo_path is None
 
-def test__find_repo_path_by_remote__immediate_level_repo(immediate_level_repo):
+
+def test__find_repo_path_by_remote__immediate_level_repo(immediate_level_repo):  # noqa F811
     import git
     import os
 
@@ -86,7 +93,8 @@ def test__find_repo_path_by_remote__immediate_level_repo(immediate_level_repo):
     assert repo.remotes[0].name == 'upstream'
     assert repo.remotes[0].url == f'git@github.com:jbcurtin/{folder_name}.git'
 
-def test__find_repo_path_by_remote__next_level_repo(next_level_repo):
+
+def test__find_repo_path_by_remote__next_level_repo(next_level_repo):  # noqa F811
     import git
     import os
 
