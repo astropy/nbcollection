@@ -80,6 +80,7 @@ for our /tmp/jdat_notebooks repository.
 .. code-block:: bash
 
     $ pip install git+https://github.com/jbcurtin/nbcollection.git
+    $ pip install GitPython requests toml PyYaml
     $ nbcollection-ci generate-ci-env --collection-names jdat_notebooks --project-path /tmp/nbcollection-doc-demo
     $ cd /tmp/nbcollection-doc-demo
     $ git add .circleci
