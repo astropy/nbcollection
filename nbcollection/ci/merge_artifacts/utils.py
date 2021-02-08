@@ -4,6 +4,7 @@ import jinja2
 import json
 import requests
 import shutil
+import sys
 import toml
 import typing
 
@@ -79,6 +80,10 @@ def artifact_merge(project_path: str,
     ci_jobs = []
     artifact_urls = []
     project_builds = requests.get(project_url, auth=CircleCIAuth()).json()
+    if len(project_builds) < 1:
+        logger.info('No builds found. Aborting Artifact Merge')
+        sys.exit(0)
+
     for idx, job in enumerate(project_builds):
         if idx == 0:
             last_author_date = datetime.strptime(job['author_date'], AUTHOR_DATE_FORMAT)
@@ -184,8 +189,15 @@ def artifact_merge(project_path: str,
                 with open(cat_source[cat_source_idx].filepath, 'rb') as stream:
                     metadata = json.loads(stream.read().decode(ENCODING))
 
-                for find, replace in NAME_ISSUES:
-                    metadata['title'].replace(find, replace)
+                if metadata['title'] is None:
+                    filename = os.path.basename(cat_source[cat_source_idx].filepath).rsplit('.', 2)[0]
+                    logger.error(f'Unable to extract metadata from: {filename}')
+                    metadata['title'] = filename
+                    metadata['description'] = filename
+
+                else:
+                    for find, replace in NAME_ISSUES:
+                        metadata['title'].replace(find, replace)
 
                 nbs.append(ArtifactNotebook(metadata['title'], metadata, notebook.filepath, notebook.filename))
 
