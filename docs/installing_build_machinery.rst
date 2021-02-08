@@ -75,13 +75,13 @@ Installing Build Machinery
 ++++++++++++++++++++++++++
 
 Turning our attention back to a terminal, lets install nbcollection & nbcollection-ci and generate fresh Build Machinery
-for our /tmp/jdat_notebooks repository.
+for our /tmp/nbcollection-doc-demo repository.
 
 .. code-block:: bash
 
     $ pip install git+https://github.com/jbcurtin/nbcollection.git
     $ pip install GitPython requests toml PyYaml
-    $ nbcollection-ci generate-ci-env --collection-names jdat_notebooks --project-path /tmp/nbcollection-doc-demo
+    $ nbcollection-ci generate-ci-env --collection-names notebooks --project-path /tmp/nbcollection-doc-demo
     $ cd /tmp/nbcollection-doc-demo
     $ git add .circleci
     $ git commit -m 'Added fresh build machinery' -a
