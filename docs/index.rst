@@ -21,3 +21,4 @@ See Also
     :maxdepth: 2
 
     getting_started
+    installing_build_machinery

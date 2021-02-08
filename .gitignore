@@ -113,3 +113,6 @@ lib64
 pyvenv.cfg
 
 *.pyc
+
+# nbcollection-ci
+pages

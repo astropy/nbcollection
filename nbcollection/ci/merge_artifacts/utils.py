@@ -99,7 +99,7 @@ def artifact_merge(project_path: str,
             ci_job['vcs_type'],
             ci_job['username'],
             ci_job['reponame'],
-            ci_job['build_num'],
+            str(ci_job['build_num']),
             'artifacts'
         ])
         resp = requests.get(url, auth=CircleCIAuth())
