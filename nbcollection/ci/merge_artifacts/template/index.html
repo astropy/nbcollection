@@ -1,18 +1,29 @@
 <html>
-  <head>
+    <head>
         {% include "header.html" %}
-  </head>
-  <body>
-        {% for coll in collections %}
-        <h2> {{ coll.name }} </h2>
-            {% for cat in coll.categories %}
-            <h3> {{ cat.name }} </h3>
-                {% for notebook in cat.notebooks %}
-                <p>
-                    <a href="{{coll.name}}/{{cat.name}}/{{notebook.filename}}" target="_blank"> {{ notebook.title }} </a>
-                </p>
-                {% endfor %}
+    </head>
+    <body>
+    <div class="header">
+        <div class="header content">
+            <img class="logo" src="images/Jspectra.svg" alt="JWST Data Analysis Notebooks"/>
+            <div class="search">
+                <div class="searchbox"></div>
+                <div class="searchbutton">
+                    Filter Notebooks
+                </div>
+            </div>
+        </div>
+    </div>
+    {% for coll in collections %}
+    <h2> {{ coll.name }} </h2>
+        {% for cat in coll.categories %}
+        <h3> {{ cat.name }} </h3>
+            {% for notebook in cat.notebooks %}
+            <p>
+                <a href="{{ coll.name }}/{{ cat.name }}/{{ notebook.filename }}" target="_blank"> {{ notebook.title }} </a>
+            </p>
             {% endfor %}
         {% endfor %}
+    {% endfor %}
   </body>
 </html>

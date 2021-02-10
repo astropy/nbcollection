@@ -6,80 +6,69 @@ import requests
 import shutil
 import sys
 import toml
+import types
 import typing
 
 from datetime import datetime
 
-from jinja2.environment import Template, Environment
-
 from nbcollection.ci.constants import ENCODING, AUTHOR_DATE_FORMAT
+from nbcollection.ci.commands.datatypes import CICommandContext
 from nbcollection.ci.merge_artifacts.constants import CIRCLECI_TOKEN
+from nbcollection.ci.merge_artifacts.datatypes import CircleCIAuth, NotebookSource, \
+        ArtifactNotebook, ArtifactCategory, ArtifactCollection, MergeContext
+from nbcollection.ci.merge_artifacts import html_builder
 from nbcollection.ci.scanner.utils import find_build_jobs
 
 logger = logging.getLogger(__name__)
+JINJA2_ENVIRONMENT = None
+
+# CircleCI
+BASE_URL = 'https://circleci.com/api/v1.1'
+# PROJECT_URL = f'{base_url}/project/github/{org}/{repo_name}'
 
 
-class CircleCIAuth(requests.auth.AuthBase):
-    def __call__(self, request):
-        request.headers['Circle-Token'] = CIRCLECI_TOKEN
-        return request
-
-
-class NotebookSource(typing.NamedTuple):
-    filename: str
-    filepath: str
-    category: str
-    collection: str
-    url: str
-    meta_file: bool
-
-
-class ArtifactNotebook(typing.NamedTuple):
-    title: str
-    metadata: typing.Dict[str, typing.Any]
-    filepath: str
-    filename: str
-
-
-class ArtifactCategory(typing.NamedTuple):
-    name: str
-    notebooks: typing.List[ArtifactNotebook]
-
-
-class ArtifactCollection(typing.NamedTuple):
-    name: str
-    categories: typing.List[ArtifactCategory]
-
-
-def artifact_merge(project_path: str,
-                   repo_name: str,
-                   org: str,
-                   collection_names: typing.List[str],
-                   category_names: typing.List[str],
-                   notebook_names: typing.List[str]) -> None:
-    if CIRCLECI_TOKEN is None:
-        raise NotImplementedError('Missing ENVVar: CIRCLECI_TOKEN')
-
+def generate_merge_context(project_path: str, org: str, repo_name: str) -> MergeContext:
     artifact_dest_dir = os.path.join(project_path, 'pages')
     if os.path.exists(artifact_dest_dir):
         shutil.rmtree(artifact_dest_dir)
 
     # Filesystem modifications
     os.makedirs(artifact_dest_dir)
+
     module_dirpath = os.path.dirname(__file__)
-    # asserts_dir = os.path.join(module_dirpath, 'assets')
-    template_dir = os.path.join(module_dirpath, 'template')
-    environment_path = os.path.join(template_dir, 'environment.toml')
+
+    template_dir = os.environ.get('ARTIFACT_TEMPLATE_DIR', None)
+    if template_dir is None:
+        logger.info('Missing ENVVar ARTIFACT_TEMPLATE_DIR, using default Template')
+        template_dir = os.path.join(module_dirpath, 'template')
+
     site_dir = os.path.join(project_path, 'site')
+    if os.path.exists(site_dir):
+        shutil.rmtree(site_dir)
 
-    # CircleCI
-    base_url = 'https://circleci.com/api/v1.1'
-    project_url = f'{base_url}/project/github/{org}/{repo_name}'
+    os.makedirs(site_dir)
+    environment_path = os.path.join(template_dir, 'environment.toml')
+    if not os.path.exists(environment_path):
+        raise NotImplementedError(f'Missing Environment File: {environment_path}')
 
-    # Containers
+    assets_dir = os.path.join(template_dir, 'assets')
+    if not os.path.exists(assets_dir):
+        logger.warning(f'Assets Dir Missing: {assets_dir}')
+
+    return MergeContext(
+            artifact_dest_dir,
+            module_dirpath,
+            template_dir,
+            environment_path,
+            site_dir,
+            f'{BASE_URL}/project/github/{org}/{repo_name}',
+            assets_dir)
+
+
+def latest_circleci_artifact_urls(merge_context: MergeContext) -> typing.List[str]:
     ci_jobs = []
     artifact_urls = []
-    project_builds = requests.get(project_url, auth=CircleCIAuth()).json()
+    project_builds = requests.get(merge_context.project_url, auth=CircleCIAuth()).json()
     if len(project_builds) < 1:
         logger.info('No builds found. Aborting Artifact Merge')
         sys.exit(0)
@@ -99,7 +88,7 @@ def artifact_merge(project_path: str,
 
     for ci_job in ci_jobs:
         url = '/'.join([
-            base_url,
+            BASE_URL,
             'project',
             ci_job['vcs_type'],
             ci_job['username'],
@@ -108,12 +97,22 @@ def artifact_merge(project_path: str,
             'artifacts'
         ])
         resp = requests.get(url, auth=CircleCIAuth())
-        artifact_urls.extend([a['url'] for a in resp.json() if not a['url'].endswith('index.html')])
+        urls = [a['url'] for a in resp.json() if not a['url'].endswith('index.html')]
+        if len(urls) % 2 == 0:
+            artifact_urls.extend(urls)
 
+        else:
+            job_name = ci_job['workflows']['job_name']
+            logger.info(f'Incomplete Build: {job_name}')
+
+    return artifact_urls
+
+
+def build_notebook_sources(artifact_urls: typing.List[str], merge_context: MergeContext) -> types.GeneratorType:
     notebook_sources: typing.List[NotebookSource] = []
     for url in artifact_urls:
         filename = os.path.basename(url)
-        filepath = os.path.join(artifact_dest_dir, filename)
+        filepath = os.path.join(merge_context.artifact_dest_dir, filename)
         file_category = os.path.dirname(url).rsplit('/', 1)[-1]
         file_collection = os.path.dirname(url).rsplit('/', 2)[-2]
         meta_file = filename.endswith('metadata.json')
@@ -123,42 +122,54 @@ def artifact_merge(project_path: str,
             for content in resp.iter_content(chunk_size=1024):
                 stream.write(content)
 
-        notebook_sources.append(NotebookSource(filename, filepath, file_category, file_collection, url, meta_file))
+        yield NotebookSource(filename, filepath, file_category, file_collection, url, meta_file)
 
-    existing_categories = [item for item in set(['.'.join([nb.collection, nb.category]) for nb in notebook_sources])]
-    for job in find_build_jobs(project_path, collection_names, category_names, notebook_names):
+
+def latest_artifacts_from_jobs(command_context: CICommandContext, merge_context: MergeContext) -> types.GeneratorType:
+    for job in find_build_jobs(command_context.project_path,
+                               command_context.collection_names,
+                               command_context.category_names,
+                               command_context.notebook_names):
+
+        # collection_names, category_names, notebook_names
         namespace = '.'.join([job.collection.name, job.category.name])
         if namespace in existing_categories:
             continue
 
         for notebook in job.category.notebooks:
             html_filepath = '/'.join([
-                artifact_dest_dir,
+                merge_context.artifact_dest_dir,
                 job.collection.name,
                 job.category.name,
                 f'{notebook.name}.html'])
             meta_filepath = '/'.join([
-                artifact_dest_dir,
+                merge_context.artifact_dest_dir,
                 job.collection.name,
                 job.category.name,
                 f'{notebook.name}.metadata.json'])
             html_filename = os.path.basename(html_filepath)
-            notebook_sources.append(
-                                    NotebookSource(html_filename,
-                                                   html_filepath,
-                                                   job.category.name,
-                                                   job.collection.name,
-                                                   'local-file',
-                                                   meta_filepath))
+            yield NotebookSource(html_filename,
+                                 html_filepath,
+                                 job.category.name,
+                                 job.collection.name,
+                                 'local-file',
+                                 meta_filepath)
 
             meta_filename = os.path.basename(meta_filepath)
-            notebook_sources.append(
-                                    NotebookSource(meta_filename,
-                                                   meta_filepath,
-                                                   job.category.name,
-                                                   job.collection.name,
-                                                   'local-file',
-                                                   meta_filepath))
+            yield NotebookSource(meta_filename,
+                                 meta_filepath,
+                                 job.category.name,
+                                 job.collection.name,
+                                 'local-file',
+                                 meta_filepath)
+
+
+def run_artifact_merge(command_context: CICommandContext, merge_context: MergeContext) -> types.GeneratorType:
+    # Find latest artifacts from CircleCI
+    artifact_urls = latest_circleci_artifact_urls(merge_context)
+    notebook_sources = [nb_source for nb_source in build_notebook_sources(artifact_urls, merge_context)]
+    existing_categories = [item for item in set(['.'.join([nb.collection, nb.category]) for nb in notebook_sources])]
+    notebook_sources.extend([nb_source for nb_source in latest_artifacts_from_jobs(command_context, merge_context)])
 
     collections = {}
     for notebook in notebook_sources:
@@ -211,59 +222,14 @@ def artifact_merge(project_path: str,
 
         artifact_collections.append(ArtifactCollection(coll_name, sorted(cats)))
 
-    if os.path.exists(site_dir):
-        shutil.rmtree(site_dir)
+    html_builder.render_index(merge_context, artifact_collections)
+    html_builder.render_static_assets(merge_context.assets_dir, merge_context.site_dir)
 
-    os.makedirs(site_dir)
-
-    def _add_jinja2_filters(environment: Environment) -> None:
-        def _render_human_datetime(datetime: datetime) -> str:
-            return datetime.strftime('%A, %d. %B %Y %I:%M%p')
-
-        def _render_machine_datetime(datetime: datetime) -> str:
-            return datetime.strftime('%Y-%m-%d')
-
-        def _render_machine_datetime_with_time(datetime: datetime) -> str:
-            return datetime.strftime('%Y-%m-%dT%H-%M-%S')
-
-        environment.filters['human_date'] = _render_human_datetime
-        environment.filters['machine_date'] = _render_machine_datetime
-        environment.filters['machine_date_with_time'] = _render_machine_datetime_with_time
-
-    def load_environment() -> typing.Dict[str, typing.Any]:
-        environment = {}
-        with open(environment_path, 'r') as stream:
-            environment = toml.loads(stream.read())
-
-        environment['today'] = datetime.utcnow()
-        return environment
-
-    jinja2_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),  # nosec
-                                            undefined=jinja2.StrictUndefined)  # nosec
-    _add_jinja2_filters(jinja2_environment)
-    index: Template = jinja2_environment.get_template('index.html')
-    environment = load_environment()
-    template_context = {
-        'page': {
-            'title': environment['index_title'],
-            'keywords': environment['keywords'],
-            'description': environment['description'],
-            'locale': environment['default_locale'],
-            'author': environment['author'],
-            'maintainer': environment['maintainer'],
-            'url': f'{environment["website_base_url"]}/index.html',
-        },
-        'static_url': 'static/',
-        'collections': artifact_collections,
-    }
-    index_filepath = os.path.join(site_dir, 'index.html')
-    with open(index_filepath, 'wb') as stream:
-        stream.write(index.render(**template_context).encode(ENCODING))
-
+    dest_filepaths = []
     for coll in artifact_collections:
         for cat in coll.categories:
             for notebook in cat.notebooks:
-                dest_filepath = os.path.join(site_dir, coll.name, cat.name, notebook.filename)
+                dest_filepath = os.path.join(merge_context.site_dir, coll.name, cat.name, notebook.filename)
                 for find, replace in NAME_ISSUES:
                     dest_filepath = dest_filepath.replace(find, replace)
 
@@ -272,3 +238,9 @@ def artifact_merge(project_path: str,
                     os.makedirs(dest_dirpath)
 
                 shutil.copyfile(notebook.filepath, dest_filepath)
+                dest_filepaths.append(dest_filepath)
+
+    for dest_filepath in dest_filepaths:
+        html_builder.extract_cells_from_html(dest_filepath)
+        html_builder.render_notebook_template(dest_filepath, merge_context)
+

@@ -108,9 +108,11 @@ env-docs
 env-tests
 secrets
 
+# pyenv
 bin
 lib64
 pyvenv.cfg
+share
 
 *.pyc
 
