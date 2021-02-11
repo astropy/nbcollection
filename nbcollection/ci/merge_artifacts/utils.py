@@ -12,8 +12,8 @@ import typing
 from datetime import datetime
 
 from nbcollection.ci.constants import ENCODING, AUTHOR_DATE_FORMAT
-from nbcollection.ci.commands.datatypes import CICommandContext
-from nbcollection.ci.merge_artifacts.constants import CIRCLECI_TOKEN
+from nbcollection.ci.commands.datatypes import CICommandContext, CIMode
+from nbcollection.ci.constants import CIRCLECI_TOKEN, SCANNER_ARTIFACT_DEST_DIR
 from nbcollection.ci.merge_artifacts.datatypes import CircleCIAuth, NotebookSource, \
         ArtifactNotebook, ArtifactCategory, ArtifactCollection, MergeContext
 from nbcollection.ci.merge_artifacts import html_builder
@@ -24,7 +24,6 @@ JINJA2_ENVIRONMENT = None
 
 # CircleCI
 BASE_URL = 'https://circleci.com/api/v1.1'
-# PROJECT_URL = f'{base_url}/project/github/{org}/{repo_name}'
 
 
 def generate_merge_context(project_path: str, org: str, repo_name: str) -> MergeContext:
@@ -62,7 +61,8 @@ def generate_merge_context(project_path: str, org: str, repo_name: str) -> Merge
             environment_path,
             site_dir,
             f'{BASE_URL}/project/github/{org}/{repo_name}',
-            assets_dir)
+            assets_dir,
+            SCANNER_ARTIFACT_DEST_DIR)
 
 
 def latest_circleci_artifact_urls(merge_context: MergeContext) -> typing.List[str]:
@@ -125,28 +125,35 @@ def build_notebook_sources(artifact_urls: typing.List[str], merge_context: Merge
         yield NotebookSource(filename, filepath, file_category, file_collection, url, meta_file)
 
 
-def latest_artifacts_from_jobs(command_context: CICommandContext, merge_context: MergeContext) -> types.GeneratorType:
+def latest_artifacts_from_jobs(command_context: CICommandContext,
+                               merge_context: MergeContext,
+                               existing_categories: typing.List[str]) -> types.GeneratorType:
     for job in find_build_jobs(command_context.project_path,
                                command_context.collection_names,
                                command_context.category_names,
                                command_context.notebook_names):
 
-        # collection_names, category_names, notebook_names
         namespace = '.'.join([job.collection.name, job.category.name])
         if namespace in existing_categories:
             continue
 
         for notebook in job.category.notebooks:
             html_filepath = '/'.join([
-                merge_context.artifact_dest_dir,
+                merge_context.local_artifact_staging_dir,
                 job.collection.name,
                 job.category.name,
                 f'{notebook.name}.html'])
             meta_filepath = '/'.join([
-                merge_context.artifact_dest_dir,
+                merge_context.local_artifact_staging_dir,
                 job.collection.name,
                 job.category.name,
                 f'{notebook.name}.metadata.json'])
+
+            if any([
+                not os.path.exists(html_filepath),
+                not os.path.exists(meta_filepath)]):
+                continue
+
             html_filename = os.path.basename(html_filepath)
             yield NotebookSource(html_filename,
                                  html_filepath,
@@ -165,11 +172,18 @@ def latest_artifacts_from_jobs(command_context: CICommandContext, merge_context:
 
 
 def run_artifact_merge(command_context: CICommandContext, merge_context: MergeContext) -> types.GeneratorType:
-    # Find latest artifacts from CircleCI
-    artifact_urls = latest_circleci_artifact_urls(merge_context)
-    notebook_sources = [nb_source for nb_source in build_notebook_sources(artifact_urls, merge_context)]
-    existing_categories = [item for item in set(['.'.join([nb.collection, nb.category]) for nb in notebook_sources])]
-    notebook_sources.extend([nb_source for nb_source in latest_artifacts_from_jobs(command_context, merge_context)])
+    if command_context.mode in [CIMode.Both, CIMode.Online]:
+        artifact_urls = latest_circleci_artifact_urls(merge_context)
+        notebook_sources = [nb_source for nb_source in build_notebook_sources(artifact_urls, merge_context)]
+        existing_categories = [item for item in set(['.'.join([nb.collection, nb.category]) for nb in notebook_sources])]
+
+    else:
+        artifact_urls = []
+        notebook_sources = []
+        existing_categories = []
+
+    if command_context.mode in [CIMode.Both, CIMode.Local]:
+        notebook_sources.extend([nb_source for nb_source in latest_artifacts_from_jobs(command_context, merge_context, existing_categories)])
 
     collections = {}
     for notebook in notebook_sources:

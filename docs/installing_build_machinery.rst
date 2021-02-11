@@ -80,7 +80,7 @@ for our /tmp/nbcollection-doc-demo repository.
 .. code-block:: bash
 
     $ pip install git+https://github.com/jbcurtin/nbcollection.git
-    $ pip install GitPython requests toml PyYaml
+    $ pip install GitPython requests toml PyYaml bs4
     $ nbcollection-ci generate-ci-env --collection-names notebooks --project-path /tmp/nbcollection-doc-demo
     $ cd /tmp/nbcollection-doc-demo
     $ git add .circleci

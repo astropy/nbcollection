@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+from nbcollection.ci.commands.datatypes import CIMode
 from nbcollection.ci.constants import PROJECT_DIR
 from nbcollection.ci.merge_artifacts.factory import run_merge_artifacts
 
@@ -23,6 +24,7 @@ def convert(options=None):
             description=DESCRIPTION,
             epilog=EXAMPLE_USAGE,
             formatter_class=argparse.RawTextHelpFormatter)
+
     parser.add_argument('-c', '--collection-names', required=False, default=None,
                         help="Select a subset of Collections to be built, or all will be built")
     parser.add_argument('-t', '--category-names', required=False, default=None,
@@ -35,6 +37,10 @@ def convert(options=None):
                         help="Which CI Project should be merged?")
     parser.add_argument('-o', '--org', required=True, type=str,
                         help="Which org runs the CI Project?")
+
+    formatted_ci_modes = ', '.join([ci_mode.value for ci_mode in CIMode.__members__.values()])
+    parser.add_argument('-m', '--ci-mode', type=CIMode, default=CIMode.Both,
+                        help=f"Run command in which mode: [{formatted_ci_modes}]")
 
     options = parser.parse_args(options[2:])
     run_merge_artifacts(options)

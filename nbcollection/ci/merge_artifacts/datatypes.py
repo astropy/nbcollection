@@ -1,7 +1,7 @@
 import requests
 import typing
 
-from nbcollection.ci.merge_artifacts.constants import CIRCLECI_TOKEN
+from nbcollection.ci.constants import CIRCLECI_TOKEN
 
 
 class MergeContext(typing.NamedTuple):
@@ -13,6 +13,7 @@ class MergeContext(typing.NamedTuple):
     site_dir: str
     project_url: str
     assets_dir: str
+    local_artifact_staging_dir: str
 
 
 class CircleCIAuth(requests.auth.AuthBase):

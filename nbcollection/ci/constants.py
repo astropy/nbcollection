@@ -25,3 +25,4 @@ COMMIT_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 # Merge Artifacts
 AUTHOR_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.000Z'
+CIRCLECI_TOKEN = os.environ.get('CIRCLECI_TOKEN', None)
