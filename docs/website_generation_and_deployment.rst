@@ -28,6 +28,7 @@ Using `nbcollection-doc-demo` as the example. Let's build some notebooks on the 
     $ git clone git@github.com:jbcurtin/nbcollection-doc-demo.git
     $ cd nbcollection-doc-demo
     $ pip install git+https://github.com/jbcurtin/nbcollection.git
+    $ pip install GitPython requests toml PyYaml bs4 jinja2 nbformat nbconvert lxml
     $ nbcollection-ci build-notebooks --collection-names notebooks --category-names asdf_example --project-path $PWD
     $ nbcollection-ci merge-artifacts -o jbcurtin -r nbcollection-doc-demo --collection-names notebooks --ci-mode local
 
