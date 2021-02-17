@@ -63,7 +63,10 @@ setup(
     include_package_data=True,
     scripts=[],
     install_requires=INSTALL_REQUIRES,
-    entry_points={'console_scripts': []},
+    entry_points={'console_scripts': [
+        'nbcollection = nbcollection.__main__:main',
+        'nbcollection-ci = nbcollection.ci.__main__:run_from_cli',
+    ]},
     zip_safe=False,
     classifiers=[
     'Operating System :: OS Independent',
