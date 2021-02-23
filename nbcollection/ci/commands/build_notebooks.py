@@ -3,6 +3,7 @@ import sys
 
 from nbcollection.ci.constants import PROJECT_DIR
 from nbcollection.ci.build_notebooks.factory import run_build
+from nbcollection.ci.commands.datatypes import BuildMode
 
 
 DESCRIPTION = "Build categories of notebooks"
@@ -40,6 +41,8 @@ def convert(options=None):
                         help="Select a subset of Notebooks to be built, or all will be built")
     parser.add_argument('-p', '--project-path', default=PROJECT_DIR, type=str,
                         help="Path relative to Project DIR install")
+    parser.add_argument('-b', '--build-mode', default=BuildMode.Single, type=BuildMode,
+                        help="Build in one process or many?")
 
     options = parser.parse_args(options[2:])
     run_build(options)

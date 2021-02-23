@@ -2,6 +2,11 @@ import enum
 import typing
 
 
+class BuildMode(enum.Enum):
+    Concurrent = 'concurrent'
+    Single = 'single'
+
+
 class CIEnvironment(enum.Enum):
     CircleCI = 'circle-ci'
 
