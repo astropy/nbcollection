@@ -121,7 +121,6 @@ def find_virtualenv_binary() -> str:
     for path in os.environ['PATH']:
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
-                print(filename)
                 if filename == 'virtualenv':
                     return os.path.join(path, filename)
 
@@ -138,6 +137,8 @@ def find_virtualenv_binary() -> str:
             sys.path.append(virtualenv_python_path)
 
         return pyenv_bin_path
+
+    return '/usr/bin/virtualenv'
 
 
 def generate_job_context(job: BuildJob) -> JobContext:
