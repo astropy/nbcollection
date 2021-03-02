@@ -2,7 +2,7 @@
 
 set -e
 cd {{ build_context.build_dir }}
-virtualenv -p $(which python) venv
+{{ build_context.virtual_env_binary }} -p $(which python) venv
 source venv/bin/activate
 pip install -U GitPython==3.1.1 Jinja2==2.11.2 nbconvert==5.6.1 requests==2.23.0 toml==0.10.1
 

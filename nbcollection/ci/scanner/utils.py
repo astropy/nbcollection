@@ -1,8 +1,10 @@
+import getpass
 import glob
 import logging
 import os
 import shutil
 import subprocess  # nosec
+import sys
 import tempfile
 import time
 import types
@@ -115,6 +117,31 @@ def find_build_jobs(start_path: str,
                     yield BuildJob(collection, category)
 
 
+def find_virtualenv_binary() -> str:
+    for path in os.environ['PATH']:
+        for root, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                if filename == 'virtualenv':
+                    return os.path.join(path, filename)
+
+            break
+
+
+    # PyENV
+    major_version = sys.version_info.major
+    minor_version = sys.version_info.minor
+    pyenv_bin_path = f'/Users/{getpass.getuser()}/.local/bin/virtualenv'
+    if os.path.exists(pyenv_bin_path):
+        virtualenv_python_path = f'/Users/{getpass.getuser()}/.local/lib/python{major_version}.{minor_version}/site-packages'
+        if not virtualenv_python_path in sys.path:
+            sys.path.append(virtualenv_python_path)
+
+        return pyenv_bin_path
+
+    # macOS
+    raise NotImplementedError('Unable to locate virtualenv')
+
+
 def generate_job_context(job: BuildJob) -> JobContext:
     # Constants
     build_dir = os.path.join(SCANNER_BUILD_DIR, job.semantic_path())
@@ -125,7 +152,7 @@ def generate_job_context(job: BuildJob) -> JobContext:
 
     shutil.copytree(job.category.path, build_dir)
 
-    build_context = BuildContext(build_dir, 'html')
+    build_context = BuildContext(build_dir, 'html', find_virtualenv_binary())
 
     # Generate Build Setup Env Script
     build_setup_script = os.path.join(build_dir, 'setup-build-env.sh')
