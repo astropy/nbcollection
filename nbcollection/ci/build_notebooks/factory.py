@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def run_build(options: argparse.ArgumentParser) -> None:
-    if not os.environ.get('CI_PULL_REQUEST', None) is None:
+    if not os.environ.get('CIRCLE_PULL_REQUEST', None) is None:
         logger.info('Pull Request detected. Skipping Build')
         return None
 
