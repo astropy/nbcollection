@@ -2,7 +2,7 @@
 
 set -e
 cd "{{ build_context.build_dir }}"
-source venv/bin/activate
+source bin/activate
 if [ -f "environment.sh" ]; then
     source environment.sh
 fi
