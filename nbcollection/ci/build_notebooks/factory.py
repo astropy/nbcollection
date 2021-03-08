@@ -22,17 +22,20 @@ def run_build(options: argparse.ArgumentParser) -> None:
     for job in find_build_jobs(options.project_path,
                                options.collection_names,
                                options.category_names,
-                               options.notebook_names):
+                               options.notebook_names,
+                               options.force_build):
         jobs.append(job)
+
 
     # Run Build
     artifact_paths = {}
     if options.build_mode is BuildMode.Single:
-        job_context = generate_job_context(job)
-        run_job_context(job_context, True)
-        for notebook in job_context.notebooks:
-            hash_name = f'{notebook.collection_name}-{notebook.category_name}'
-            artifact_paths[hash_name] = notebook.artifact.path
+        for job in jobs:
+            job_context = generate_job_context(job)
+            run_job_context(job_context, True)
+            for notebook in job_context.notebooks:
+                hash_name = f'{notebook.collection_name}-{notebook.category_name}'
+                artifact_paths[hash_name] = notebook.artifact.path
 
     else:
         build_artifacts_concurrently(options, jobs, artifact_paths)

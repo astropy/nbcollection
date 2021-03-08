@@ -43,6 +43,8 @@ def convert(options=None):
                         help="Path relative to Project DIR install")
     parser.add_argument('-b', '--build-mode', default=BuildMode.Single, type=BuildMode,
                         help="Build in one process or many?")
+    parser.add_argument('-f', '--force-build', default=False, action='store_true',
+                        help="Force build excluded notebooks")
 
     options = parser.parse_args(options[2:])
     run_build(options)

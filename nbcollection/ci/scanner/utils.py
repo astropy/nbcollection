@@ -13,7 +13,7 @@ import typing
 from nbcollection.ci.constants import ENCODING, SCANNER_BUILD_DIR, SCANNER_ARTIFACT_DEST_DIR, SCANNER_BUILD_LOG_DIR
 from nbcollection.ci.datatypes import Collection, Category, Notebook, PreRequirements, Requirements, Namespace, \
         BuildJob, JobContext, BuildContext, PreInstall, IgnoreData, NotebookContext, ArtifactContext, Metadata, \
-        MetadataContext
+        MetadataContext, ExcludeJob
 from nbcollection.ci.exceptions import BuildError
 from nbcollection.ci.metadata.utils import extract_metadata
 from nbcollection.ci.renderer import render_template
@@ -106,15 +106,41 @@ def find_categories(collection: Collection, filter_in_notebooks: typing.List[str
             yield category
 
 
+def find_excluded_jobs(start_path: str) -> typing.List[ExcludeJob]:
+    excluded_notebooks_path = os.path.join(start_path, 'excluded_notebooks')
+    excluded_jobs = []
+    with open(excluded_notebooks_path, 'rb') as stream:
+        entries = [line for line in stream.read().decode(ENCODING).split('\n') if line]
+        for entry in entries:
+            collection, category = entry.split(':', 1)
+            excluded_jobs.append(ExcludeJob(collection, category))
+
+    return excluded_jobs
+
+
+def is_excluded(build_job: BuildJob, excluded_jobs: typing.List[ExcludeJob]) -> bool:
+    # If build_job exists inside excluded_jobs, return true
+    for excluded_job in excluded_jobs:
+        if excluded_job.collection == build_job.collection.name and \
+            excluded_job.collection == build_job.category.name:
+            return True
+
+    return False
+
+
 def find_build_jobs(start_path: str,
                     filter_in_collections: typing.List[str] = [],
                     filter_in_categories: typing.List[str] = [],
-                    filter_in_notebooks: typing.List[str] = []) -> types.GeneratorType:
+                    filter_in_notebooks: typing.List[str] = [],
+                    force_build: bool = False) -> types.GeneratorType:
+    excluded_jobs = find_excluded_jobs(start_path)
     for collection in find_collections(start_path):
         if len(filter_in_collections) == 0 or collection.name in filter_in_collections:
             for category in find_categories(collection, filter_in_notebooks):
                 if len(filter_in_categories) == 0 or category.name in filter_in_categories:
-                    yield BuildJob(collection, category)
+                    build_job = BuildJob(collection, category)
+                    if is_excluded(build_job, excluded_jobs) is False or force_build is True:
+                        yield BuildJob(collection, category)
 
 
 def find_virtualenv_binary() -> str:

@@ -97,3 +97,8 @@ class BuildContext(typing.NamedTuple):
     output_format: str
     virtual_env_binary: str
     timeout: int = 2400
+
+
+class ExcludeJob(typing.NamedTuple):
+    collection: str
+    category: str
