@@ -15,4 +15,4 @@ def run_generate_ci_environment(options: argparse.Namespace) -> None:
             options.notebook_names):
         jobs.append(job)
 
-    gen_ci_env(jobs, options.ci_environment, options.project_path)
+    gen_ci_env(jobs, options.ci_environment, options.project_path, options.enable_website_publication)

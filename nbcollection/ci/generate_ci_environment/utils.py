@@ -6,17 +6,19 @@ import yaml
 
 from nbcollection.ci.constants import ENCODING, SCANNER_ARTIFACT_DEST_DIR
 from nbcollection.ci.generate_ci_environment.constants import NBCOLLECTION_BUILDER, CONFIG_TEMPLATE, JOB_TEMPLATE, \
-        PULL_REQUEST_TEMPLATE, NBCOLLECTION_WORKFLOW_NAME
+        PULL_REQUEST_TEMPLATE, NBCOLLECTION_WORKFLOW_NAME, PUBLISH_JOB_NAME_TEMPLATE
 from nbcollection.ci.commands.datatypes import CIEnvironment
 from nbcollection.ci.datatypes import BuildJob
 
 logger = logging.getLogger(__name__)
 
 
-def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path: str) -> None:
+def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path: str, enable_website_publication: bool) -> None:
     if ci_env is not CIEnvironment.CircleCI:
         raise NotImplementedError(f'CIEnvironment "{ci_env}" not supported')
 
+    formatted_collections = []
+    formatted_job_names = []
     config = copy.deepcopy(CONFIG_TEMPLATE)
     logger.info(f'Using {NBCOLLECTION_BUILDER} for CircleCI Image Executor')
     for build_job in jobs:
@@ -38,10 +40,30 @@ def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path:
 
         config['jobs'][job_name] = job
         config['workflows'][NBCOLLECTION_WORKFLOW_NAME]['jobs'].append(job_name)
+        if not build_job.collection.name in formatted_collections:
+            formatted_collections.append(build_job.collection.name)
 
+        formatted_job_names.append(job_name)
+
+    formatted_collections = ','.join(formatted_collections)
+
+    # Pull Request
     pr_job_name = 'Pull Request'
     config['jobs'][pr_job_name] = copy.deepcopy(PULL_REQUEST_TEMPLATE)
     config['workflows'][NBCOLLECTION_WORKFLOW_NAME]['jobs'].append(pr_job_name)
+
+    # Publish Website
+    if enable_website_publication:
+        publish_job_name = 'Publish Website'
+        config['jobs'][publish_job_name] = copy.deepcopy(PUBLISH_JOB_NAME_TEMPLATE)
+        config['jobs'][publish_job_name]['steps'][1]['run']['command'] = f'nbcollection-ci merge-artifacts -c {formatted_collections}'
+        config['jobs'][publish_job_name]['steps'][1]['run']['name'] = 'Publish Website'
+        config['workflows'][NBCOLLECTION_WORKFLOW_NAME]['jobs'].append({
+            publish_job_name: {
+                'requires': formatted_job_names
+            }
+        })
+
     config_path = os.path.join(project_path, '.circleci/config.yml')
     config_dirpath = os.path.dirname(config_path)
     if not os.path.exists(config_dirpath):

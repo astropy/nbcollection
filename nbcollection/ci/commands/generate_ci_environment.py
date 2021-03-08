@@ -33,6 +33,8 @@ def convert(options=None):
                         help="Select a subset of Notebooks to be built, or all will be built")
     parser.add_argument('-p', '--project-path', default=PROJECT_DIR, type=str,
                         help="Path relative to Project DIR install")
+    parser.add_argument('-w', '--enable-website-publication', default=False, action='store_true',
+                        help="Enable Website Publication")
 
     options = parser.parse_args(options[2:])
     run_generate_ci_environment(options)

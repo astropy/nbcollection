@@ -52,3 +52,14 @@ PULL_REQUEST_TEMPLATE = {
         }
     ]
 }
+PUBLISH_JOB_NAME_TEMPLATE = {
+    'executor': 'nbcollection-builder',
+    'steps': [
+        'checkout',
+        {
+            'run': {
+                'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,
+            },
+        }
+    ]
+}
