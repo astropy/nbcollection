@@ -1,6 +1,7 @@
-NBCOLLECTION_BUILDER = 'jbcurtin/nbcollection-builder'
+NBCOLLECTION_BUILDER = 'jupyter/scipy-notebook:703d8b2dcb88'
 NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT = '60m'
 NBCOLLECTION_WORKFLOW_NAME = 'Build Notebooks'
+
 CONFIG_TEMPLATE = {
     'version': 2.1,
     'executors': {
@@ -22,6 +23,12 @@ JOB_TEMPLATE = {
     'executor': 'nbcollection-builder',
     'steps': [
         'checkout',
+        {
+            'run': {
+                'command': 'bash ./.circleci/setup-env.sh',
+                'name': 'Setup Environment',
+            }
+        },
         {
             'run': {
                 'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,

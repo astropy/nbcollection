@@ -9,6 +9,7 @@ from nbcollection.ci.generate_ci_environment.constants import NBCOLLECTION_BUILD
         PULL_REQUEST_TEMPLATE, NBCOLLECTION_WORKFLOW_NAME, PUBLISH_JOB_NAME_TEMPLATE
 from nbcollection.ci.commands.datatypes import CIEnvironment
 from nbcollection.ci.datatypes import BuildJob
+from nbcollection.ci.renderer import render_template
 
 logger = logging.getLogger(__name__)
 
@@ -30,13 +31,13 @@ def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path:
         job_name = '-'.join([formatted_col_name, formatted_cat_name])
         logger.info(f'Generating job for "{job_name}"')
         job = copy.deepcopy(JOB_TEMPLATE)
-        job['steps'][1]['run']['command'] = ' '.join([
+        job['steps'][2]['run']['command'] = ' '.join([
             'nbcollection-ci build-notebooks',
             f'--collection-names {build_job.collection.name}',
             f'--category-names {build_job.category.name}',
         ])
-        job['steps'][1]['run']['name'] = f'Build {job_name} notebooks'
-        job['steps'][2]['store_artifacts']['path'] = SCANNER_ARTIFACT_DEST_DIR
+        job['steps'][2]['run']['name'] = f'Build {job_name} notebooks'
+        job['steps'][3]['store_artifacts']['path'] = SCANNER_ARTIFACT_DEST_DIR
 
         config['jobs'][job_name] = job
         config['workflows'][NBCOLLECTION_WORKFLOW_NAME]['jobs'].append(job_name)
@@ -72,3 +73,9 @@ def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path:
     logger.info(f'Writing config-file to "{config_path}"')
     with open(config_path, 'wb') as stream:
         stream.write(yaml.dump(config).encode(ENCODING))
+
+    setup_script_filepath = os.path.join(project_path, '.circleci/setup-env.sh')
+    logger.info(f"Rendering Setup Script: {setup_script_filepath}")
+    with open(setup_script_filepath, 'wb') as stream:
+        rendered_script = render_template('setup-env.sh', {})
+        stream.write(rendered_script.encode(ENCODING))
