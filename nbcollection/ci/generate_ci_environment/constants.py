@@ -1,6 +1,9 @@
+from nbcollection.ci.constants import SCANNER_ARTIFACT_DEST_DIR
+
 NBCOLLECTION_BUILDER = 'jupyter/scipy-notebook:703d8b2dcb88'
 NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT = '60m'
 NBCOLLECTION_WORKFLOW_NAME = 'Build Notebooks'
+
 
 CONFIG_TEMPLATE = {
     'version': 2.1,
@@ -27,7 +30,7 @@ JOB_TEMPLATE = {
             'run': {
                 'command': 'bash ./.circleci/setup-env.sh',
                 'name': 'Setup Environment',
-            }
+            },
         },
         {
             'run': {
@@ -36,9 +39,9 @@ JOB_TEMPLATE = {
         },
         {
             'store_artifacts': {
-                'path': '/tmp/nbcollection-ci-artifacts',  # nosec
-            }
-        }
+                'path': SCANNER_ARTIFACT_DEST_DIR,
+            },
+        },
     ]
 }
 PULL_REQUEST_TEMPLATE = {
@@ -54,7 +57,7 @@ PULL_REQUEST_TEMPLATE = {
         },
         {
             'store_artifacts': {
-                'path': '/tmp/nbcollection-ci-artifacts',  # nosec
+                'path': SCANNER_ARTIFACT_DEST_DIR,
             }
         }
     ]
