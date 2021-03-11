@@ -40,7 +40,7 @@ def convert(options=None):
     if options.publish_branch in ['main', 'master']:
         raise NotImplementedError(f'This program will not push anything to branch:{options.site_directory}')
 
-    if options.publish_remote in ['upstream', 'origin']:
+    if options.publish_remote in ['upstream']:
         raise NotImplementedError(f'This program will not push anything to remote:{options.publish_branch}')
 
     run_site_deployment(options)

@@ -1,9 +1,12 @@
 import argparse
 import git
+import logging
 import os
 import shutil
 
 from nbcollection.ci.commands.datatypes import Site
+
+logger = logging.getLogger(__name__)
 
 
 def run_site_deployment(options: argparse.Namespace) -> None:
@@ -20,9 +23,11 @@ def run_site_deployment(options: argparse.Namespace) -> None:
             branch = project_repo.create_head(options.publish_branch)
 
         try:
-            project_repo.remotes[options.publish_remote]
+            push_remote = project_repo.remotes[options.publish_remote]
         except IndexError:
-            project_repo.create_remote(options.publish_remote, os.environ['CIRCLE_REPOSITORY_URL'])
+            remote_url = os.environ['CIRCLE_REPOSITORY_URL']
+            logger.info(f'Using Remote URL: {remote_url}')
+            push_remote = project_repo.create_remote(options.publish_remote, remote_url)
       
 
         # TODO: Refactor this file traversing block to use methods available in scanner module
@@ -86,7 +91,7 @@ def run_site_deployment(options: argparse.Namespace) -> None:
             break
 
         project_repo.index.commit('Added Site Directory Files')
-        project_repo.remotes[options.publish_remote].push(options.publish_branch, force=True)
+        push_remote.push(options.publish_branch, force=True)
 
     else:
         raise NotImplementedError(options.site)

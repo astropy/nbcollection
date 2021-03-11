@@ -81,7 +81,7 @@ PUBLISH_JOB_NAME_TEMPLATE = {
         {
             'run': {
                 'name': 'Deploy Website',
-                'command': 'nbcollection-ci site-deployment -r publish -b gh-pages',
+                'command': 'nbcollection-ci site-deployment -r origin -b gh-pages',
                 'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,
             }
         },
