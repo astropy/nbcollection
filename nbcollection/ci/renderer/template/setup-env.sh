@@ -12,7 +12,7 @@ sudo apt-get install -y libfreetype6-dev
 
 git clone https://github.com/spacetelescope/nbcollection nbcollection
 cd nbcollection
-git checkout cdb69e5f353c2119d53a85e6a8ae739423ad7df0
+git checkout b5d715b11f47878d8173e5a8029bde7a1e4c264b
 pip install -U pip setuptools
 pip install -r ci_requirements.txt
 python setup.py install
