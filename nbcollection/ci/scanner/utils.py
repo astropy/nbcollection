@@ -108,6 +108,9 @@ def find_categories(collection: Collection, filter_in_notebooks: typing.List[str
 
 def find_excluded_jobs(start_path: str) -> typing.List[ExcludeJob]:
     excluded_notebooks_path = os.path.join(start_path, 'excluded_notebooks')
+    if not os.path.exists(excluded_notebooks_path):
+        return []
+
     excluded_jobs = []
     with open(excluded_notebooks_path, 'rb') as stream:
         entries = [line for line in stream.read().decode(ENCODING).split('\n') if line]
