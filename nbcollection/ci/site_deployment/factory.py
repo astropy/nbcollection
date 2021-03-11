@@ -22,11 +22,7 @@ def run_site_deployment(options: argparse.Namespace) -> None:
         try:
             project_repo.remotes[options.publish_remote]
         except IndexError:
-            remote_url = os.environ.get('CIRCLE_REPOSITORY_URL', None)
-            if remote_url is None:
-                raise NotImplementedError(f'Publish Remote[{options.publish_remote}] not found!')
-
-            project_repo.create_remote(options.publish_remote, remote_url)
+            project_repo.create_remote(options.publish_remote, os.environ['CIRCLE_REPOSITORY_URL'])
       
 
         # TODO: Refactor this file traversing block to use methods available in scanner module
