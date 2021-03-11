@@ -258,3 +258,4 @@ def run_artifact_merge(command_context: CICommandContext, merge_context: MergeCo
         html_builder.extract_cells_from_html(dest_filepath)
         html_builder.render_notebook_template(dest_filepath, merge_context)
 
+    logger.info(f'Website Generated: {merge_context.site_dir}')

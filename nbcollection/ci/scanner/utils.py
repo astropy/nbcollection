@@ -122,7 +122,7 @@ def is_excluded(build_job: BuildJob, excluded_jobs: typing.List[ExcludeJob]) -> 
     # If build_job exists inside excluded_jobs, return true
     for excluded_job in excluded_jobs:
         if excluded_job.collection == build_job.collection.name and \
-            excluded_job.collection == build_job.category.name:
+            excluded_job.category == build_job.category.name:
             return True
 
     return False

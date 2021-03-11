@@ -57,8 +57,8 @@ def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path:
     if enable_website_publication:
         publish_job_name = 'Publish Website'
         config['jobs'][publish_job_name] = copy.deepcopy(PUBLISH_JOB_NAME_TEMPLATE)
-        config['jobs'][publish_job_name]['steps'][1]['run']['command'] = f'nbcollection-ci merge-artifacts -c {formatted_collections}'
-        config['jobs'][publish_job_name]['steps'][1]['run']['name'] = 'Publish Website'
+        config['jobs'][publish_job_name]['steps'][2]['run']['command'] = f'nbcollection-ci merge-artifacts -c {formatted_collections} -o $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME'
+        config['jobs'][publish_job_name]['steps'][2]['run']['name'] = 'Publish Website'
         config['workflows'][NBCOLLECTION_WORKFLOW_NAME]['jobs'].append({
             publish_job_name: {
                 'requires': formatted_job_names

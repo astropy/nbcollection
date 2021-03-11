@@ -28,3 +28,7 @@ class CICommandContext(typing.NamedTuple):
     category_names: typing.List[str]
     notebook_names: typing.List[str]
     mode: CIMode
+
+
+class Site(enum.Enum):
+    GithubPages = 'github pages'

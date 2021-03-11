@@ -68,8 +68,14 @@ PUBLISH_JOB_NAME_TEMPLATE = {
         'checkout',
         {
             'run': {
+                'command': 'bash ./.circleci/setup-env.sh',
+                'name': 'Setup Environment',
+            },
+        },
+        {
+            'run': {
                 'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,
             },
-        }
+        },
     ]
 }
