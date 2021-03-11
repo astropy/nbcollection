@@ -7,7 +7,7 @@ export LC_ALL=C.UTF-8
 
 git clone https://github.com/spacetelescope/nbcollection nbcollection
 cd nbcollection
-git checkout d56de2876b4ab4814838250007a9cc862cd3bd1d
+git checkout ee085023f565abc0b177932321caf2e3fda5e040
 pip install -U pip setuptools
 pip install -r ci_requirements.txt
 python setup.py install
