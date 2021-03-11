@@ -70,12 +70,20 @@ PUBLISH_JOB_NAME_TEMPLATE = {
             'run': {
                 'command': 'bash ./.circleci/setup-env.sh',
                 'name': 'Setup Environment',
+                'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,
             },
         },
         {
             'run': {
                 'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,
             },
+        },
+        {
+            'run': {
+                'name': 'Deploy Website',
+                'command': 'nbcollection-ci site-deployment -r origin -b gh-pages',
+                'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,
+            }
         },
     ]
 }
