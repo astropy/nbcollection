@@ -1,6 +1,6 @@
 from nbcollection.ci.constants import SCANNER_ARTIFACT_DEST_DIR
 
-NBCOLLECTION_BUILDER = 'jupyter/scipy-notebook:703d8b2dcb88'
+NBCOLLECTION_BUILDER = 'continuumio/miniconda3:latest'
 NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT = '60m'
 NBCOLLECTION_WORKFLOW_NAME = 'Build Notebooks'
 
@@ -78,6 +78,7 @@ PUBLISH_JOB_NAME_TEMPLATE = {
                 'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,
             },
         },
+        'add_ssh_keys',
         {
             'run': {
                 'name': 'Deploy Website',
