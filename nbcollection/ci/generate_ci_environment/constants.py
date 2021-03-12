@@ -57,7 +57,7 @@ PULL_REQUEST_TEMPLATE = {
         {
             'run': {
                 'no_output_timeout': NBCOLLECTION_BUILDER_CIRCLE_CI_TIMEOUT,
-                'command': 'nbcollection-ci pull-request -u $CIRCLE_PULL_REQUEST',
+                'command': 'bash ./.circleci/build-pull-request.sh',
                 'name': 'Build Pull Request',
             },
         },
