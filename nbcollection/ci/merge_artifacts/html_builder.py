@@ -69,6 +69,8 @@ def render_notebook_template(notebook_filepath: str, merge_context: MergeContext
             'author': environment['author'],
             'maintainer': environment['maintainer'],
             'url': '{environment["website_base_url"]}/notebooks/{notebook_filename}',
+            'org_name': merge_context.org_name,
+            'repo_name': merge_context.repo_name,
         },
         'static_url': 'static/',
         'notebook_content': notebook_content,

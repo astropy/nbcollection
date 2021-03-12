@@ -3,7 +3,7 @@ import os
 import sys
 
 from nbcollection.ci.commands import replicate, build_notebooks, metadata, generate_ci_environment, merge_artifacts, \
-        pull_request, site_deployment
+        pull_request, site_deployment, sync_notebooks
 
 commands = {
   'metadata': metadata,
@@ -13,6 +13,7 @@ commands = {
   'merge-artifacts': merge_artifacts,
   'pull-request': pull_request,
   'site-deployment': site_deployment,
+  'sync-notebooks': sync_notebooks,
 }
 
 rendered_commands = '\n    '.join([' '.join(['nbcollection-ci', key]) for key in commands.keys()])

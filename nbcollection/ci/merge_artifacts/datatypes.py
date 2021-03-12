@@ -14,6 +14,8 @@ class MergeContext(typing.NamedTuple):
     project_url: str
     assets_dir: str
     local_artifact_staging_dir: str
+    org_name: str
+    repo_name: str
 
 
 class CircleCIAuth(requests.auth.AuthBase):

@@ -62,7 +62,8 @@ def generate_merge_context(project_path: str, org: str, repo_name: str) -> Merge
             site_dir,
             f'{BASE_URL}/project/github/{org}/{repo_name}',
             assets_dir,
-            SCANNER_ARTIFACT_DEST_DIR)
+            SCANNER_ARTIFACT_DEST_DIR,
+            org, repo_name)
 
 
 def latest_circleci_artifact_urls(merge_context: MergeContext) -> typing.List[str]:
@@ -229,7 +230,8 @@ def run_artifact_merge(command_context: CICommandContext, merge_context: MergeCo
             for find, replace in NAME_ISSUES:
                 cat_name = cat_name.replace(find, replace)
 
-            cats.append(ArtifactCategory(cat_name, sorted(nbs)))
+            cats.append(ArtifactCategory(cat_name, sorted(nbs, key=lambda x: x.title)))
+
 
         for find, replace in NAME_ISSUES:
             coll_name = coll_name.replace(find, replace)
