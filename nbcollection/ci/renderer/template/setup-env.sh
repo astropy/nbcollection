@@ -11,7 +11,7 @@ apt-get install -y git make build-essential libssl-dev zlib1g-dev libbz2-dev lib
 
 git clone https://github.com/spacetelescope/nbcollection nbcollection
 cd nbcollection
-git checkout 59b7dc2d2293aeacb90ddbbb909e2ed6a7d16d8f
+git checkout 1a3a1657adc20fa9dd9727d43dce8cb8ce03b89c
 pip install -U pip setuptools
 pip install -r ci_requirements.txt
 python setup.py install
