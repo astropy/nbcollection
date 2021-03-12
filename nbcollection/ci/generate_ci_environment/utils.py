@@ -83,5 +83,5 @@ def gen_ci_env(jobs: typing.List[BuildJob], ci_env: CIEnvironment, project_path:
     build_pull_request_filepath = os.path.join(project_path, '.circleci/build-pull-request.sh')
     logger.info(f'Rendering Pull Request: {build_pull_request_filepath}')
     with open(build_pull_request_filepath, 'wb') as stream:
-        rendered_pr_script = render_template('build-pull-request.sh')
+        rendered_pr_script = render_template('build-pull-request.sh', {})
         stream.write(rendered_pr_script.encode(ENCODING))
