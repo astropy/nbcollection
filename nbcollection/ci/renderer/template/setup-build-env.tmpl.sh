@@ -6,7 +6,7 @@ python -m venv .
 source bin/activate
 pip install -U GitPython==3.1.1 Jinja2==2.11.2 nbconvert==5.6.1 requests==2.23.0 toml==0.10.1
 
-pip install -U pip setuptools
+pip install -U pip setuptools wheel
 if [ -f "pre-install.sh" ]; then
     bash pre-install.sh
 fi
