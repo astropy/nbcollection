@@ -133,6 +133,11 @@ def render_static_assets(initial_dir: str, target_dir: str) -> None:
                 filename.endswith('.gif')]):
                 logger.info(f'Moving File[{filename}] from Asset Dir -> Target Dir')
                 shutil.copyfile(source_filepath, target_filepath)
+
+            elif any([
+                filename.endswith('.swp')]):
+                continue
+
             else:
                 raise NotImplementedError(filename)
 

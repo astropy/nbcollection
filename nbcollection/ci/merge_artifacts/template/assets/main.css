@@ -3,7 +3,7 @@ body {
     font-family: 'Overpass', sans-serif;
     background-color: #F4F4F4;
 }
-h3 {
+h3, h2 {
     color: #00617E;
     font-size: 25px;
     margin-bottom: -10px;
