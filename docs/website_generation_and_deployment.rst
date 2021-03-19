@@ -23,12 +23,12 @@ website from these notebooks.
 
 .. code-block:: bash
 
-    $ git clone git@github.com:jbcurtin/nbcollection-doc-demo.git
+    $ git clone git@github.com:spacetelescope/nbcollection-doc-demo.git
     $ cd nbcollection-doc-demo
-    $ pip install git+https://github.com/jbcurtin/nbcollection.git
+    $ pip install git+https://github.com/spacetelescope/nbcollection.git
     $ pip install GitPython requests toml PyYaml bs4 jinja2 nbformat nbconvert lxml
     $ nbcollection-ci build-notebooks --collection-names notebooks --category-names asdf_example --project-path $PWD
-    $ nbcollection-ci merge-artifacts -o jbcurtin -r nbcollection-doc-demo --collection-names notebooks --ci-mode local
+    $ nbcollection-ci merge-artifacts -o spacetelescope -r nbcollection-doc-demo --collection-names notebooks --ci-mode local
 
 
 A new website will be generated and distributed into $PWD/site. Any static-site webserver is capable of serving the

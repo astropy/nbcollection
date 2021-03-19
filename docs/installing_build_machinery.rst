@@ -19,7 +19,7 @@ If you're new to github, I recommend following the official documentation on how
 Inserting content into the newly created Github Repository
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-I've created https://github.com/jbcurtin/nbcollection-doc-demo in my Github Account. I'll clone that repository,
+I've created https://github.com/spacetelescope/nbcollection-doc-demo in my Github Account. I'll clone that repository,
  add a new GitRemote pointing to git@github.com:spacetelescope/jdat_notebooks.git and copy the content into
  nbcollection-doc-demo.
 
@@ -29,16 +29,16 @@ Near the end, we'll remove build machinery previously installed. This is meant t
 
 .. code-block:: bash
 
-    $ git clone https://github.com/jbcurtin/nbcollection-doc-demo.git
+    $ git clone https://github.com/spacetelescope/nbcollection-doc-demo.git
     $ cd nbcollection-doc-demo
     $ git checkout -b main
-    $ git remote rename origin jbcurtin
+    $ git remote rename origin spacetelescope 
     $ git add remote spacetelescope git@github.com:spacetelescope/jdat_notebooks.git
     $ git fetch --all
     $ git reset spacetelescope/main --hard
     $ rm -rf .circleci
     $ git commit -m 'Removed pre-installed build machinery' -a
-    $ git push jbcurtin main
+    $ git push spacetelescope main
 
 
 Enabling CircleCI
@@ -79,13 +79,13 @@ for our /tmp/nbcollection-doc-demo repository.
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/jbcurtin/nbcollection.git
+    $ pip install git+https://github.com/spacetelescope/nbcollection.git
     $ pip install GitPython requests toml PyYaml bs4
     $ nbcollection-ci generate-ci-env --collection-names notebooks --project-path /tmp/nbcollection-doc-demo
     $ cd /tmp/nbcollection-doc-demo
     $ git add .circleci
     $ git commit -m 'Added fresh build machinery' -a
-    $ git push jbcurtin main
+    $ git push spacetelescope main
 
 
 Checking our work

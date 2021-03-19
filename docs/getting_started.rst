@@ -9,7 +9,7 @@ nbcollection-ci to Github Actions, Jenkins or another CI/CD solution.
 
 This document covers what nbcollection-ci expects to see in a repository and associated pull request. Let's start with
 an example project called `nbcollection-demo`. nbcollection-demo has all the moving parts of `nbcollection-ci pull-request` implemented.
-https://github.com/jbcurtin/nbcollection-demo/pull/2. It concludes with building a website by merging artifacts from CircleCI, which can
+https://github.com/spacetelescope/nbcollection-demo/pull/2. It concludes with building a website by merging artifacts from CircleCI, which can
 than be commited into a Github Pages complient repository on Github.
 
 
@@ -18,7 +18,7 @@ How to install
 
 .. code-block:: bash
 
-    $ pip install git+https://github.com/jbcurtin/nbcollection.git
+    $ pip install git+https://github.com/spacetelescope/nbcollection.git
 
 
 How to manage a Pull Request
@@ -101,19 +101,19 @@ To preserve your time, `nbcollection-ci` implementes a series of commands to ass
 all parties interested in using the framework. Since we've already talked about how to manage a pull request, lets cover
 what to do on the main branch after the pull request has been merged.
 
-We've recently closed `https://github.com/jbcurtin/nbcollection-demo/pull/1` and need to update the CircleCI `config.yml` file
+We've recently closed `https://github.com/spacetelescope/nbcollection-demo/pull/1` and need to update the CircleCI `config.yml` file
 to run concurrent builds. `nbcollection-ci` expects this kind of workflow and has created a set of commands to make this process
 as seemless as possible. We'll run a command to render a new `config.yml` file to add the a category in `jdat_notebooks` collection, 
 called background_estimation_imaging notebooks.
 
 .. code-block:: bash
 
-    $ git clone git@github.com:jbcurtin/nbcollection-demo.git $HOME/nbcollection-demo
+    $ git clone git@github.com:spacetelescope/nbcollection-demo.git $HOME/nbcollection-demo
     $ cd $HOME/nbcollection-demo
-    $ git rename remote origin jbcurtin
+    $ git rename remote origin spacetelescope 
     $ nbcollection-ci generate-ci-env --ci-environment circle-ci -p $PWD
     $ git commit -m 'Updated CircleCI Config with latest collections and categories found in main branch' -a
-    $ git push jbcurtin main
+    $ git push spacetelescope main
 
 
 `nbcollection-ci generate-ci-env` has destroyed and created the `.circleci/config.yml` for all collections and categories found in
@@ -133,7 +133,7 @@ them into a website using `nbcollection-ci merge-artifacts`.
 
 .. code-block:: bash
 
-    $ nbcollection-ci merge-artifacts -p /tmp/merge-artifacts -r nbcollection-demo -o jbcurtin
+    $ nbcollection-ci merge-artifacts -p /tmp/merge-artifacts -r nbcollection-demo -o spacetelescope
 
 With the artifacts created in `/tmp/merge-artifacts`, lets copy the files into `nbcollection-demo` and push them to Github Pages.
 
@@ -143,9 +143,8 @@ With the artifacts created in `/tmp/merge-artifacts`, lets copy the files into `
     $ rm -rf ./*
     $ cp -r /tmp/merge-artifacts/site .
     $ git commit -m 'Uploading nbcollection-demo Website' -a
-    $ git push jbcurtin gh-pages
+    $ git push spacetelescope gh-pages
 
 
-Give Github Pages some time to update, then navigate to https://github.io/jbcurtin/nbcollection-demo
-
+Give Github Pages some time to update, then navigate to https://github.io/spacetelescope/nbcollection-demo
 
