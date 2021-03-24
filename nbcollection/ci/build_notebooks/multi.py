@@ -6,19 +6,17 @@ import time
 import typing
 
 from nbcollection.ci.scanner.utils import find_build_jobs, generate_job_context, run_job_context
-
-
-BUILD_LOG_DIR = '/tmp/nbcollection-ci-build-logs'
+from nbcollection.ci.constants import SCANNER_BUILD_LOG_DIR
 
 logger = logging.getLogger(__name__)
 
 
 def build_artifacts_concurrently(options, jobs, artifact_paths) -> typing.Dict[str, str]:
-    if os.path.exists(BUILD_LOG_DIR):
-        shutil.rmtree(BUILD_LOG_DIR)
+    if os.path.exists(SCANNER_BUILD_LOG_DIR):
+        shutil.rmtree(SCANNER_BUILD_LOG_DIR)
 
 
-    os.makedirs(BUILD_LOG_DIR)
+    os.makedirs(SCANNER_BUILD_LOG_DIR)
     def _build_category(project_path: str, collection_name: str, category_name: str) -> None:
         os.environ['CHANNEL_BUILD'] = 'true'
         for job in find_build_jobs(project_path, [collection_name], [category_name]):

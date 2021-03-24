@@ -7,10 +7,11 @@ DEFAULT_REMOTE = os.environ.get('DEFAULT_REMOTE', 'origin')
 ENCODING = 'utf-8'
 PROJECT_DIR = os.getcwd()
 
+TEMP_FOLDER = os.environ.get('TEMP_FOLDER', '/tmp')
 # Scanner Module
-SCANNER_BUILD_DIR = '/tmp/nbcollection-ci/scanner-build-dir'  # nosec
-SCANNER_ARTIFACT_DEST_DIR = '/tmp/nbcollection-ci-artifacts'  # nosec
-SCANNER_BUILD_LOG_DIR = '/tmp/nbcollection-ci/scanner-build-logs'  # nosec
+SCANNER_BUILD_DIR = f'{TEMP_FOLDER}/nbcollection-ci/scanner-build-dir'  # nosec
+SCANNER_ARTIFACT_DEST_DIR = f'{TEMP_FOLDER}/nbcollection-ci-artifacts'  # nosec
+SCANNER_BUILD_LOG_DIR = f'{TEMP_FOLDER}/nbcollection-ci/scanner-build-logs'  # nosec
 
 # Renderer Module
 RENDERER_ENV_CONTEXT_PATH = os.path.join(os.getcwd(), 'env-context.toml')
