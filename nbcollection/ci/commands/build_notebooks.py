@@ -33,6 +33,7 @@ def convert(options=None):
                                      description=DESCRIPTION,
                                      epilog=EXAMPLE_USAGE,
                                      formatter_class=argparse.RawTextHelpFormatter)
+
     parser.add_argument('-c', '--collection-names', required=False, default=None,
                         help="Select a subset of Collections to be built, or all will be built")
     parser.add_argument('-t', '--category-names', required=False, default=None,
@@ -41,8 +42,11 @@ def convert(options=None):
                         help="Select a subset of Notebooks to be built, or all will be built")
     parser.add_argument('-p', '--project-path', default=PROJECT_DIR, type=str,
                         help="Path relative to Project DIR install")
+    formatted_build_modes = ', '.join([v.value for v in BuildMode.__members__.values()])
     parser.add_argument('-b', '--build-mode', default=BuildMode.Single, type=BuildMode,
-                        help="Build in one process or many?")
+                        help=f"Available Build Modes: {formatted_build_modes}")
+    parser.add_argument('-m', '--max-workers', default=10, type=int,
+                        help="Maximum number of workers to build notebooks")
     parser.add_argument('-f', '--force-build', default=False, action='store_true',
                         help="Force build excluded notebooks")
 

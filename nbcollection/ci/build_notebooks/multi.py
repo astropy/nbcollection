@@ -37,7 +37,8 @@ def build_artifacts_concurrently(options, jobs, artifact_paths) -> typing.Dict[s
 
 
     processes = []
-    max_workers = 10
+    max_workers = options.max_workers
+    logger.info(f'Job List: {len(job_list)} - Max Workers: {max_workers}')
     while len(job_list) > 0 or len(processes) > 0:
         for proc_idx, proc in enumerate([proc for proc in processes if not proc.is_alive()]):
             processes.remove(proc)
@@ -51,7 +52,7 @@ def build_artifacts_concurrently(options, jobs, artifact_paths) -> typing.Dict[s
         except IndexError:
             continue
 
-        if len(processes) > 0:
+        if len(processes) >= max_workers:
             continue
 
         logger.info(f'Starting new Build[{collection_name}, {category_name}]')
