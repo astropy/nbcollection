@@ -6,6 +6,12 @@ from nbcollection.ci.sync_notebooks.factory import run_sync_notebooks
 
 DESCRIPTION = "Sync Notebooks between two folders"
 EXAMPLE_USAGE = """
+Sync Notebooks copies notebook categories into another space in the file-system
+
+nbcollection-ci sync-notebooks -c jdat_notebooks -d ../jdat_notebooks/notebooks
+
+Source Example
+PYTHONPATH='.' python -m nbcollection.ci sync-notebooks -c jdat_notebooks -d ../jdat_notebooks/notebooks
 """
 
 
