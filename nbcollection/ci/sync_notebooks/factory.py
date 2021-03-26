@@ -17,7 +17,7 @@ def run_sync_notebooks(options: argparse.Namespace) -> None:
     for job in find_build_jobs(options.project_path,
                                options.collection_names,
                                options.category_names,
-                               options.notebook_names):
+                               options.notebook_names, True):
 
         notebooks_to_update = {}
         for notebook in job.category.notebooks:
