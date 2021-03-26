@@ -102,3 +102,9 @@ def git_config_file(request: SubRequest) -> str:
     git_config_repo = TestRepo(RepoType.Local, Template.OnlyGitConfigFile)
     request.addfinalizer(git_config_repo.destroy)
     return git_config_repo.setup().repo_path
+
+@pytest.fixture
+def repo_with_html(request: SubRequest) -> str:
+    html_repo = TestRepo(RepoType.Local, Template.RepoWithHTML)
+    request.addfinalizer(html_repo.destroy)
+    return html_repo.setup().repo_path

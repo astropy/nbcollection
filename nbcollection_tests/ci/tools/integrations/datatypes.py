@@ -19,3 +19,4 @@ class Template(enum.Enum):
     EmptyDirWithGitRemoteUpstream = 'empty-dir-with-git-remote-upstream'
     NextDirWithGitRemoteUpstream = 'next-dir-with-git-remote-upstream'
     OnlyGitConfigFile = 'only-git-config-file'
+    RepoWithHTML = 'repo-with-html'
