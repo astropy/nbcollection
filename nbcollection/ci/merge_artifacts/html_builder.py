@@ -109,7 +109,8 @@ def extract_cells_from_html(filepath: str) -> None:
         cell_data.append(str(cell))
 
     if len(cell_data) == 0:
-        cell_data.extend([str(cell) for cell in soup.find('body', {'class': 'jp-Notebook'}).findAll()])
+        cell_data.extend([str(cell) for cell in soup.find('body', {'class': 'jp-Notebook'}).findAll()][3:])
+
 
     cell_data = '\n'.join(cell_data)
     with open(filepath, 'wb') as stream:
