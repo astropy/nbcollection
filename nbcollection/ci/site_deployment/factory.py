@@ -10,6 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 def run_site_deployment(options: argparse.Namespace) -> None:
+    if not os.environ.get('CIRCLE_PULL_REQUEST', None) is None:
+        logger.info('Pull Request detected. Skipping Website Publication')
+        return None
+
     if options.site is Site.GithubPages:
         try:
             project_repo = git.Repo(options.project_path)
