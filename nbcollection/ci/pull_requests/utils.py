@@ -29,12 +29,6 @@ def pull_request_build(
         repo_info = extract_repo_info(repo, pr_info)
         build_jobs = {}
 
-        # This automation exists to make it easier to run dynamic PRs. Rather than expecting the Scientist to install
-        #   the build machinery per notebook-category. We'll have the categories detected via commits created in the
-        #   PullRequest
-
-        # The automation can be bypassed by the Scientist nistalling the build machinery with specific notebook-category
-        #   specifications
         if len(collection_names) > 0:
             for job in select_build_jobs_by_pr_author_commits(repo_info, pr_info):
                 if not job.semantic_path() in build_jobs.keys():

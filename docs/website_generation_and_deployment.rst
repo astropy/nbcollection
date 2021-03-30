@@ -29,6 +29,8 @@ website from these notebooks.
     $ pip install GitPython requests toml PyYaml bs4 jinja2 nbformat nbconvert lxml
     $ nbcollection-ci build-notebooks --collection-names notebooks --category-names asdf_example --project-path $PWD
     $ nbcollection-ci merge-artifacts -o spacetelescope -r nbcollection-doc-demo --collection-names notebooks --ci-mode local
+    # Push to Github Pages branch 'gh-pages'
+    $ nbcollection-ci site-deployment -r origin -b gh-pages
 
 
 A new website will be generated and distributed into $PWD/site. Any static-site webserver is capable of serving the

@@ -18,8 +18,9 @@ See Also
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
 
     getting_started
     installing_build_machinery
     website_generation_and_deployment
+    architecture
