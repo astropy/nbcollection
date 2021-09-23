@@ -79,6 +79,14 @@ def get_parser(description):
                         help="Overwrite executed notebooks if they already "
                              "exist.")
 
+    parser.add_argument('--exclude', dest='exclude_pattern',
+                        help='A regular expression to match against files in '
+                             'the target path, used to exclude files')
+
+    parser.add_argument('--include', dest='include_pattern',
+                        help='A regular expression to match against files in '
+                             'the target path, used to include files')
+
     vq_group = parser.add_mutually_exclusive_group()
     vq_group.add_argument('-v', '--verbose', action='count', default=0,
                           dest='verbosity')
@@ -107,8 +115,7 @@ def get_converter(args):
     # Bit of a hack, but it seems like explicitly passing a value for
     # template_file (even if it is the default, null value) raises an error in
     # nbconvert
-    if kw['convert_kwargs'].get('template_file', None) == '':
-        kw['convert_kwargs'].pop('template_file')
+    kw['convert_kwargs'].pop('template_file', None)
 
     # Process the other flags:
     kwargs = vars(args)
@@ -117,4 +124,5 @@ def get_converter(args):
             continue
         kw[k] = getattr(args, k)
 
+    print(kw)
     return nbcollectionConverter(**kw)
