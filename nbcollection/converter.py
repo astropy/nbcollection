@@ -1,5 +1,6 @@
 # Standard library
 import os
+import re
 
 # Third-party
 import jinja2
@@ -43,6 +44,7 @@ class nbcollectionConverter:
 
     def __init__(self, notebooks, overwrite=False,
                  build_path=None, flatten=False,
+                 exclude_pattern=None, include_pattern=None,
                  execute_kwargs=None, convert_kwargs=None, **kwargs):
         """
         Parameters
@@ -89,6 +91,14 @@ class nbcollectionConverter:
                     for name in files:
                         basename, ext = os.path.splitext(name)
                         file_path = os.path.join(root, name)
+
+                        if exclude_pattern is not None:
+                            if re.search(exclude_pattern, name):
+                                continue
+
+                        if include_pattern is not None:
+                            if re.search(include_pattern, name) is None:
+                                continue
 
                         if ext == '.ipynb':
                             nb = nbcollectionNotebook(

@@ -11,6 +11,14 @@ def execute(args=None):
 
     parser = get_parser(DESCRIPTION)
 
+    parser.add_argument('--exclude', dest='exclude_pattern',
+                        help='A regular expression to match against files in '
+                             'the target path, used to exclude files')
+
+    parser.add_argument('--include', dest='include_pattern',
+                        help='A regular expression to match against files in '
+                             'the target path, used to include files')
+
     # Specific to this command:
     for trait_name in execute_trait_names:
         trait = getattr(ExecutePreprocessor, trait_name)

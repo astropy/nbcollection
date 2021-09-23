@@ -113,7 +113,7 @@ def get_converter(args):
     # Process the other flags:
     kwargs = vars(args)
     for k in kwargs:
-        if k in list(execute_kw.keys())+list(convert_kw.keys()):
+        if k in list(execute_kw.keys()) + list(convert_kw.keys()):
             continue
         kw[k] = getattr(args, k)
 
