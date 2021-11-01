@@ -6,6 +6,7 @@ import time
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 from nbconvert.exporters import HTMLExporter
 from nbconvert.writers import FilesWriter
+from traitlets.config import Config
 import nbformat
 
 # Package
@@ -68,6 +69,11 @@ class nbcollectionNotebook:
         if convert_kwargs is None:
             convert_kwargs = dict()
         self.convert_kwargs = convert_kwargs
+
+        self.converter_config = Config()
+        self.converter_config.HTMLExporter.preprocessors = [
+            'nbconvert.preprocessors.ExtractOutputPreprocessor'
+        ]
 
     def execute(self):
         """Execute this notebook file and write out the executed contents to a
@@ -142,7 +148,8 @@ class nbcollectionNotebook:
 
         # Exports the notebook to HTML
         logger.debug('Exporting notebook to HTML...')
-        exporter = HTMLExporter(**self.convert_kwargs)
+        exporter = HTMLExporter(config=self.converter_config,
+                                **self.convert_kwargs)
         output, resources = exporter.from_filename(self.exec_path,
                                                    resources=resources)
 
