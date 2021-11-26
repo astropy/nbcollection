@@ -150,6 +150,16 @@ For example:
 
     nbcollection convert my_notebooks --template-file=templates/custom.tpl
 
+#### Extracting figures and other preprocessors
+
+You can enable additional
+[preprocessors](https://nbconvert.readthedocs.io/en/latest/api/preprocessors.html#specialized-preprocessors)
+for the HTML exporter by passing one or more preprocessor names to the
+`--preprocessors` option. A useful preprocessor is `ExtractOutputPreprocessor`,
+which extracts figures from the HTML into separate files for better page loading
+performance:
+
+    nbcollection convert my_notebooks --preprocessors=nbconvert.preprocessors.ExtractOutputPreprocessor
 
 #### Only execute the notebooks
 

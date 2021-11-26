@@ -45,7 +45,8 @@ class nbcollectionConverter:
     def __init__(self, notebooks, overwrite=False,
                  build_path=None, flatten=False,
                  exclude_pattern=None, include_pattern=None,
-                 execute_kwargs=None, convert_kwargs=None, **kwargs):
+                 execute_kwargs=None, convert_kwargs=None,
+                 convert_preprocessors=None, **kwargs):
         """
         Parameters
         ----------
@@ -109,7 +110,8 @@ class nbcollectionConverter:
                                     flatten=flatten),
                                 overwrite=overwrite,
                                 execute_kwargs=execute_kwargs,
-                                convert_kwargs=convert_kwargs)
+                                convert_kwargs=convert_kwargs,
+                                convert_preprocessors=convert_preprocessors)
                             nbs.append(nb)
 
             elif os.path.isfile(notebook):

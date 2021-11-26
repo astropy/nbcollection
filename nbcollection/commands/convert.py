@@ -22,6 +22,10 @@ def convert(args=None):
                         help="Controls whether to make an index page that "
                              "lists all of the converted notebooks.")
 
+    parser.add_argument('--preprocessors', nargs='*', default=[],
+                        help="Preprocessors for convert. For example, "
+                             "nbconvert.preprocessors.ExtractOutputPreprocessor.")
+
     for trait_name in convert_trait_names:
         trait = getattr(HTMLExporter, trait_name)
         parser.add_argument("--" + trait_name.replace('_', '-'),

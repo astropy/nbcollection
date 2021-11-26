@@ -6,6 +6,7 @@ import time
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 from nbconvert.exporters import HTMLExporter
 from nbconvert.writers import FilesWriter
+from traitlets.config import Config
 import nbformat
 
 # Package
@@ -19,7 +20,8 @@ class nbcollectionNotebook:
     nbformat_version = 4
 
     def __init__(self, file_path, output_path=None, overwrite=False,
-                 execute_kwargs=None, convert_kwargs=None):
+                 execute_kwargs=None, convert_kwargs=None,
+                 convert_preprocessors=None):
         """
         Parameters
         ----------
@@ -34,6 +36,9 @@ class nbcollectionNotebook:
             ``nbconvert.ExecutePreprocessor``.
         convert_kwargs : dict (optional)
             Keyword arguments passed through to ``nbconvert.HTMLExporter``.
+        convert_preprocessors : list of str (optional)
+            The preprocessors enabled for the HTMLExporter. For example,
+            ``"nbconvert.preprocessors.ExtractOutputPreprocessor"``.
         """
 
         if not os.path.exists(file_path):
@@ -68,6 +73,10 @@ class nbcollectionNotebook:
         if convert_kwargs is None:
             convert_kwargs = dict()
         self.convert_kwargs = convert_kwargs
+
+        self.converter_config = Config()
+        if convert_preprocessors is not None:
+            self.converter_config.HTMLExporter.preprocessors = convert_preprocessors
 
     def execute(self):
         """Execute this notebook file and write out the executed contents to a
@@ -142,7 +151,8 @@ class nbcollectionNotebook:
 
         # Exports the notebook to HTML
         logger.debug('Exporting notebook to HTML...')
-        exporter = HTMLExporter(**self.convert_kwargs)
+        exporter = HTMLExporter(config=self.converter_config,
+                                **self.convert_kwargs)
         output, resources = exporter.from_filename(self.exec_path,
                                                    resources=resources)
 
