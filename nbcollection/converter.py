@@ -206,6 +206,7 @@ class nbcollectionConverter:
         if out_path == '':
             # By default, write the index file to the _build/ path
             out_path = self.build_path
+        os.makedirs(out_path, exist_ok=True)
 
         notebook_metadata = []
         for nb in self.notebooks:
