@@ -117,6 +117,9 @@ def get_converter(args):
     # nbconvert
     kw['convert_kwargs'].pop('template_file', None)
 
+    if hasattr(args, 'preprocessors'):
+        kw['convert_preprocessors'] = args.preprocessors
+
     # Process the other flags:
     kwargs = vars(args)
     for k in kwargs:

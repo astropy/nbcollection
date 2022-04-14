@@ -24,7 +24,7 @@ def convert(args=None):
 
     parser.add_argument('--preprocessors', nargs='*', default=[],
                         help="Preprocessors for convert. For example, "
-                             "nbconvert.preprocessors.ExtractOutputPreprocessor.")
+                             "nbconvert.preprocessors.ExtractOutputPreprocessor")
 
     for trait_name in convert_trait_names:
         trait = getattr(HTMLExporter, trait_name)
