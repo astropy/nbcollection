@@ -1,0 +1,51 @@
+[project]
+name = "nbcollection"
+dynamic = [
+    "version"
+]
+description = "Execute and convert collections of Jupyter notebooks to static HTML sites."
+license = {file = "LICENSE"}
+readme = "README.md"
+authors = [
+    { name = "The Astropy Developers", email = "astropy.team@gmail.com" },
+    { name = "Adrian Price-Whelan", email = "adrianmpw@gmail.com" },
+    { name = "Erik Tollerud" }
+]
+requires-python = ">=3.9"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD-3-Clause",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+keywords = [
+    "astronomy",
+    "jupyter",
+    "notebooks",
+    "tutorials",
+]
+dependencies = [
+    "nbconvert",
+    "jupyter-client",
+]
+
+[project.urls]
+repository = "https://github.com/astropy/nbcollection"
+
+[project.scripts]
+nbcollection = "nbcollection.__main__:main"
+
+[build-system]
+requires = [
+    "setuptools",
+    "setuptools_scm>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["nbcollection*"]
