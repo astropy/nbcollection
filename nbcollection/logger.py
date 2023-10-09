@@ -1,12 +1,12 @@
 # Standard library
 import logging
 
-__all__ = ['logger']
+__all__ = ["logger"]
 
 
 class CustomHandler(logging.StreamHandler):
     def emit(self, record):
-        record.msg = f'[nbcollection ({record.levelname})]: {record.msg}'
+        record.msg = f"[nbcollection ({record.levelname})]: {record.msg}"
         super().emit(record)
 
 
@@ -27,5 +27,5 @@ class CustomLogger(logging.getLoggerClass()):
 
 
 logging.setLoggerClass(CustomLogger)
-logger = logging.getLogger('nbcollection')
+logger = logging.getLogger("nbcollection")
 logger._set_defaults()
