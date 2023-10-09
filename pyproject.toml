@@ -49,3 +49,6 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["nbcollection*"]
+
+[tool.black]
+line-length = 88

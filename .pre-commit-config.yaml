@@ -57,3 +57,8 @@ repos:
         args: ["--write-changes"]
         additional_dependencies:
           - tomli
+
+  - repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+      - id: black
