@@ -1,0 +1,1 @@
+"""Nbcollection tests."""

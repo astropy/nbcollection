@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from nbcollection.__main__ import main
@@ -22,7 +23,7 @@ def test_default(tmp_path, command):
     build_path = tmp_path / f"test_{command}_{counter}"
     counter += 1
     build_path.mkdir()
-    _ = main(["nbcollection", command, nb_path, f"--build-path={str(build_path)}"])
+    _ = main(["nbcollection", command, nb_path, f"--build-path={build_path!s}"])
     assert "_build" in os.listdir(str(build_path))
     assert nb_name in os.listdir(os.path.join(build_path, "_build"))
 
@@ -35,7 +36,7 @@ def test_default(tmp_path, command):
     build_path = tmp_path / f"test_{command}_{counter}"
     counter += 1
     build_path.mkdir()
-    _ = main(["nbcollection", command, nb_root_path, f"--build-path={str(build_path)}"])
+    _ = main(["nbcollection", command, nb_root_path, f"--build-path={build_path!s}"])
     assert "_build" in os.listdir(str(build_path))
     assert nb_name in os.listdir(os.path.join(build_path, "_build/nb_test1"))
 
@@ -46,7 +47,7 @@ def test_default(tmp_path, command):
     counter += 1
     build_path.mkdir()
     _ = main(
-        ["nbcollection", command, f"--build-path={str(build_path)}", nb_path1, nb_path2]
+        ["nbcollection", command, f"--build-path={build_path!s}", nb_path1, nb_path2]
     )
     assert "_build" in os.listdir(str(build_path))
     for nb_name in ["notebook1.ipynb", "notebook2.ipynb"]:
@@ -54,7 +55,7 @@ def test_default(tmp_path, command):
 
 
 @pytest.mark.parametrize("command", ["execute", "convert"])
-def test_flatten(tmp_path, command):
+def test_flatten(command):
     test_root_path = os.path.dirname(__file__)
 
     nb_root_path = os.path.join(test_root_path, "data/my_notebooks")
@@ -80,13 +81,13 @@ def test_index(tmp_path):
     index_tpl_path = os.path.join(test_root_path, "data/default.tpl")
 
     # Make an index file with more complex notebook path structure
-    build_path = tmp_path / f"test_index"
+    build_path = tmp_path / "test_index"
     _ = main(
         [
             "nbcollection",
             "convert",
             nb_root_path,
-            f"--build-path={str(build_path)}",
+            f"--build-path={build_path!s}",
             "--make-index",
             f"--index-template={index_tpl_path}",
         ]
@@ -114,5 +115,3 @@ def test_index(tmp_path):
 # def teardown_module():
 #     for path in BUILD_PATHS:
 #         if path is not None and os.path.exists(path):
-#             print(f"Test cleanup: Removing {path}")
-#             shutil.rmtree(path)

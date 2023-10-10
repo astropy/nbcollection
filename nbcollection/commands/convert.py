@@ -1,16 +1,21 @@
+"""The nbcollection convert command."""
+
 import sys
+
 from nbconvert.exporters import HTMLExporter
+
 from .argparse_helpers import (
-    get_parser,
-    get_converter,
     _trait_type_map,
     convert_trait_names,
+    get_converter,
+    get_parser,
 )
 
 DESCRIPTION = "Convert a collection of Jupyter notebooks to HTML"
 
 
 def convert(args=None):
+    """Run the convert command."""
     args = args or sys.argv
 
     parser = get_parser(DESCRIPTION)
@@ -21,7 +26,7 @@ def convert(args=None):
         dest="index_template",
         default=None,
         type=str,
-        help="A jinja2 template file used to create the index " "page.",
+        help="A jinja2 template file used to create the index page.",
     )
 
     parser.add_argument(

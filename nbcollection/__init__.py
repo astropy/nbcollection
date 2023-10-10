@@ -1,2 +1,1 @@
-from .converter import nbcollectionConverter
-from .notebook import nbcollectionNotebook
+"""Execute and convert collections of Jupyter notebooks to static websites."""

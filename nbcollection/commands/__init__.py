@@ -1,3 +1,6 @@
 """Defines the commands that the CLI will use."""
-from .execute import execute
+
 from .convert import convert
+from .execute import execute
+
+__all__ = ["convert", "execute"]

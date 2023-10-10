@@ -1,12 +1,13 @@
-from argparse import ArgumentParser
+"""Utility functions for argparse."""
+
 import logging
 import sys
+from argparse import ArgumentParser
 
 import traitlets
 
-from ..logger import logger
-from nbcollection import nbcollectionConverter
-
+from nbcollection.converter import NbcollectionConverter
+from nbcollection.logger import logger
 
 _trait_type_map = {traitlets.Unicode: str, traitlets.Int: int, traitlets.Bool: bool}
 
@@ -17,6 +18,7 @@ convert_trait_names = [
 
 
 def set_log_level(args, logger):
+    """Set the logger's level given the CLI arguments."""
     if args.verbosity == 1:
         log_level = logging.DEBUG
 
@@ -39,15 +41,16 @@ def set_log_level(args, logger):
 
 
 def get_parser(description):
+    """Create an argument parser for the CLI."""
+
     class CustomArgumentParser(ArgumentParser):
         def parse_args(self, *args, **kwargs):
             parsed = super().parse_args(*args, **kwargs)
             set_log_level(parsed, logger)
 
-            if parsed.notebooks is None:
-                if not sys.stdin.isatty():
-                    stdin = sys.stdin.read().strip()
-                    parsed.notebooks = stdin.split()
+            if parsed.notebooks is None and not sys.stdin.isatty():
+                stdin = sys.stdin.read().strip()
+                parsed.notebooks = stdin.split()
 
             return parsed
 
@@ -85,7 +88,7 @@ def get_parser(description):
         "--overwrite",
         action="store_true",
         dest="overwrite",
-        help="Overwrite executed notebooks if they already " "exist.",
+        help="Overwrite executed notebooks if they already exist.",
     )
 
     parser.add_argument(
@@ -112,6 +115,7 @@ def get_parser(description):
 
 
 def get_converter(args):
+    """Create an NbcollectionConverter instance from the CLI configuration."""
     kw = {}
 
     execute_kw = {}
@@ -142,5 +146,4 @@ def get_converter(args):
             continue
         kw[k] = getattr(args, k)
 
-    print(kw)
-    return nbcollectionConverter(**kw)
+    return NbcollectionConverter(**kw)

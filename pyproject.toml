@@ -64,6 +64,8 @@ target-version = "py39"
 line-length = 88
 select = ["ALL"]
 ignore = [  # NOTE: non-permeanent exclusions should be added to `.ruff.toml` instead.
+    # Don't run type checking yet
+    "ANN",
 
     # flake8-builtins (A) : shadowing a Python built-in.
     # New ones should be avoided and is up to maintainers to enforce.
@@ -97,6 +99,9 @@ ignore = [  # NOTE: non-permeanent exclusions should be added to `.ruff.toml` in
     "N803",  # invalid-argument-name. Physics variables are often poor code variables
     "N806",  # non-lowercase-variable-in-function. Physics variables are often poor code variables
 
+    # Disable conversion to pathlib initially
+    "PTH",
+
     # pandas-vet (PD)
     "PD",
 
@@ -105,6 +110,7 @@ ignore = [  # NOTE: non-permeanent exclusions should be added to `.ruff.toml` in
 
     # flake8-todos (TD)
     "TD002",  # Missing author in TODO
+    "TD003",  # Missing issue link in TODO
 
     # Ruff-specific rules (RUF)
     "RUF005",  # unpack-instead-of-concatenating-to-collection-literal -- it's not clearly faster.
@@ -117,6 +123,19 @@ ignore = [  # NOTE: non-permeanent exclusions should be added to `.ruff.toml` in
     "E402",  # Module level import not at top of file
     "PGH001",  # No builtin eval() allowed
     "S101",  # Use of assert detected
+]
+"nbcollection/commands/argparse_helpers.py" = [
+    "PLR2004",  # Used to set logger level
+]
+"nbcollection/converter.py" = [
+    "C901",  # __init__ needs to be simplified
+    "PLR0912",  # __init__ needs to be simplified
+    "PLR0913",  # __init__ needs to be simplified
+    "PERF203",  # catching exceptions in a loop
+    "BLE001",  # catching Exception is necessary right now (?)
+]
+"nbcollection/notebook.py" = [
+    "PLR0913",  # too many arguments to __init__
 ]
 
 [tool.ruff.isort]

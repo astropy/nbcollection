@@ -1,12 +1,14 @@
+"""Notebook utilities."""
+
 import re
+
 import nbformat
 
 __all__ = ["is_executed", "get_title"]
 
 
 def is_executed(nb_path):
-    """
-    Determine whether the notebook at the specified path has been executed
+    """Determine whether the notebook file has been executed.
 
     Parameters
     ----------
@@ -19,16 +21,11 @@ def is_executed(nb_path):
         True if the notebook has been executed.
     """
     nb = nbformat.read(nb_path, nbformat.NO_CONVERT)
-    for cell in nb.cells:
-        if cell.cell_type == "code":
-            if cell.outputs:
-                return True
-    return False
+    return any(cell.cell_type == "code" and cell.outputs for cell in nb.cells)
 
 
 def get_title(nb_path):
-    """
-    Return the title of a notebook by finding the first H1 header
+    """Get the title of a notebook by finding the first H1 header.
 
     Parameters
     ----------
@@ -51,12 +48,11 @@ def get_title(nb_path):
             break
 
     else:
-        raise RuntimeError(
-            "Failed to find a title for the notebook. To include"
-            " it in an index page, each notebook must have a H1 "
-            "heading that is treated as the notebooks title."
+        msg = (
+            "Failed to find a title for the notebook. To include it in an index page, "
+            "each notebook must have a H1 heading that is treated as the notebooks "
+            "title."
         )
+        raise RuntimeError(msg)
 
-    title = match.groups()[0]
-
-    return title
+    return match.groups()[0]

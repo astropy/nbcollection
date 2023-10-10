@@ -1,16 +1,21 @@
+"""The nbcollection execute command."""
+
 import sys
+
 from nbconvert.preprocessors import ExecutePreprocessor
+
 from .argparse_helpers import (
-    get_parser,
-    get_converter,
     _trait_type_map,
     execute_trait_names,
+    get_converter,
+    get_parser,
 )
 
 DESCRIPTION = "Execute a collection of Jupyter notebooks"
 
 
 def execute(args=None):
+    """Run the execute command."""
     args = args or sys.argv
 
     parser = get_parser(DESCRIPTION)

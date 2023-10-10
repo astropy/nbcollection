@@ -1,61 +1,67 @@
+"""Operations on an individual notebook."""
+
 # Standard library
 import os
 import time
 
-# Third-party
-from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
+import nbformat
 from nbconvert.exporters import HTMLExporter
+
+# Third-party
+from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 from nbconvert.writers import FilesWriter
 from traitlets.config import Config
-import nbformat
 
 # Package
 from nbcollection.logger import logger
 from nbcollection.nb_helpers import is_executed
 
-__all__ = ["nbcollectionNotebook"]
+__all__ = ["NbcollectionNotebook"]
 
 
-class nbcollectionNotebook:
+class NbcollectionNotebook:
+    """An individual notebook.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to a notebook file
+    output_path : str (optional)
+        The full path to a notebook
+    overwrite : bool (optional)
+        Whether or not to overwrite files.
+    execute_kwargs : dict (optional)
+        Keyword arguments passed through to
+        ``nbconvert.ExecutePreprocessor``.
+    convert_kwargs : dict (optional)
+        Keyword arguments passed through to ``nbconvert.HTMLExporter``.
+    convert_preprocessors : list of str (optional)
+        The preprocessors enabled for the HTMLExporter. For example,
+        ``"nbconvert.preprocessors.ExtractOutputPreprocessor"``.
+    """
+
     nbformat_version = 4
 
     def __init__(
         self,
         file_path,
+        *,
         output_path=None,
         overwrite=False,
         execute_kwargs=None,
         convert_kwargs=None,
         convert_preprocessors=None,
-    ):
-        """
-        Parameters
-        ----------
-        file_path : str
-            The path to a notebook file
-        output_path : str (optional)
-            The full path to a notebook
-        overwrite : bool (optional)
-            Whether or not to overwrite files.
-        execute_kwargs : dict (optional)
-            Keyword arguments passed through to
-            ``nbconvert.ExecutePreprocessor``.
-        convert_kwargs : dict (optional)
-            Keyword arguments passed through to ``nbconvert.HTMLExporter``.
-        convert_preprocessors : list of str (optional)
-            The preprocessors enabled for the HTMLExporter. For example,
-            ``"nbconvert.preprocessors.ExtractOutputPreprocessor"``.
-        """
-
+    ) -> None:
         if not os.path.exists(file_path):
-            raise IOError(f"Notebook file '{file_path}' does not exist")
+            msg = f"Notebook file '{file_path}' does not exist"
+            raise OSError(msg)
 
         if not os.path.isfile(file_path):
-            raise ValueError(
-                "Input notebook path must contain a filename, "
-                "e.g., /path/to/some/notebook.ipynb (received: "
-                f"{file_path})"
+            msg = (
+                "Input notebook path must contain a filename, e.g., "
+                f"/path/to/some/notebook.ipynb (received: {file_path})"
             )
+            raise ValueError(msg)
 
         # First, get the path and notebook filename separately:
         self.file_path = os.path.abspath(file_path)
@@ -75,11 +81,11 @@ class nbcollectionNotebook:
         self.overwrite = overwrite
 
         if execute_kwargs is None:
-            execute_kwargs = dict()
+            execute_kwargs = {}
         self.execute_kwargs = execute_kwargs
 
         if convert_kwargs is None:
-            convert_kwargs = dict()
+            convert_kwargs = {}
         self.convert_kwargs = convert_kwargs
 
         self.converter_config = Config()
@@ -87,8 +93,9 @@ class nbcollectionNotebook:
             self.converter_config.HTMLExporter.preprocessors = convert_preprocessors
 
     def execute(self):
-        """Execute this notebook file and write out the executed contents to a
-        new file.
+        """Execute this notebook file.
+
+        The output notebook is written to a  new file.
 
         Parameters
         ----------
@@ -99,9 +106,7 @@ class nbcollectionNotebook:
         -------
         executed_nb_path : str, ``None``
             The path to the executed notebook.
-
         """
-
         if (
             os.path.exists(self.exec_path)
             and is_executed(self.exec_path)
@@ -141,12 +146,7 @@ class nbcollectionNotebook:
         return self.exec_path
 
     def convert(self):
-        """Convert the executed notebook to a static HTML file.
-
-        Parameters
-        ----------
-        """
-
+        """Convert the executed notebook to a static HTML file."""
         self.execute()
 
         if os.path.exists(self.html_path) and not self.overwrite:
@@ -172,6 +172,4 @@ class nbcollectionNotebook:
 
         # Write the output HTML file
         writer = FilesWriter(build_directory=os.path.dirname(self.html_path))
-        output_file_path = writer.write(output, resources, notebook_name=self.basename)
-
-        return output_file_path
+        return writer.write(output, resources, notebook_name=self.basename)
