@@ -1,0 +1,18 @@
+<header>
+  <p class="at-logotext"><a href="https://learn.astropy.org">
+      <span class="at-logotext__primary">Learn.Astropy</span>
+      <span class="at-logotext__divider">/</span>
+      <span class="at-logotext__secondary">Tutorials</span>
+    </a></p>
+  <nav class="at-header-nav">
+    {% if resources.learn_astropy_editor_url %}
+    <a href="{{ resources['learn_astropy_editor_url'] }}">{{ resources["learn_astropy_editor_label"] or "Open in Binder" }}</a>
+    {% endif %}
+    {% if resources.learn_astropy_source_url %}
+    <a href="{{ resources['learn_astropy_source_url'] }}">{{ resources["learn_astropy_source_label"] or "View on GitHub" }}</a>
+    {% endif %}
+    {% if resources.learn_astropy_ipynb_download_url %}
+    <a href="{{ resources['learn_astropy_ipynb_download_url'] }}" download>Download</a>
+    {% endif %}
+  </nav>
+</header>

@@ -1,0 +1,30 @@
+{% macro toc_sections(sections) -%}
+
+<ol class="at-outline">
+{% for section in sections %}
+<li><a href="{{ section.href }}">{{ section.title }}</a>
+
+{% if section.children|length > 0 %}
+{{ toc_sections(section.children) }}
+{% endif %}
+
+</li>
+
+{% endfor %}
+</ol>
+
+{%- endmacro %}
+
+<aside class="at-notebook-sidebar">
+<div class="at-notebook-sidebar__content">
+
+{% if resources.learn_astropy_toc %}
+<nav class="at-notebook-sidebar-section">
+<h2 class="at-notebook-sidebar-section__header">Outline</h2>
+
+{{ toc_sections(resources.learn_astropy_toc) }}
+
+</nav>
+{% endif %}
+</div>
+</aside>

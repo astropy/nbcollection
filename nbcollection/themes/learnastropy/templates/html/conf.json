@@ -1,0 +1,12 @@
+{
+  "base_template": "lab",
+  "mimetypes": {
+    "text/html": true
+  },
+  "preprocessors": {
+    "900-extract-outputs": {
+      "type": "nbconvert.preprocessors.ExtractOutputPreprocessor",
+      "enabled": true
+    }
+  }
+}
