@@ -1,0 +1,164 @@
+[project]
+name = "nbcollection"
+dynamic = [
+    "version"
+]
+description = "Execute and convert collections of Jupyter notebooks to static HTML sites."
+license = {file = "LICENSE"}
+readme = "README.md"
+authors = [
+    { name = "The Astropy Developers", email = "astropy.team@gmail.com" },
+    { name = "Adrian Price-Whelan", email = "adrianmpw@gmail.com" },
+    { name = "Erik Tollerud" }
+]
+requires-python = ">=3.9"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD-3-Clause",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+keywords = [
+    "astronomy",
+    "jupyter",
+    "notebooks",
+    "tutorials",
+]
+dependencies = [
+    "nbconvert",
+    "jupyter-client",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "notebook",
+]
+
+[project.urls]
+repository = "https://github.com/astropy/nbcollection"
+
+[project.scripts]
+nbcollection = "nbcollection.__main__:main"
+
+[build-system]
+requires = [
+    "setuptools",
+    "setuptools_scm>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["nbcollection*"]
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+select = ["ALL"]
+ignore = [  # NOTE: non-permeanent exclusions should be added to `.ruff.toml` instead.
+    # Don't run type checking yet
+    "ANN",
+
+    # flake8-builtins (A) : shadowing a Python built-in.
+    # New ones should be avoided and is up to maintainers to enforce.
+    "A00",
+
+    # flake8-bugbear (B)
+    "B008",  # FunctionCallArgumentDefault
+
+    # flake8-commas (COM)
+    "COM812",  # TrailingCommaMissing
+    "COM819",  # TrailingCommaProhibited
+
+    # pydocstyle (D)
+    # Missing Docstrings
+    "D102",  # Missing docstring in public method. Don't check b/c docstring inheritance.
+    "D105",  # Missing docstring in magic method. Don't check b/c class docstring.
+    # Whitespace Issues
+    "D200",  # FitsOnOneLine
+    # Docstring Content Issues
+    "D410",  # BlankLineAfterSection. Using D412 instead.
+    "D400",  # EndsInPeriod.  NOTE: might want to revisit this.
+
+    # pycodestyle (E, W)
+    "E711",  # NoneComparison  (see unfixable)
+    "E741",  # AmbiguousVariableName. Physics variables are often poor code variables
+
+    # flake8-fixme (FIX)
+    "FIX002",  # Line contains TODO | notes for improvements are OK iff the code works
+
+    # pep8-naming (N)
+    "N803",  # invalid-argument-name. Physics variables are often poor code variables
+    "N806",  # non-lowercase-variable-in-function. Physics variables are often poor code variables
+
+    # Disable conversion to pathlib initially
+    "PTH",
+
+    # pandas-vet (PD)
+    "PD",
+
+    # flake8-self (SLF)
+    "SLF001", # private member access
+
+    # flake8-todos (TD)
+    "TD002",  # Missing author in TODO
+    "TD003",  # Missing issue link in TODO
+
+    # Ruff-specific rules (RUF)
+    "RUF005",  # unpack-instead-of-concatenating-to-collection-literal -- it's not clearly faster.
+]
+
+[tool.ruff.extend-per-file-ignores]
+"test_*.py" = [
+    "B018",  # UselessExpression
+    "D",  # pydocstyle
+    "E402",  # Module level import not at top of file
+    "PGH001",  # No builtin eval() allowed
+    "S101",  # Use of assert detected
+]
+"nbcollection/commands/argparse_helpers.py" = [
+    "PLR2004",  # Used to set logger level
+]
+"nbcollection/converter.py" = [
+    "C901",  # __init__ needs to be simplified
+    "PLR0912",  # __init__ needs to be simplified
+    "PLR0913",  # __init__ needs to be simplified
+    "PERF203",  # catching exceptions in a loop
+    "BLE001",  # catching Exception is necessary right now (?)
+]
+"nbcollection/notebook.py" = [
+    "PLR0913",  # too many arguments to __init__
+]
+
+[tool.ruff.isort]
+known-first-party = ["nbcollection", "tests"]
+split-on-trailing-comma = false
+
+# These are too useful as attributes or methods to allow the conflict with the
+# built-in to rule out their use.
+[tool.ruff.flake8-builtins]
+builtins-ignorelist = [
+    "all",
+    "any",
+    "dict",
+    "help",
+    "id",
+    "list",
+    "open",
+    "type",
+]
+
+[tool.ruff.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
+
+[tool.ruff.pydocstyle]
+convention = "numpy"

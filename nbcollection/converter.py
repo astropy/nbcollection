@@ -1,3 +1,5 @@
+"""The nbcollection converter."""
+
 # Standard library
 import os
 import re
@@ -8,54 +10,81 @@ import jinja2
 # Package
 from nbcollection.logger import logger
 from nbcollection.nb_helpers import get_title
-from nbcollection.notebook import nbcollectionNotebook
+from nbcollection.notebook import NbcollectionNotebook
 
-__all__ = ['nbcollectionConverter']
+__all__ = ["NbcollectionConverter"]
 
 
-def get_output_path(nb_path, build_path,
-                    relative_root_path=None, flatten=False):
+def get_output_path(nb_path, build_path, *, relative_root_path=None, flatten=False):
+    """Compute the output path for a notebook.
+
+    Parameters
+    ----------
+    nb_path : str
+        Path to the notebook file.
+    build_path : str
+        Path to the build directory.
+    relative_root_path : str (optional)
+        The path to the root directory containing the notebooks. This is used
+        to determine the relative path to the notebook file in the output
+        directory.
+    flatten : bool (optional)
+        Whether or not to flatten the directory structure of the output
+        directory.
+
+    Returns
+    -------
+    str
+        The path of the output file in the build directory.
+    """
     if relative_root_path is not None:
-        # relative_root_path = os.path.abspath(relative_root_path)
-        common_prefix = os.path.commonpath([nb_path,
-                                            relative_root_path])
-        if common_prefix == '/':
+        common_prefix = os.path.commonpath([nb_path, relative_root_path])
+        if common_prefix == "/":
             # If there is no common prefix, write all notebooks directly to
             # the build directory. This is useful for testing and, e.g.,
             # writing all executed notebooks to a temporary directory
-            relative_path = ''
+            relative_path = ""
             # TODO: should we warn?
         else:
             relative_path = os.path.relpath(nb_path, common_prefix)
     else:
-        relative_path = ''
+        relative_path = ""
 
     if flatten:  # flatten the directory structure
         full_build_path = build_path
     else:
-        full_build_path = os.path.abspath(os.path.join(build_path,
-                                                       relative_path))
+        full_build_path = os.path.abspath(os.path.join(build_path, relative_path))
     os.makedirs(full_build_path, exist_ok=True)
     return full_build_path
 
 
-class nbcollectionConverter:
+class NbcollectionConverter:
+    """A class that executes and converting a collection of notebooks.
+
+    Parameters
+    ----------
+    notebooks : str, iterable
+        Either a string path to a single notebook, a path to a collection of
+        notebooks, or an iterable containing individual notebook files.
+    overwrite : bool (optional)
+    """
+
     build_dir_name = "_build"
 
-    def __init__(self, notebooks, overwrite=False,
-                 build_path=None, flatten=False,
-                 exclude_pattern=None, include_pattern=None,
-                 execute_kwargs=None, convert_kwargs=None,
-                 convert_preprocessors=None, **kwargs):
-        """
-        Parameters
-        ----------
-        notebooks : str, iterable
-            Either a string path to a single notebook, a path to a collection of
-            notebooks, or an iterable containing individual notebook files.
-        overwrite : bool (optional)
-        """
-
+    def __init__(
+        self,
+        notebooks,
+        *,
+        overwrite=False,
+        build_path=None,
+        flatten=False,
+        exclude_pattern=None,
+        include_pattern=None,
+        execute_kwargs=None,
+        convert_kwargs=None,
+        convert_preprocessors=None,
+        **kwargs,  # noqa: ARG002
+    ) -> None:
         if isinstance(notebooks, str) or len(notebooks) == 1:
             if isinstance(notebooks, str):
                 notebooks = [notebooks]
@@ -84,7 +113,7 @@ class nbcollectionConverter:
                 # collect any notebook files
                 for root, dirs, files in os.walk(notebook):
                     for d in dirs:
-                        if d.startswith('.') or d.startswith('_'):
+                        if d.startswith((".", "_")):
                             # calling remove here actually modifies the paths
                             # that os.walk will recursively explore
                             dirs.remove(d)
@@ -93,86 +122,93 @@ class nbcollectionConverter:
                         basename, ext = os.path.splitext(name)
                         file_path = os.path.join(root, name)
 
-                        if exclude_pattern is not None:
-                            if re.search(exclude_pattern, name):
-                                continue
+                        if exclude_pattern is not None and re.search(
+                            exclude_pattern, name
+                        ):
+                            continue
 
-                        if include_pattern is not None:
-                            if re.search(include_pattern, name) is None:
-                                continue
+                        if (
+                            include_pattern is not None
+                            and re.search(include_pattern, name) is None
+                        ):
+                            continue
 
-                        if ext == '.ipynb':
-                            nb = nbcollectionNotebook(
+                        if ext == ".ipynb":
+                            nb = NbcollectionNotebook(
                                 file_path,
                                 output_path=get_output_path(
-                                    file_path, build_path=build_path,
+                                    file_path,
+                                    build_path=build_path,
                                     relative_root_path=self._relative_root_path,
-                                    flatten=flatten),
+                                    flatten=flatten,
+                                ),
                                 overwrite=overwrite,
                                 execute_kwargs=execute_kwargs,
                                 convert_kwargs=convert_kwargs,
-                                convert_preprocessors=convert_preprocessors)
+                                convert_preprocessors=convert_preprocessors,
+                            )
                             nbs.append(nb)
 
             elif os.path.isfile(notebook):
                 # It's a single file:
-                nb = nbcollectionNotebook(
+                nb = NbcollectionNotebook(
                     notebook,
                     output_path=get_output_path(
-                        notebook, build_path=build_path,
+                        notebook,
+                        build_path=build_path,
                         relative_root_path=self._relative_root_path,
-                        flatten=flatten),
+                        flatten=flatten,
+                    ),
                     overwrite=overwrite,
                     execute_kwargs=execute_kwargs,
-                    convert_kwargs=convert_kwargs)
+                    convert_kwargs=convert_kwargs,
+                )
                 nbs.append(nb)
 
             else:
-                raise ValueError("Input specification of notebooks not "
-                                 "understood: File or path does not exist "
-                                 f"'{notebook}'")
+                msg = (
+                    "Input specification of notebooks not understood: File or path "
+                    f"does not exist {notebook}"
+                )
+                raise ValueError(msg)
 
         logger.info(f"Collected {len(nbs)} notebook files")
-        logger.debug("Executed/converted notebooks will be saved in: "
-                     f"{build_path}")
+        logger.debug(f"Executed/converted notebooks will be saved in: {build_path}")
 
         self.notebooks = nbs
         self.flatten = flatten
         self.build_path = build_path
 
-    def execute(self, stop_on_error=False):
-        exceptions = dict()
+    def execute(self, *, stop_on_error=False):
+        exceptions = {}
         for nb in self.notebooks:
             try:
                 nb.execute()
             except Exception as e:
                 if stop_on_error:
-                    raise e
+                    raise
                 exceptions[nb.filename] = e
 
         if exceptions:
             for nb, e in exceptions.items():
-                logger.error(f"Notebook '{nb}' errored: {str(e)}")
-            raise RuntimeError(f"{len(exceptions)} notebooks raised unexpected "
-                               "errors while executing cells: "
-                               f"{list(exceptions.keys())} — see above for "
-                               "more details about the failing cells. If any "
-                               "of these are expected errors, add a Jupyter "
-                               "cell tag 'raises-exception' to the failing "
-                               "cells.")
+                logger.error(f"Notebook '{nb}' errored: {e!s}")
+            msg = (
+                f"{len(exceptions)} notebooks raised unexpected errors while executing "
+                f"cells: {list(exceptions.keys())} — see above for more details about "
+                "the failing cells. If any of these are expected errors, add a Jupyter "
+                "cell tag 'raises-exception' to the failing cells."
+            )
+            raise RuntimeError(msg)
 
     def convert(self):
         for nb in self.notebooks:
             nb.convert()
 
-    def make_html_index(self, template_file, output_filename='index.html'):
-        """
-        Generates an html index page for a set of notebooks
+    def make_html_index(self, template_file, output_filename="index.html"):
+        """Generate an html index page for a set of notebooks.
 
         Parameters
         ----------
-        converted_files : list
-            The list of paths to the notebooks
         template_file : str
             A path to the template file to be used for generating the index. The
             template should be in jinja2 format and have a loop over
@@ -185,25 +221,27 @@ class nbcollectionConverter:
         content : str
             The content of the index file
         """
-
         if isinstance(template_file, str):
             # Load jinja2 template for index page:
             path, fn = os.path.split(template_file)
             env = jinja2.Environment(
                 loader=jinja2.FileSystemLoader(path),
-                autoescape=jinja2.select_autoescape(['html', 'xml']))
+                autoescape=jinja2.select_autoescape(["html", "xml"]),
+            )
             templ = env.get_template(fn)
 
         elif isinstance(template_file, jinja2.Template):
             templ = template_file
 
         else:
-            raise TypeError("Unknown template file type "
-                            f"'{type(template_file)}'. Must be either a string "
-                            "path or a jinja2 template instance.")
+            msg = (
+                f"Unknown template file type '{type(template_file)}'. Must be either a "
+                "string path or a jinja2 template instance."
+            )
+            raise TypeError(msg)
 
         out_path = os.path.dirname(output_filename)
-        if out_path == '':
+        if out_path == "":
             # By default, write the index file to the _build/ path
             out_path = self.build_path
         os.makedirs(out_path, exist_ok=True)
@@ -212,13 +250,12 @@ class nbcollectionConverter:
         for nb in self.notebooks:
             relpath = os.path.relpath(nb.html_path, out_path)
 
-            notebook_metadata.append({
-                'html_path': relpath,
-                'name': get_title(nb.exec_path)
-            })
+            notebook_metadata.append(
+                {"html_path": relpath, "name": get_title(nb.exec_path)}
+            )
 
         content = templ.render(notebooks=notebook_metadata)
-        with open(os.path.join(out_path, output_filename), 'w') as f:
+        with open(os.path.join(out_path, output_filename), "w") as f:
             f.write(content)
 
         return content
