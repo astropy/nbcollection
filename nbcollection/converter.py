@@ -190,8 +190,8 @@ class NbcollectionConverter:
                 exceptions[nb.filename] = e
 
         if exceptions:
-            for nb, e in exceptions.items():
-                logger.error(f"Notebook '{nb}' errored: {e!s}")
+            for nb, exception in exceptions.items():
+                logger.error(f"Notebook '{nb}' errored: {exception!s}")
             msg = (
                 f"{len(exceptions)} notebooks raised unexpected errors while executing "
                 f"cells: {list(exceptions.keys())} — see above for more details about "

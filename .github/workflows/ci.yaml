@@ -29,6 +29,19 @@ jobs:
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.0
 
+  typing:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tox
+        uses: lsst-sqre/run-tox@v1
+        with:
+          python-version: "3.11"
+          tox-envs: "typing"
+
   test:
 
     runs-on: ubuntu-latest

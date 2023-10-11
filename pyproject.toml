@@ -34,6 +34,7 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "pytest>=7.0",
+    "mypy",
     "notebook",
 ]
 
@@ -58,6 +59,15 @@ include = ["nbcollection*"]
 
 [tool.black]
 line-length = 88
+
+[tool.mypy]
+disallow_untyped_defs = false # for partial adoption of type hints
+disallow_incomplete_defs = false # for partial adoption of type hints
+ignore_missing_imports = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
 
 [tool.ruff]
 target-version = "py39"
