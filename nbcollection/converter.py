@@ -12,6 +12,8 @@ from nbcollection.logger import logger
 from nbcollection.nb_helpers import get_title
 from nbcollection.notebook import NbcollectionNotebook
 
+from .config import NbcollectionConfig
+
 __all__ = ["NbcollectionConverter"]
 
 
@@ -75,6 +77,7 @@ class NbcollectionConverter:
         self,
         notebooks,
         *,
+        config: NbcollectionConfig,
         overwrite=False,
         build_path=None,
         flatten=False,
@@ -85,6 +88,8 @@ class NbcollectionConverter:
         convert_preprocessors=None,
         **kwargs,  # noqa: ARG002
     ) -> None:
+        self._config = config
+
         if isinstance(notebooks, str) or len(notebooks) == 1:
             if isinstance(notebooks, str):
                 notebooks = [notebooks]
