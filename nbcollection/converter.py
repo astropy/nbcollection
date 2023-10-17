@@ -3,6 +3,7 @@
 # Standard library
 import os
 import re
+from pathlib import Path
 
 # Third-party
 import jinja2
@@ -100,11 +101,25 @@ class NbcollectionConverter:
             default_build_path = os.path.join(nb_path, self.build_dir_name)
             self._relative_root_path = nb_path
 
+            # The root source dir is the common directory containing all the
+            # notebooks. If NbcollectionConfig.github_repo_path is set, then
+            # this local directory corresponds to that path in the GitHub
+            # repository.
+            # Case 1: the input is the root source directory itself
+            self._root_source_dir = Path(notebooks[0]).resolve()
+            if self._root_source_dir.is_file():
+                # Case 2: the input is a single notebook file, so we use its
+                # directory
+                self._root_source_dir = self._root_source_dir.parent
+
         else:
             # Multiple paths were specified as a list, so we can't infer the
             # build path location - default to using the cwd:
             default_build_path = os.path.join(os.getcwd(), self.build_dir_name)
             self._relative_root_path = None
+            # Case 3: set the root source directory to the current working
+            # directory.
+            self._root_source_dir = Path.cwd()
 
         if build_path is None:
             build_path = default_build_path
@@ -139,6 +154,14 @@ class NbcollectionConverter:
                             continue
 
                         if ext == ".ipynb":
+                            # repo_path is the path to the notebook file
+                            # relative to the root repository directory
+                            repo_path = (
+                                Path(file_path)
+                                .resolve()
+                                .relative_to(self._root_source_dir)
+                                .as_posix()
+                            )
                             nb = NbcollectionNotebook(
                                 file_path,
                                 output_path=get_output_path(
@@ -147,6 +170,8 @@ class NbcollectionConverter:
                                     relative_root_path=self._relative_root_path,
                                     flatten=flatten,
                                 ),
+                                config=self._config,
+                                repo_path=repo_path,
                                 overwrite=overwrite,
                                 execute_kwargs=execute_kwargs,
                                 convert_kwargs=convert_kwargs,
@@ -156,6 +181,15 @@ class NbcollectionConverter:
 
             elif os.path.isfile(notebook):
                 # It's a single file:
+
+                # repo_path is the path to the notebook file
+                # relative to the root repository directory
+                repo_path = (
+                    Path(notebook)
+                    .resolve()
+                    .relative_to(self._root_source_dir)
+                    .as_posix()
+                )
                 nb = NbcollectionNotebook(
                     notebook,
                     output_path=get_output_path(
@@ -164,6 +198,8 @@ class NbcollectionConverter:
                         relative_root_path=self._relative_root_path,
                         flatten=flatten,
                     ),
+                    config=self._config,
+                    repo_path=repo_path,
                     overwrite=overwrite,
                     execute_kwargs=execute_kwargs,
                     convert_kwargs=convert_kwargs,
