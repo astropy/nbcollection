@@ -1,5 +1,6 @@
 # Ignore test outputs
 tests/**/_build
+_build/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

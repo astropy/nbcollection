@@ -27,13 +27,16 @@ keywords = [
     "tutorials",
 ]
 dependencies = [
-    "nbconvert",
+    "beautifulsoup4",
     "jupyter-client",
+    "markdown-it-py",
+    "nbconvert",
 ]
 
 [project.optional-dependencies]
 test = [
     "pytest>=7.0",
+    "mypy",
     "notebook",
 ]
 
@@ -42,6 +45,9 @@ repository = "https://github.com/astropy/nbcollection"
 
 [project.scripts]
 nbcollection = "nbcollection.__main__:main"
+
+[project.entry-points."nbconvert.exporters"]
+learn-astropy = "learnastropytutorialtheme.html:LearnAstropyExporter"
 
 [build-system]
 requires = [
@@ -58,6 +64,15 @@ include = ["nbcollection*"]
 
 [tool.black]
 line-length = 88
+
+[tool.mypy]
+disallow_untyped_defs = false # for partial adoption of type hints
+disallow_incomplete_defs = false # for partial adoption of type hints
+ignore_missing_imports = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
 
 [tool.ruff]
 target-version = "py39"
@@ -123,6 +138,7 @@ ignore = [  # NOTE: non-permeanent exclusions should be added to `.ruff.toml` in
     "E402",  # Module level import not at top of file
     "PGH001",  # No builtin eval() allowed
     "S101",  # Use of assert detected
+    "T203",  # allow pprint in tests for debugging
 ]
 "nbcollection/commands/argparse_helpers.py" = [
     "PLR2004",  # Used to set logger level

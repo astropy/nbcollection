@@ -46,6 +46,33 @@ def convert(args=None):
         "nbconvert.preprocessors.ExtractOutputPreprocessor",
     )
 
+    parser.add_argument(
+        "--github-url",
+        dest="github_repo_url",
+        default=None,
+        type=str,
+        help="URL of the GitHub repository hosting the notebooks.",
+    )
+
+    parser.add_argument(
+        "--github-path",
+        dest="github_repo_path",
+        default="",
+        type=str,
+        help=(
+            "Root path of the notebooks inside the GitHub repository. (default is "
+            "the root)",
+        ),
+    )
+
+    parser.add_argument(
+        "--github-branch",
+        dest="github_repo_branch",
+        default="main",
+        type=str,
+        help="Branch or tag of the GitHub repository to use. (default is main)",
+    )
+
     for trait_name in convert_trait_names:
         trait = getattr(HTMLExporter, trait_name)
         parser.add_argument(

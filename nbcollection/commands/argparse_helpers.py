@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 
 import traitlets
 
+from nbcollection.config import NbcollectionConfig
 from nbcollection.converter import NbcollectionConverter
 from nbcollection.logger import logger
 
@@ -145,5 +146,16 @@ def get_converter(args):
         if k in list(execute_kw.keys()) + list(convert_kw.keys()):
             continue
         kw[k] = getattr(args, k)
+
+    config_args = {}
+    try:
+        # These arguments are available for the execute command
+        config_args["github_repo_url"] = args.github_repo_url
+        config_args["github_repo_path"] = args.github_repo_path
+        config_args["github_repo_branch"] = args.github_repo_branch
+    except AttributeError:
+        pass
+    config = NbcollectionConfig(**config_args)
+    kw["config"] = config
 
     return NbcollectionConverter(**kw)

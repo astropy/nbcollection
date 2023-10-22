@@ -1,5 +1,7 @@
 """Custom logger for nbcollection."""
 
+# mypy: ignore-errors
+
 # Standard library
 import logging
 

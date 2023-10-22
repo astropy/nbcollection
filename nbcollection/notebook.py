@@ -3,9 +3,10 @@
 # Standard library
 import os
 import time
+from pathlib import PurePosixPath
+from urllib.parse import urlencode
 
 import nbformat
-from nbconvert.exporters import HTMLExporter
 
 # Third-party
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
@@ -15,6 +16,7 @@ from traitlets.config import Config
 # Package
 from nbcollection.logger import logger
 from nbcollection.nb_helpers import is_executed
+from nbcollection.themes.learnastropy.html import LearnAstropyHtmlExporter
 
 __all__ = ["NbcollectionNotebook"]
 
@@ -46,12 +48,17 @@ class NbcollectionNotebook:
         self,
         file_path,
         *,
+        config,
+        repo_path,
         output_path=None,
         overwrite=False,
         execute_kwargs=None,
         convert_kwargs=None,
         convert_preprocessors=None,
     ) -> None:
+        self._config = config
+        self._repo_path = repo_path
+
         if not os.path.exists(file_path):
             msg = f"Notebook file '{file_path}' does not exist"
             raise OSError(msg)
@@ -165,9 +172,40 @@ class NbcollectionNotebook:
         # path to store extra files, like plots generated
         resources["output_files_dir"] = "nboutput"
 
+        if self._config.github_repo_url is not None:
+            # Path of the notebook relative to the root of the repository
+            repo_path = (
+                PurePosixPath(self._config.github_repo_path)
+                .joinpath(self._repo_path)
+                .as_posix()
+            )
+
+            # URL to open the notebook in the Binder editor
+            qs = urlencode({"labpath": repo_path}, doseq=True)
+            editor_url = (
+                f"https://mybinder.org/v2/gh/{self._config.github_owner}/{self._config.github_repo}"
+                f"/{self._config.github_repo_branch}?{qs}"
+            )
+            resources["learn_astropy_editor_url"] = editor_url
+
+            # URL to open the GitHub source view for the notebook
+            resources["learn_astropy_source_url"] = (
+                f"https://github.com/{self._config.github_owner}/{self._config.github_repo}/blob/"
+                f"{self._config.github_repo_branch}/"
+                f"{repo_path}"
+            )
+
+        # Relative path to the executed notebook published to the site
+        # alongside the HTML file.
+        resources["learn_astropy_ipynb_download_url"] = (
+            PurePosixPath(self.html_path).with_suffix(".ipynb").name
+        )
+
         # Exports the notebook to HTML
         logger.debug("Exporting notebook to HTML...")
-        exporter = HTMLExporter(config=self.converter_config, **self.convert_kwargs)
+        exporter = LearnAstropyHtmlExporter(
+            config=self.converter_config, **self.convert_kwargs
+        )
         output, resources = exporter.from_filename(self.exec_path, resources=resources)
 
         # Write the output HTML file

@@ -1,6 +1,8 @@
 import os
+from pathlib import Path
 
 import pytest
+from bs4 import BeautifulSoup
 
 from nbcollection.__main__ import main
 
@@ -109,6 +111,44 @@ def test_index(tmp_path):
     assert "_build" in os.listdir(os.path.join(nb_root_path, ".."))
     build_path = os.path.join(nb_root_path, "../_build/")
     assert "index.html" in os.listdir(build_path)
+
+
+def test_learn_astropy_theme(tmp_path):
+    """Build a site and verify that links are populated correctly."""
+    source_root = Path(__file__).parent / "data" / "my_notebooks"
+    build_path = tmp_path / "test_learn_astropy_theme"
+
+    _ = main(
+        [
+            "nbcollection",
+            "convert",
+            str(source_root),
+            f"--build-path={build_path!s}",
+            "--flatten",
+            "--github-url",
+            "https://github.com/astropy/astropy-tutorials",
+            "--github-path",
+            "tutorials",
+            "--github-branch",
+            "main",
+        ]
+    )
+
+    # Test links
+    html_path = build_path / "_build" / "notebook1.html"
+    soup = BeautifulSoup(html_path.read_text(), "html.parser")
+    header_nav = soup.find("nav", class_="at-header-nav")
+    binder_link = header_nav.find("a", string="Open in Binder")
+    assert binder_link.attrs["href"] == (
+        "https://mybinder.org/v2/gh/astropy/astropy-tutorials/main"
+        "?labpath=tutorials%2Fnotebook1.ipynb"
+    )
+    github_link = header_nav.find("a", string="View on GitHub")
+    assert github_link.attrs["href"] == (
+        "https://github.com/astropy/astropy-tutorials/blob/main/tutorials/notebook1.ipynb"
+    )
+    download_link = header_nav.find("a", string="Download")
+    assert download_link.attrs["href"] == "notebook1.ipynb"
 
 
 # Too scary...

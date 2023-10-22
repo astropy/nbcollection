@@ -57,6 +57,7 @@ repos:
         args: ["--write-changes"]
         additional_dependencies:
           - tomli
+        exclude: "^tests/themes/data/"
 
   - repo: https://github.com/kynan/nbstripout
     rev: 0.6.1
@@ -66,6 +67,8 @@ repos:
           "--extra-keys",
           "metadata.kernelspec",
         ]
+        # These notebooks should keep outputs for testing themes independently.
+        exclude: "^tests/themes/data/"
 
   - repo: https://github.com/psf/black
     rev: 23.9.1
