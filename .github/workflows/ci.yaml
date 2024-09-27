@@ -19,25 +19,25 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938  # v4.2.0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3  # v5.2.0
         with:
           python-version: "3.11"
 
       - name: Run pre-commit
-        uses: pre-commit/action@v3.0.0
+        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd  # v3.0.1
 
   typing:
 
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938  # v4.2.0
 
       - name: Run tox
-        uses: lsst-sqre/run-tox@v1
+        uses: lsst-sqre/run-tox@0be7e8464864caa0abeea2fe73246a9261aedc7f  # v1.4.1
         with:
           python-version: "3.11"
           tox-envs: "typing"
@@ -54,10 +54,10 @@ jobs:
           - "3.11"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938  # v4.2.0
 
       - name: Run tox
-        uses: lsst-sqre/run-tox@v1
+        uses: lsst-sqre/run-tox@0be7e8464864caa0abeea2fe73246a9261aedc7f  # v1.4.1
         with:
           python-version: ${{ matrix.python }}
           tox-envs: "py"
