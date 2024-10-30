@@ -147,7 +147,7 @@ def test_learn_astropy_theme(tmp_path):
     assert github_link.attrs["href"] == (
         "https://github.com/astropy/astropy-tutorials/blob/main/tutorials/notebook1.ipynb"
     )
-    download_link = header_nav.find("a", string="Download")
+    download_link = header_nav.find("a", string="Download this notebook")
     assert download_link.attrs["href"] == "notebook1.ipynb"
 
 
