@@ -1,5 +1,7 @@
 # nbcollection
 
+**The functionality this repository provided is now integrated into the workflow process run over individual tutorial repositories. See the `build.yml` workflow in a given tutorial repository and the `action--` repositories in this organization.**
+
 Tools for building collections of Jupyter notebooks into web pages for public
 consumption.
 
